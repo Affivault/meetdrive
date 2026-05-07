@@ -227,7 +227,7 @@ export function startEmailWorker() {
             to,
             subject,
             message_id: messageId,
-          }).catch(() => {});
+          }).catch((err: any) => console.error('[Email] Webhook fire error (email.sent):', err.message));
         }
 
         // 10. Advance to next step in sequence
@@ -273,7 +273,7 @@ export function startEmailWorker() {
             fireEvent(campaign.user_id, 'campaign.completed', {
               campaign_id: campaignId,
               contact_id: contactId,
-            }).catch(() => {});
+            }).catch((err: any) => console.error('[Email] Webhook fire error (campaign.completed):', err.message));
           }
         }
 
@@ -282,7 +282,7 @@ export function startEmailWorker() {
         console.error(`Email job ${job.id} send error:`, err.message);
 
         // Check for bounce-type errors
-        const isBounce = err.responseCode >= 500 || err.code === 'EENVELOPE';
+        const isBounce = Number(err.responseCode) >= 500 || err.code === 'EENVELOPE';
 
         // Record appropriate activity
         await supabaseAdmin

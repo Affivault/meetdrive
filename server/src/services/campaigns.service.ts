@@ -69,7 +69,7 @@ export const campaignsService = {
       .single();
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.created', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.created', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
     return data;
   },
 
@@ -88,7 +88,7 @@ export const campaignsService = {
       .single();
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.updated', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.updated', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
     return data;
   },
 
@@ -100,7 +100,7 @@ export const campaignsService = {
       .eq('user_id', userId);
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.deleted', { campaign_id: id }).catch(() => {});
+    fireEvent(userId, 'campaign.deleted', { campaign_id: id }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
   },
 
   async launch(userId: string, id: string) {
@@ -190,7 +190,7 @@ export const campaignsService = {
     const totalActivated = (activatedPending?.length || 0) + (resetActive?.length || 0);
     console.log(`[Campaign] Activated ${activatedPending?.length || 0} pending + reset ${resetActive?.length || 0} active = ${totalActivated} total contacts`);
 
-    fireEvent(userId, 'campaign.launched', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.launched', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
 
     // Immediately start processing — await for real feedback
     console.log(`[Campaign] Launched campaign ${id} — triggering immediate processing`);
@@ -218,7 +218,7 @@ export const campaignsService = {
       .single();
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.paused', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.paused', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
     return data;
   },
 
@@ -236,7 +236,7 @@ export const campaignsService = {
       .single();
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.resumed', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.resumed', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
     return data;
   },
 
@@ -254,7 +254,7 @@ export const campaignsService = {
       .single();
 
     if (error) throw new AppError(error.message, 500);
-    fireEvent(userId, 'campaign.cancelled', { campaign: data }).catch(() => {});
+    fireEvent(userId, 'campaign.cancelled', { campaign: data }).catch((err: any) => console.error('[Campaign] Webhook error:', err.message));
     return data;
   },
 

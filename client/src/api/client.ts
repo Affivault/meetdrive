@@ -11,9 +11,13 @@ const apiClient = axios.create({
 
 // Attach Supabase auth token to every request
 apiClient.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  } catch {
+    // Auth service unavailable — proceed without token
   }
   return config;
 });

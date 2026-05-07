@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { InboxMessageWithContext, PaginatedResponse } from '@lemlist/shared';
+import type { InboxMessage, InboxMessageWithContext, PaginatedResponse } from '@lemlist/shared';
 
 export const inboxApi = {
   list: async (params?: {
@@ -92,7 +92,7 @@ export const inboxApi = {
   },
 
   listScheduled: async () => {
-    const { data } = await apiClient.get<any[]>('/inbox/scheduled');
+    const { data } = await apiClient.get<(InboxMessage & { scheduled_at: string; smtp_email: string | null; smtp_label: string | null })[]>('/inbox/scheduled');
     return data;
   },
 

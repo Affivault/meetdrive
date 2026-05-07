@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Users,
@@ -18,6 +19,7 @@ import { cn } from '../../lib/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { SkySendLogo, SkySendLogoMark } from '../SkySendLogo';
+import { inboxApi } from '../../api/inbox.api';
 
 const mainNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -42,12 +44,15 @@ function NavItem({
   item,
   isActive,
   collapsed,
+  badge,
 }: {
   item: { name: string; href: string; icon: React.ElementType };
   isActive: boolean;
   collapsed: boolean;
+  badge?: number;
 }) {
   const Icon = item.icon;
+  const badgeLabel = badge && badge > 0 ? (badge > 99 ? '99+' : String(badge)) : null;
 
   return (
     <NavLink
@@ -61,8 +66,20 @@ function NavItem({
           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
       )}
     >
-      <Icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={1.5} />
-      {!collapsed && <span>{item.name}</span>}
+      <div className="relative flex-shrink-0">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
+        {badgeLabel && collapsed && (
+          <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            {badgeLabel}
+          </span>
+        )}
+      </div>
+      {!collapsed && <span className="flex-1">{item.name}</span>}
+      {!collapsed && badgeLabel && (
+        <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center leading-none">
+          {badgeLabel}
+        </span>
+      )}
     </NavLink>
   );
 }
@@ -71,10 +88,12 @@ function NavSection({
   title,
   items,
   collapsed,
+  badges,
 }: {
   title?: string;
   items: Array<{ name: string; href: string; icon: React.ElementType }>;
   collapsed: boolean;
+  badges?: Record<string, number>;
 }) {
   const location = useLocation();
 
@@ -97,6 +116,7 @@ function NavSection({
             item={item}
             isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')}
             collapsed={collapsed}
+            badge={badges?.[item.href]}
           />
         ))}
       </div>
@@ -108,6 +128,17 @@ export function Sidebar() {
   const { user, signOut: logout } = useAuth();
   const { collapsed, toggle } = useSidebar();
   const workspaceName = user?.email?.split('@')[0] || 'Workspace';
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['inbox-unread-count'],
+    queryFn: () => inboxApi.list({ is_read: false, limit: 1 }),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+
+  const mainNavBadges = {
+    '/inbox': unreadData?.total ?? 0,
+  };
 
   return (
     <aside
@@ -152,7 +183,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className={cn('flex-1 py-3 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
-        <NavSection items={mainNav} collapsed={collapsed} />
+        <NavSection items={mainNav} collapsed={collapsed} badges={mainNavBadges} />
         <NavSection title="Tools" items={toolsNav} collapsed={collapsed} />
         <NavSection title="Configure" items={settingsNav} collapsed={collapsed} />
       </nav>

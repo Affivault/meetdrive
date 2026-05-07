@@ -97,19 +97,23 @@ export async function recordSend(accountId: string): Promise<void> {
     });
   } catch {
     // Fallback: direct update if RPC doesn't exist
-    const { data } = await supabaseAdmin
-      .from('smtp_accounts')
-      .select('sends_today, total_sent')
-      .eq('id', accountId)
-      .single();
-    if (data) {
-      await supabaseAdmin
+    try {
+      const { data } = await supabaseAdmin
         .from('smtp_accounts')
-        .update({
-          sends_today: data.sends_today + 1,
-          total_sent: data.total_sent + 1,
-        })
-        .eq('id', accountId);
+        .select('sends_today, total_sent')
+        .eq('id', accountId)
+        .single();
+      if (data) {
+        await supabaseAdmin
+          .from('smtp_accounts')
+          .update({
+            sends_today: data.sends_today + 1,
+            total_sent: data.total_sent + 1,
+          })
+          .eq('id', accountId);
+      }
+    } catch (fallbackErr: any) {
+      console.error(`[SSE] Failed to record send for account ${accountId}:`, fallbackErr.message);
     }
   }
 }
