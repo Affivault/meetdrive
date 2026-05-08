@@ -57,7 +57,13 @@ export function startInboxWorker() {
         return;
       }
 
-      const password = decrypt(account.smtp_pass_encrypted);
+      let password: string;
+      try {
+        password = decrypt(account.smtp_pass_encrypted);
+      } catch (decryptErr: any) {
+        console.error(`Failed to decrypt password for SMTP account ${smtpAccountId}:`, decryptErr.message);
+        return;
+      }
       const emailDomain = account.email_address?.split('@')[1] || '';
 
       // Derive IMAP host from SMTP host or email domain

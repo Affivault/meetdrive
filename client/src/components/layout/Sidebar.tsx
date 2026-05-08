@@ -57,6 +57,7 @@ function NavItem({
   badge?: number;
 }) {
   const Icon = item.icon;
+  const badgeLabel = badge && badge > 0 ? (badge > 99 ? '99+' : String(badge)) : null;
 
   return (
     <NavLink
@@ -78,9 +79,7 @@ function NavItem({
           </span>
         )}
       </div>
-      {!collapsed && (
-        <span className="flex-1">{item.name}</span>
-      )}
+      {!collapsed && <span className="flex-1">{item.name}</span>}
       {!collapsed && badge != null && badge > 0 && (
         <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6366F1] text-white text-[10px] font-bold px-1 leading-none">
           {badge > 99 ? '99+' : badge}
