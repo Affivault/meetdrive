@@ -1187,6 +1187,8 @@ export function InboxPage() {
   const [showReplySchedule, setShowReplySchedule] = useState(false);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const replyComposerRef = useRef<HTMLDivElement>(null);
+  // Stores the contact email of the conversation being archived so onMutate can remove it from cache
+  const archiveContactEmailRef = useRef<string | null>(null);
   const replyEditor = useRichTextEditorRef();
 
   /* ── SMTP accounts for sender selection ── */
@@ -1274,16 +1276,6 @@ export function InboxPage() {
     setIsRefreshing(false);
   }, [syncMut, qc]);
 
-  /* ── Select next message after removal ── */
-  const selectNextMessage = useCallback((removedId: string) => {
-    const idx = messages.findIndex(m => m.id === removedId);
-    if (idx >= 0 && messages.length > 1) {
-      const next = messages[idx + 1] || messages[idx - 1];
-      setSelectedId(next?.id || null);
-    } else {
-      setSelectedId(null);
-    }
-  }, [messages]);
 
   /* ── Mutations ── */
   const markReadMut = useMutation({
@@ -1347,22 +1339,66 @@ export function InboxPage() {
 
   const archiveMut = useMutation({
     mutationFn: inboxApi.archiveThread,
-    onSuccess: (_data, id) => {
-      selectNextMessage(id);
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ['inbox', folder, tagFilter, search] });
+      const prevData = qc.getQueryData(['inbox', folder, tagFilter, search]);
+      const contactEmail = archiveContactEmailRef.current;
+      if (contactEmail) {
+        qc.setQueryData(['inbox', folder, tagFilter, search], (old: any) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.filter((m: Message) => {
+              const msgEmail = m.direction === 'outbound'
+                ? (m.contact_email || m.to_email)
+                : (m.contact_email || m.from_email);
+              return msgEmail !== contactEmail;
+            }),
+          };
+        });
+      }
+      return { prevData };
+    },
+    onError: (_err: any, _id: any, context: any) => {
+      if (context?.prevData) qc.setQueryData(['inbox', folder, tagFilter, search], context.prevData);
+      toast.error('Failed to archive');
+    },
+    onSuccess: () => {
       invalidate();
       toast.success('Archived');
     },
-    onError: () => toast.error('Failed to archive'),
   });
 
   const unarchiveMut = useMutation({
     mutationFn: inboxApi.unarchiveThread,
-    onSuccess: (_data, id) => {
-      selectNextMessage(id);
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ['inbox', folder, tagFilter, search] });
+      const prevData = qc.getQueryData(['inbox', folder, tagFilter, search]);
+      const contactEmail = archiveContactEmailRef.current;
+      if (contactEmail) {
+        qc.setQueryData(['inbox', folder, tagFilter, search], (old: any) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.filter((m: Message) => {
+              const msgEmail = m.direction === 'outbound'
+                ? (m.contact_email || m.to_email)
+                : (m.contact_email || m.from_email);
+              return msgEmail !== contactEmail;
+            }),
+          };
+        });
+      }
+      return { prevData };
+    },
+    onError: (_err: any, _id: any, context: any) => {
+      if (context?.prevData) qc.setQueryData(['inbox', folder, tagFilter, search], context.prevData);
+      toast.error('Failed to unarchive');
+    },
+    onSuccess: () => {
       invalidate();
       toast.success('Moved to Inbox');
     },
-    onError: () => toast.error('Failed to unarchive'),
   });
 
   const replyMut = useMutation({
@@ -1432,14 +1468,6 @@ export function InboxPage() {
     setSelectedId(null);
   }, [searchInput]);
 
-  const handleArchiveToggle = useCallback((msg: Message) => {
-    if (folder === 'archived' || msg.is_archived) {
-      unarchiveMut.mutate(msg.id);
-    } else {
-      archiveMut.mutate(msg.id);
-    }
-  }, [folder, archiveMut, unarchiveMut]);
-
   // Reset forward to field when switching modes; scroll composer into view when opening
   useEffect(() => {
     if (!replyMode) {
@@ -1494,6 +1522,25 @@ export function InboxPage() {
       };
     }).sort((a, b) => new Date(b.latestMessage.received_at).getTime() - new Date(a.latestMessage.received_at).getTime());
   }, [messages]);
+
+  // Defined here (after conversations) so it can read conversations to pick the next entry
+  const handleArchiveToggle = useCallback((msg: Message) => {
+    const conv = conversations.find(c => c.latestMessage.id === msg.id);
+    archiveContactEmailRef.current = conv?.contactEmail ?? null;
+    // Select the next conversation immediately so the panel doesn't go blank
+    if (conv) {
+      const idx = conversations.indexOf(conv);
+      const next = conversations[idx + 1] ?? conversations[idx - 1] ?? null;
+      setSelectedId(next?.latestMessage.id ?? null);
+    } else {
+      setSelectedId(null);
+    }
+    if (folder === 'archived' || msg.is_archived) {
+      unarchiveMut.mutate(msg.id);
+    } else {
+      archiveMut.mutate(msg.id);
+    }
+  }, [folder, archiveMut, unarchiveMut, conversations]);
 
   const unreadCount = conversations.filter(c => c.hasUnread).length;
 
@@ -1810,6 +1857,23 @@ export function InboxPage() {
                         minHeight="140px"
                         autoFocus
                       />
+                      {/* Forwarded message preview — shows the original email content so the user knows what they're forwarding */}
+                      {replyMode === 'forward' && (
+                        <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40">
+                          <div className="px-4 py-2.5">
+                            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Forwarded message</p>
+                            <div className="text-[11px] text-[var(--text-tertiary)] space-y-0.5">
+                              <p><span className="font-medium text-[var(--text-secondary)]">From:</span> {currentMsg.from_email}</p>
+                              <p><span className="font-medium text-[var(--text-secondary)]">Date:</span> {formatFullDate(currentMsg.received_at)}</p>
+                              <p><span className="font-medium text-[var(--text-secondary)]">Subject:</span> {currentMsg.subject || '(no subject)'}</p>
+                              <p><span className="font-medium text-[var(--text-secondary)]">To:</span> {currentMsg.to_email}</p>
+                            </div>
+                          </div>
+                          <div className="max-h-[200px] overflow-y-auto border-t border-[var(--border-subtle)]">
+                            <EmailBody html={currentMsg.body_html} text={currentMsg.body_text} />
+                          </div>
+                        </div>
+                      )}
                       {/* AI Assist Bar */}
                       {replyMode === 'reply' && (
                         <AiAssistBar
