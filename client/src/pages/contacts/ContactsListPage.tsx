@@ -17,6 +17,9 @@ import {
   FolderOpen,
   Pencil,
   ArrowRight,
+  ShieldCheck,
+  ShieldX,
+  Shield,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { CreateContactInput, ContactWithTags, ContactList } from '@lemlist/shared';
@@ -497,6 +500,9 @@ export function ContactsListPage() {
                   <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Added
                   </th>
+                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                    DCS
+                  </th>
                   <th className="px-4 py-3.5 w-20"></th>
                 </tr>
               </thead>
@@ -561,6 +567,28 @@ export function ContactsListPage() {
                         <span className="text-[12px] text-[var(--text-tertiary)]">
                           {formatDate(contact.created_at)}
                         </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {contact.dcs_score !== null && contact.dcs_score !== undefined ? (
+                          <span title={`DCS: ${contact.dcs_score}/100`} className={cn(
+                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
+                            contact.dcs_score >= 80
+                              ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                              : contact.dcs_score >= 50
+                              ? 'text-amber-700 bg-amber-50 border-amber-200'
+                              : 'text-red-700 bg-red-50 border-red-200'
+                          )}>
+                            {contact.dcs_score >= 80
+                              ? <ShieldCheck className="h-3 w-3" />
+                              : contact.dcs_score >= 50
+                              ? <Shield className="h-3 w-3" />
+                              : <ShieldX className="h-3 w-3" />
+                            }
+                            {contact.dcs_score}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-[var(--text-muted)]">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">

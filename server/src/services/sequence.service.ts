@@ -2,6 +2,7 @@ import { supabaseAdmin } from '../config/supabase.js';
 import { fireEvent } from './webhook.service.js';
 import { classifyReply } from './sara.service.js';
 import { sendCampaignEmail } from './email-sender.service.js';
+import { suppressionService } from './suppression.service.js';
 
 /**
  * Sequence Engine Service
@@ -139,6 +140,16 @@ async function _processNextStepInner(campaignContactId: string): Promise<void> {
         status: cc.contacts.is_bounced ? 'bounced' : 'unsubscribed',
         next_send_at: null,
       })
+      .eq('id', campaignContactId);
+    return;
+  }
+
+  // Check centralised suppression list
+  const suppressed = await suppressionService.isSuppressed(cc.campaigns.user_id, cc.contacts.email);
+  if (suppressed) {
+    await supabaseAdmin
+      .from('campaign_contacts')
+      .update({ status: 'unsubscribed', next_send_at: null })
       .eq('id', campaignContactId);
     return;
   }
@@ -286,16 +297,19 @@ async function processEmailStep(cc: any, step: any): Promise<void> {
     return;
   }
 
-  // A/B subject: pick variant based on contact ID hash (deterministic 50/50 split)
+  // A/B split: deterministic 50/50 based on contact ID hash
+  const charCode = cc.contact_id.charCodeAt(0) || 0;
+  const useVariantB = charCode % 2 !== 0;
+
   let rawSubject = step.subject || '';
   if (step.subject_b) {
-    const charCode = cc.contact_id.charCodeAt(0) || 0;
-    rawSubject = charCode % 2 === 0 ? rawSubject : step.subject_b;
+    rawSubject = useVariantB ? step.subject_b : rawSubject;
   }
 
   // Interpolate merge tags in subject and body
   const subject = interpolateMergeTags(rawSubject, cc.contacts);
-  const bodyHtml = interpolateMergeTags(step.body_html || '', cc.contacts);
+  const rawBodyHtml = (step.body_html_b && useVariantB) ? step.body_html_b : (step.body_html || '');
+  const bodyHtml = interpolateMergeTags(rawBodyHtml, cc.contacts);
   const bodyText = bodyHtml.replace(/<[^>]*>/g, '');
 
   // Nullify next_send_at BEFORE sending to prevent re-processing

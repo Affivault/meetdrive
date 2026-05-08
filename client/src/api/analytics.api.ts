@@ -49,6 +49,15 @@ export const analyticsApi = {
     return data;
   },
 
+  deliverability: async () => {
+    const { data } = await apiClient.get<{
+      dcs_distribution: { label: string; value: number; color: string }[];
+      bounced_contacts: number;
+      suppression_by_reason: { label: string; value: number; color: string }[];
+    }>('/analytics/deliverability');
+    return data;
+  },
+
   exportOverviewReport: (days?: number) => {
     const params = new URLSearchParams();
     if (days) params.set('days', String(days));

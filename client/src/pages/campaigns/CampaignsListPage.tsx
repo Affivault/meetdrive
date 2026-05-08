@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatDate, cn } from '../../lib/utils';
-import { Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare } from 'lucide-react';
+import { Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { CampaignWithStats } from '@lemlist/shared';
 import { DEFAULT_PAGE_SIZE } from '../../lib/constants';
@@ -67,6 +67,16 @@ export function CampaignsListPage() {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       toast.success('Campaign deleted');
     },
+  });
+
+  const cloneMutation = useMutation({
+    mutationFn: campaignsApi.clone,
+    onSuccess: (cloned) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      toast.success('Campaign cloned');
+      navigate(`/campaigns/${cloned.id}`);
+    },
+    onError: () => toast.error('Failed to clone campaign'),
   });
 
   const campaigns = data?.data || [];
@@ -171,6 +181,14 @@ export function CampaignsListPage() {
                         Resume
                       </button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Clone campaign"
+                      onClick={() => cloneMutation.mutate(campaign.id)}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
                     {(campaign.status === 'draft' || campaign.status === 'completed' || campaign.status === 'cancelled') && (
                       <Button
                         variant="ghost"

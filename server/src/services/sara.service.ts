@@ -434,3 +434,100 @@ export async function getQueueStats(userId: string): Promise<SaraQueueStats> {
     top_intents: topIntents,
   };
 }
+
+
+export interface GenerateEmailInput {
+  goal: string;
+  tone: string;
+  product?: string;
+  audience?: string;
+  extra?: string;
+}
+
+export interface GeneratedEmail {
+  subject: string;
+  body_html: string;
+  body_text: string;
+}
+
+export function generateCampaignEmail(input: GenerateEmailInput): GeneratedEmail {
+  const { goal, tone, product = 'our solution', audience = 'your team', extra = '' } = input;
+  const toneAdj = tone === 'formal' ? 'formal, professional' : tone === 'casual' ? 'casual, friendly' : 'professional yet approachable';
+
+  const goalLower = goal.toLowerCase();
+
+  let subject: string;
+  let bodyText: string;
+
+  if (/introduc|intro|outreach|first/i.test(goalLower)) {
+    subject = `Quick introduction — ${product}`;
+    bodyText = `Hi {{first_name}},
+
+I wanted to reach out briefly to introduce myself and share something that might be relevant for {{company}}.
+
+${product ? `We built ${product} specifically to help ${audience} ${extra || 'save time and get better results'}.` : ''}
+
+I'd love to learn more about your current approach and see if there's a fit. Would you be open to a quick 15-minute call this week?
+
+Looking forward to connecting.
+
+Best regards,
+{{sender_name}}`;
+  } else if (/follow.?up|check.?in|reconnect/i.test(goalLower)) {
+    subject = `Following up — ${product}`;
+    bodyText = `Hi {{first_name}},
+
+I wanted to follow up on my previous message in case it got buried.
+
+${extra || `I truly believe ${product} could be valuable for ${audience} at {{company}}.`}
+
+I know your time is valuable, so I'll keep this brief. Would a quick 15-minute call work this week?
+
+Best regards,
+{{sender_name}}`;
+  } else if (/demo|trial|free|show|see/i.test(goalLower)) {
+    subject = `See ${product} in action — free demo for {{company}}`;
+    bodyText = `Hi {{first_name}},
+
+I'd love to show you what ${product} can do for {{company}}.
+
+${extra || `In 20 minutes, I can walk you through exactly how ${audience} like yours are using it.`}
+
+Want to pick a time that works for you?
+
+Best regards,
+{{sender_name}}`;
+  } else if (/problem|pain|challenge|struggle/i.test(goalLower)) {
+    subject = `Is this a challenge for {{company}}?`;
+    bodyText = `Hi {{first_name}},
+
+A lot of teams I talk to are dealing with ${extra || goal}.
+
+We built ${product} to solve exactly that — and the results have been pretty remarkable.
+
+Would it make sense to share what we're seeing?
+
+Best regards,
+{{sender_name}}`;
+  } else {
+    subject = `${goal} — ${product}`;
+    bodyText = `Hi {{first_name}},
+
+${extra || `I'm reaching out because I think ${product} could be a great fit for {{company}}.`}
+
+${goal}
+
+Would you have 15 minutes to connect this week?
+
+Best regards,
+{{sender_name}}`;
+  }
+
+  const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.7;color:#1a1a1a;max-width:560px;">${bodyText.replace(/\n\n/g, '</p><p style="margin:0 0 12px;">').replace(/\n/g, '<br/>')}</div>`;
+
+  return {
+    subject,
+    body_html: html,
+    body_text: bodyText,
+  };
+}

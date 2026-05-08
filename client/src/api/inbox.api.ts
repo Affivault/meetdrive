@@ -2,6 +2,11 @@ import { apiClient } from './client';
 import type { InboxMessage, InboxMessageWithContext, PaginatedResponse } from '@lemlist/shared';
 
 export const inboxApi = {
+  unreadCount: async (): Promise<number> => {
+    const { data } = await apiClient.get<{ count: number }>('/inbox/unread-count');
+    return data.count;
+  },
+
   list: async (params?: {
     page?: number;
     limit?: number;

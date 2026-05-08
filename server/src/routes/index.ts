@@ -18,6 +18,8 @@ import { apikeyRoutes } from './apikey.routes.js';
 import { domainRoutes } from './domain.routes.js';
 import { templateRoutes } from './template.routes.js';
 import { settingsRoutes } from './settings.routes.js';
+import { suppressionRoutes } from './suppression.routes.js';
+import { teamRoutes } from './team.routes.js';
 
 export const routes = Router();
 
@@ -43,3 +45,5 @@ routes.use('/api-keys', apikeyRoutes);
 routes.use('/domains', domainRoutes);
 routes.use('/templates', templateRoutes);
 routes.use('/settings', settingsRoutes);
+routes.use('/suppression', suppressionRoutes);
+routes.use('/team', teamRoutes);

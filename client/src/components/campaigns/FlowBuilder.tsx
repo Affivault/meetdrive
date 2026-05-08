@@ -356,14 +356,23 @@ function FlowNode({
                       />
                     </div>
                   </div>
-                  <div className="flex gap-3 pt-1">
-                    <div className="flex-1 p-2 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-subtle)] text-center">
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">True Branch</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Next step</p>
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-xs font-semibold text-emerald-700">✓ True Branch</p>
+                      <p className="text-xs text-emerald-600 mt-0.5">Continues to next step</p>
                     </div>
-                    <div className="flex-1 p-2 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-default)] text-center">
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">False Branch</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Skip to end</p>
+                    <div className="p-2.5 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-default)] space-y-1.5">
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">✗ False Branch</p>
+                      <select
+                        value={step.false_branch_step ?? ''}
+                        onChange={(e) => onUpdate({ false_branch_step: e.target.value === '' ? undefined : Number(e.target.value) })}
+                        className="w-full h-7 rounded border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 text-xs focus:border-[#6366F1] outline-none"
+                      >
+                        <option value="">Skip to end</option>
+                        {Array.from({ length: totalSteps }, (_, i) => i).filter((i) => i !== index).map((i) => (
+                          <option key={i} value={i}>Jump to Step {i + 1}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>

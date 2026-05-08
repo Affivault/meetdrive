@@ -3,12 +3,12 @@ import { analyticsApi, type TrendDataPoint } from '../../api/analytics.api';
 import { campaignsApi } from '../../api/campaigns.api';
 import { inboxApi } from '../../api/inbox.api';
 import { templateApi } from '../../api/template.api';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { Spinner } from '../../components/ui/Spinner';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import {
   Plus,
   ArrowUpRight,
-  ArrowDownRight,
   Megaphone,
   Users,
   Mail,
@@ -16,7 +16,6 @@ import {
   ArrowRight,
   Send,
   Inbox,
-  Star,
   FileText,
   BarChart3,
   Sparkles,
@@ -25,14 +24,13 @@ import {
   Pause,
   CircleDot,
   CheckCircle2,
-  Clock,
-  TrendingUp,
-  Zap,
   Eye,
   MessageSquare,
   Globe,
-  Settings,
   ChevronRight,
+  ShieldCheck,
+  ShieldOff,
+  UserPlus,
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -130,6 +128,7 @@ function MiniTrendChart({ data }: { data: TrendDataPoint[] }) {
 /* ─── Dashboard Page ──────────────────────────────── */
 export function DashboardPage() {
   const navigate = useNavigate();
+  const unreadCount = useUnreadCount();
 
   /* ── Data Queries ── */
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
@@ -171,13 +170,13 @@ export function DashboardPage() {
     total_campaigns: 0, active_campaigns: 0, total_contacts: 0,
     total_sent: 0, total_opened: 0, total_clicked: 0, total_replied: 0,
     avg_open_rate: 0, avg_click_rate: 0, avg_reply_rate: 0,
+    suppressed_count: 0, avg_dcs_score: 0, verified_contacts: 0, bounced_contacts: 0,
   };
 
   const allCampaigns = campaigns?.data || [];
   const activeCampaigns = allCampaigns.filter((c: any) => c.status === 'active');
   const recentCampaigns = allCampaigns.slice(0, 5);
   const recentMessages = Array.isArray(inboxData?.data) ? inboxData.data : [];
-  const unreadCount = recentMessages.filter((m: any) => !m.is_read).length;
   const templates = Array.isArray(emailTemplates) ? emailTemplates : [];
   const trend = Array.isArray(trendData) ? trendData : [];
   return (
@@ -477,9 +476,9 @@ export function DashboardPage() {
           { to: '/campaigns/new', icon: Megaphone, label: 'New Campaign', desc: 'Create sequence' },
           { to: '/contacts', icon: Users, label: 'Contacts', desc: fmtNum(stats.total_contacts) + ' total' },
           { to: '/templates', icon: FileText, label: 'Templates', desc: `${templates.length} saved` },
-          { to: '/smtp-accounts', icon: Send, label: 'SMTP', desc: 'Email accounts' },
-          { to: '/domains', icon: Globe, label: 'Domains', desc: 'DNS settings' },
-          { to: '/settings', icon: Settings, label: 'Settings', desc: 'Preferences' },
+          { to: '/verification', icon: ShieldCheck, label: 'Verification', desc: 'DCS scoring' },
+          { to: '/suppression', icon: ShieldOff, label: 'Suppression', desc: 'Block list' },
+          { to: '/team', icon: UserPlus, label: 'Team', desc: 'Members & invites' },
         ].map(item => (
           <Link
             key={item.to}

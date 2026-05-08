@@ -58,4 +58,11 @@ export const analyticsController = {
       res.json(data);
     } catch (err) { next(err); }
   },
+
+  async deliverability(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const data = await analyticsService.deliverability(req.userId!);
+      res.json(data);
+    } catch (err) { next(err); }
+  },
 };

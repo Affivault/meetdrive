@@ -20,6 +20,10 @@ import { AssetBuilderPage } from './pages/assets/AssetBuilderPage';
 import { TemplatesPage } from './pages/templates/TemplatesPage';
 import { DeveloperPage } from './pages/developer/DeveloperPage';
 import { DomainsPage } from './pages/domains/DomainsPage';
+import { SuppressionPage } from './pages/suppression/SuppressionPage';
+import { VerificationPage } from './pages/verification/VerificationPage';
+import { TeamPage } from './pages/team/TeamPage';
+import { InviteAcceptPage } from './pages/team/InviteAcceptPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -111,7 +115,13 @@ export default function App() {
         <Route path="/assets" element={<AssetBuilderPage />} />
         <Route path="/developer" element={<DeveloperPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/suppression" element={<SuppressionPage />} />
+        <Route path="/verification" element={<VerificationPage />} />
+        <Route path="/team" element={<TeamPage />} />
       </Route>
+
+      {/* Invite accept — public, handles auth redirect internally */}
+      <Route path="/invite" element={<InviteAcceptPage />} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

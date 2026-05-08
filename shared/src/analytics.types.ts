@@ -38,6 +38,10 @@ export interface OverviewAnalytics {
   avg_open_rate: number;
   avg_click_rate: number;
   avg_reply_rate: number;
+  suppressed_count: number;
+  avg_dcs_score: number;
+  verified_contacts: number;
+  bounced_contacts: number;
 }
 
 export interface ContactActivityItem {

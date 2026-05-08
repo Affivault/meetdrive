@@ -1,5 +1,4 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Users,
@@ -14,12 +13,15 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  ShieldOff,
+  ShieldCheck,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { SkySendLogo, SkySendLogoMark } from '../SkySendLogo';
-import { inboxApi } from '../../api/inbox.api';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 
 const mainNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -37,6 +39,9 @@ const toolsNav = [
 const settingsNav = [
   { name: 'SMTP Accounts', href: '/smtp-accounts', icon: Send },
   { name: 'Domains', href: '/domains', icon: Globe },
+  { name: 'Suppression', href: '/suppression', icon: ShieldOff },
+  { name: 'Verification', href: '/verification', icon: ShieldCheck },
+  { name: 'Team', href: '/team', icon: UserPlus },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -68,16 +73,16 @@ function NavItem({
     >
       <div className="relative flex-shrink-0">
         <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-        {badgeLabel && collapsed && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center leading-none">
-            {badgeLabel}
+        {badge != null && badge > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6366F1] text-white text-[9px] font-bold px-0.5 leading-none">
+            {badge > 99 ? '99+' : badge}
           </span>
         )}
       </div>
       {!collapsed && <span className="flex-1">{item.name}</span>}
-      {!collapsed && badgeLabel && (
-        <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center leading-none">
-          {badgeLabel}
+      {!collapsed && badge != null && badge > 0 && (
+        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6366F1] text-white text-[10px] font-bold px-1 leading-none">
+          {badge > 99 ? '99+' : badge}
         </span>
       )}
     </NavLink>
@@ -128,17 +133,7 @@ export function Sidebar() {
   const { user, signOut: logout } = useAuth();
   const { collapsed, toggle } = useSidebar();
   const workspaceName = user?.email?.split('@')[0] || 'Workspace';
-
-  const { data: unreadData } = useQuery({
-    queryKey: ['inbox-unread-count'],
-    queryFn: () => inboxApi.list({ is_read: false, limit: 1 }),
-    refetchInterval: 30_000,
-    staleTime: 20_000,
-  });
-
-  const mainNavBadges = {
-    '/inbox': unreadData?.total ?? 0,
-  };
+  const unreadCount = useUnreadCount();
 
   return (
     <aside
@@ -183,7 +178,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className={cn('flex-1 py-3 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
-        <NavSection items={mainNav} collapsed={collapsed} badges={mainNavBadges} />
+        <NavSection items={mainNav} collapsed={collapsed} badges={{ '/inbox': unreadCount }} />
         <NavSection title="Tools" items={toolsNav} collapsed={collapsed} />
         <NavSection title="Configure" items={settingsNav} collapsed={collapsed} />
       </nav>

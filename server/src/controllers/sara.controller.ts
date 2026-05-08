@@ -47,4 +47,13 @@ export const saraController = {
       res.status(204).send();
     } catch (err) { next(err); }
   },
+
+  async generateEmail(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { goal, tone, product, audience, extra } = req.body;
+      if (!goal) return res.status(400).json({ error: 'goal is required' });
+      const result = saraService.generateCampaignEmail({ goal, tone: tone || 'professional', product, audience, extra });
+      res.json(result);
+    } catch (err) { next(err); }
+  },
 };

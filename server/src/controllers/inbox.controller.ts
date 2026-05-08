@@ -3,6 +3,13 @@ import { AuthRequest } from '../middleware/auth.middleware.js';
 import { inboxService } from '../services/inbox.service.js';
 
 export const inboxController = {
+  async unreadCount(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const count = await inboxService.unreadCount(req.userId!);
+      res.json({ count });
+    } catch (err) { next(err); }
+  },
+
   async list(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const result = await inboxService.list(req.userId!, req.query as any);

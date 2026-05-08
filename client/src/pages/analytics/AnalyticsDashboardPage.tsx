@@ -8,6 +8,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { Badge } from '../../components/ui/Badge';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { useTheme } from '../../context/ThemeContext';
+import { Link } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -33,9 +34,12 @@ import {
   Users,
   ChevronDown,
   Download,
+  ShieldOff,
+  ShieldCheck,
+  Activity,
+  TrendingUp,
 } from 'lucide-react';
 
-/** Safe number formatting — never throws on null/undefined/NaN */
 function safeNum(v: unknown): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -49,7 +53,6 @@ function fmtRate(v: unknown): string {
   return safeNum(v).toFixed(1);
 }
 
-/* Indigo palette for charts */
 const LIGHT_COLORS = ['#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE'];
 const DARK_COLORS  = ['#818CF8', '#6366F1', '#A5B4FC', '#4338CA'];
 
@@ -79,28 +82,33 @@ function StatCard({
   label,
   value,
   rate,
+  suffix,
+  color,
+  to,
 }: {
   icon: React.ElementType;
   label: string;
   value: number;
   rate?: number;
+  suffix?: string;
+  color?: string;
+  to?: string;
 }) {
-  return (
+  const inner = (
     <div
-      className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 transition-all duration-300 hover:border-[var(--border-default)] hover:translate-y-[-2px] group"
+      className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 transition-all duration-300 hover:border-[var(--border-default)] hover:translate-y-[-2px] group h-full"
       style={{ boxShadow: 'var(--shadow-card)' }}
     >
       <div className="relative flex items-center justify-between mb-4">
         <div
           className="flex items-center justify-center h-10 w-10 rounded-xl transition-transform duration-300 group-hover:scale-110"
-          style={{ background: 'rgba(99,102,241,0.08)' }}
+          style={{ background: color ? `${color}15` : 'rgba(99,102,241,0.08)' }}
         >
-          <Icon className="h-5 w-5 text-[#6366F1]" strokeWidth={1.5} />
+          <Icon className="h-5 w-5" style={{ color: color || '#6366F1' }} strokeWidth={1.5} />
         </div>
       </div>
-
       <div className="relative">
-        <p className="stat-value">{fmtNum(value)}</p>
+        <p className="stat-value">{fmtNum(value)}{suffix}</p>
         <div className="flex items-center justify-between mt-1">
           <p className="stat-label">{label}</p>
           {rate !== undefined && rate !== null && (
@@ -112,6 +120,10 @@ function StatCard({
       </div>
     </div>
   );
+  if (to) {
+    return <Link to={to} className="block">{inner}</Link>;
+  }
+  return inner;
 }
 
 function EngagementRing({ data, colors }: { data: { name: string; value: number }[]; colors: string[] }) {
@@ -183,6 +195,33 @@ function EngagementRing({ data, colors }: { data: { name: string; value: number 
   );
 }
 
+function DcsScoreGauge({ score }: { score: number }) {
+  const color = score >= 80 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
+  const label = score >= 80 ? 'Excellent' : score >= 50 ? 'Fair' : score > 0 ? 'Poor' : 'N/A';
+  const circumference = 2 * Math.PI * 40;
+  const progress = circumference - (score / 100) * circumference;
+  return (
+    <div className="flex flex-col items-center">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border-subtle)" strokeWidth="10" />
+        <circle
+          cx="50" cy="50" r="40" fill="none"
+          stroke={color} strokeWidth="10"
+          strokeDasharray={circumference}
+          strokeDashoffset={progress}
+          strokeLinecap="round"
+          transform="rotate(-90 50 50)"
+          style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+        />
+        <text x="50" y="54" textAnchor="middle" className="text-sm font-bold" fill="var(--text-primary)" fontSize="18" fontWeight="700">
+          {score}
+        </text>
+      </svg>
+      <span className="text-xs font-semibold mt-1" style={{ color }}>{label}</span>
+    </div>
+  );
+}
+
 async function downloadReport(url: string, filename: string) {
   try {
     const resp = await apiClient.get(url, { responseType: 'blob' });
@@ -193,7 +232,6 @@ async function downloadReport(url: string, filename: string) {
     link.click();
     URL.revokeObjectURL(link.href);
   } catch {
-    // Fallback: open in new tab
     window.open(url, '_blank');
   }
 }
@@ -218,6 +256,11 @@ export function AnalyticsDashboardPage() {
     queryFn: () => analyticsApi.trend(days),
   });
 
+  const { data: deliverabilityData } = useQuery({
+    queryKey: ['analytics', 'deliverability'],
+    queryFn: () => analyticsApi.deliverability(),
+  });
+
   const { data: campaignsData } = useQuery({
     queryKey: ['campaigns', 'list'],
     queryFn: () => campaignsApi.list({ limit: 100 }),
@@ -235,7 +278,6 @@ export function AnalyticsDashboardPage() {
     enabled: !!selectedCampaignId,
   });
 
-  // All useMemo hooks must be called before any early returns (Rules of Hooks)
   const campaigns = Array.isArray(campaignsData?.data) ? campaignsData.data : [];
 
   const chartData = useMemo(() => campaignAnalytics
@@ -252,10 +294,7 @@ export function AnalyticsDashboardPage() {
     if (!Array.isArray(trendData) || trendData.length === 0) return [];
     return trendData.map((d: TrendDataPoint) => ({
       ...d,
-      label: new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
+      label: new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     }));
   }, [trendData]);
 
@@ -267,6 +306,21 @@ export function AnalyticsDashboardPage() {
         { name: 'No engagement', value: Math.max(0, safeNum(overview.total_sent) - safeNum(overview.total_opened)) },
       ].filter((d) => d.value > 0)
     : [], [overview]);
+
+  const dcsDistribution = useMemo(
+    () => (deliverabilityData?.dcs_distribution || []).filter((d) => d.value > 0),
+    [deliverabilityData]
+  );
+
+  const suppressionByReason = useMemo(
+    () => (deliverabilityData?.suppression_by_reason || []).filter((d) => d.value > 0),
+    [deliverabilityData]
+  );
+
+  const totalContacts = safeNum(overview?.total_contacts);
+  const verifiedPct = totalContacts > 0
+    ? Math.round((safeNum(overview?.verified_contacts) / totalContacts) * 100)
+    : 0;
 
   if (overviewLoading) {
     return (
@@ -311,7 +365,7 @@ export function AnalyticsDashboardPage() {
         <div>
           <h1 className="text-heading-lg text-[var(--text-primary)]">Analytics</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1.5">
-            Monitor performance, engagement, and delivery metrics across all your campaigns.
+            Monitor performance, engagement, deliverability, and suppression across all campaigns.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -328,9 +382,7 @@ export function AnalyticsDashboardPage() {
                 <button
                   key={opt.value}
                   onClick={() => setDateRange(opt.value)}
-                  className={`tab-item text-xs px-3 py-2 ${
-                    dateRange === opt.value ? 'active' : ''
-                  }`}
+                  className={`tab-item text-xs px-3 py-2 ${dateRange === opt.value ? 'active' : ''}`}
                 >
                   {opt.label}
                 </button>
@@ -339,52 +391,40 @@ export function AnalyticsDashboardPage() {
             <div className="ml-3 pl-3 border-l border-[var(--border-subtle)]">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
                 <Calendar className="h-3.5 w-3.5" />
-                <span className="text-xs font-medium">
-                  Last {dateRange === '7d' ? '7' : dateRange === '30d' ? '30' : '90'} days
-                </span>
+                <span className="text-xs font-medium">Last {days} days</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Overview Stats */}
+      {/* Overview Stats — 7 KPI cards */}
       {overview && (
-        <div className="grid grid-cols-5 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+          <StatCard icon={Send} label="Total Sent" value={safeNum(overview.total_sent)} />
+          <StatCard icon={Mail} label="Opened" value={safeNum(overview.total_opened)} rate={safeNum(overview.avg_open_rate)} />
+          <StatCard icon={MousePointerClick} label="Clicked" value={safeNum(overview.total_clicked)} rate={safeNum(overview.avg_click_rate)} />
+          <StatCard icon={MessageSquare} label="Replied" value={safeNum(overview.total_replied)} rate={safeNum(overview.avg_reply_rate)} />
+          <StatCard icon={Target} label="Campaigns" value={safeNum(overview.total_campaigns)} />
           <StatCard
-            icon={Send}
-            label="Total Sent"
-            value={safeNum(overview.total_sent)}
+            icon={ShieldOff}
+            label="Suppressed"
+            value={safeNum(overview.suppressed_count)}
+            color="#EF4444"
+            to="/suppression"
           />
           <StatCard
-            icon={Mail}
-            label="Opened"
-            value={safeNum(overview.total_opened)}
-            rate={safeNum(overview.avg_open_rate)}
-          />
-          <StatCard
-            icon={MousePointerClick}
-            label="Clicked"
-            value={safeNum(overview.total_clicked)}
-            rate={safeNum(overview.avg_click_rate)}
-          />
-          <StatCard
-            icon={MessageSquare}
-            label="Replied"
-            value={safeNum(overview.total_replied)}
-            rate={safeNum(overview.avg_reply_rate)}
-          />
-          <StatCard
-            icon={Target}
-            label="Campaigns"
-            value={safeNum(overview.total_campaigns)}
+            icon={ShieldCheck}
+            label="Avg DCS Score"
+            value={safeNum(overview.avg_dcs_score)}
+            color={safeNum(overview.avg_dcs_score) >= 80 ? '#10B981' : safeNum(overview.avg_dcs_score) >= 50 ? '#F59E0B' : '#EF4444'}
+            to="/verification"
           />
         </div>
       )}
 
-      {/* Charts row */}
+      {/* Performance Trend + Engagement Ring */}
       <div className="grid grid-cols-3 gap-6">
-        {/* Trend chart */}
         <div
           className="col-span-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition-all duration-300 hover:border-[var(--border-default)]"
           style={{ boxShadow: 'var(--shadow-card)' }}
@@ -444,23 +484,13 @@ export function AnalyticsDashboardPage() {
                       cursor={{ stroke: 'var(--border-default)', strokeDasharray: '4 4' }}
                     />
                     <Area
-                      type="monotone"
-                      dataKey="sent"
-                      stroke={primaryChartColor}
-                      strokeWidth={2.5}
-                      fill="url(#colorSent)"
-                      name="Sent"
-                      dot={false}
+                      type="monotone" dataKey="sent" stroke={primaryChartColor} strokeWidth={2.5}
+                      fill="url(#colorSent)" name="Sent" dot={false}
                       activeDot={{ r: 5, fill: primaryChartColor, stroke: 'var(--bg-surface)', strokeWidth: 2 }}
                     />
                     <Area
-                      type="monotone"
-                      dataKey="opened"
-                      stroke={secondaryChartColor}
-                      strokeWidth={2.5}
-                      fill="url(#colorOpened)"
-                      name="Opened"
-                      dot={false}
+                      type="monotone" dataKey="opened" stroke={secondaryChartColor} strokeWidth={2.5}
+                      fill="url(#colorOpened)" name="Opened" dot={false}
                       activeDot={{ r: 5, fill: secondaryChartColor, stroke: 'var(--bg-surface)', strokeWidth: 2 }}
                     />
                   </AreaChart>
@@ -474,7 +504,6 @@ export function AnalyticsDashboardPage() {
           </div>
         </div>
 
-        {/* Engagement ring */}
         {pieData.length > 0 ? (
           <EngagementRing data={pieData} colors={COLORS} />
         ) : (
@@ -485,6 +514,152 @@ export function AnalyticsDashboardPage() {
             <p className="text-sm text-[var(--text-tertiary)]">No engagement data yet</p>
           </div>
         )}
+      </div>
+
+      {/* Deliverability Health */}
+      <div
+        className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden"
+        style={{ boxShadow: 'var(--shadow-card)' }}
+      >
+        <div className="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+          <div>
+            <h2 className="text-heading-sm text-[var(--text-primary)] flex items-center gap-2">
+              <Activity className="h-4 w-4 text-[#6366F1]" />
+              Deliverability Health
+            </h2>
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">DCS scores, suppression breakdown, and contact quality</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/verification" className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors">
+              Verify Contacts
+            </Link>
+            <Link to="/suppression" className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors">
+              Suppression List
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* DCS Gauge + summary */}
+          <div className="flex flex-col items-center justify-center gap-4 py-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)]">
+            <DcsScoreGauge score={safeNum(overview?.avg_dcs_score)} />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Average DCS Score</p>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                {fmtNum(safeNum(overview?.verified_contacts))} of {fmtNum(totalContacts)} verified ({verifiedPct}%)
+              </p>
+            </div>
+            <div className="w-full px-4 space-y-1.5">
+              {[
+                { label: 'Verified (≥60)', value: safeNum(overview?.verified_contacts), color: '#10B981' },
+                { label: 'Bounced contacts', value: safeNum(overview?.bounced_contacts), color: '#EF4444' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-[var(--text-secondary)]">{item.label}</span>
+                  </div>
+                  <span className="font-semibold text-[var(--text-primary)]">{fmtNum(item.value)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DCS distribution bar chart */}
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-1.5">
+              <TrendingUp className="h-4 w-4 text-[var(--text-tertiary)]" />
+              DCS Score Distribution
+            </h4>
+            {dcsDistribution.length > 0 ? (
+              <div className="h-48">
+                <ErrorBoundary fallback={<div className="flex items-center justify-center h-full text-sm text-[var(--text-tertiary)]">Chart unavailable</div>}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dcsDistribution} barSize={36}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false} tickLine={false}
+                        tick={{ fill: 'var(--text-tertiary)', fontSize: 10 }}
+                        dy={6}
+                      />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-tertiary)', fontSize: 11 }} dx={-6} />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        itemStyle={tooltipItemStyle}
+                        labelStyle={tooltipLabelStyle}
+                        cursor={{ fill: 'var(--bg-hover)', radius: 6 }}
+                      />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Contacts">
+                        {dcsDistribution.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ErrorBoundary>
+              </div>
+            ) : (
+              <div className="h-48 flex flex-col items-center justify-center gap-2">
+                <ShieldCheck className="h-8 w-8 text-[var(--text-tertiary)]" strokeWidth={1.5} />
+                <p className="text-sm text-[var(--text-tertiary)]">No DCS scores yet</p>
+                <Link to="/verification" className="text-xs font-medium text-[#6366F1] hover:underline">
+                  Start verifying contacts →
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Suppression by reason */}
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-1.5">
+              <ShieldOff className="h-4 w-4 text-[var(--text-tertiary)]" />
+              Suppression by Reason
+            </h4>
+            {suppressionByReason.length > 0 ? (
+              <div className="space-y-3">
+                {suppressionByReason.map((item) => {
+                  const total = suppressionByReason.reduce((s, r) => s + r.value, 0);
+                  const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                  return (
+                    <div key={item.label}>
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span className="text-[var(--text-secondary)]">{item.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-[var(--text-primary)]">{fmtNum(item.value)}</span>
+                          <span className="text-[var(--text-tertiary)]">{pct}%</span>
+                        </div>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700"
+                          style={{ width: `${pct}%`, backgroundColor: item.color }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="pt-2 border-t border-[var(--border-subtle)]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[var(--text-tertiary)]">Total suppressed</span>
+                    <span className="font-bold text-[var(--text-primary)]">
+                      {fmtNum(suppressionByReason.reduce((s, r) => s + r.value, 0))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="h-48 flex flex-col items-center justify-center gap-2">
+                <ShieldOff className="h-8 w-8 text-[var(--text-tertiary)]" strokeWidth={1.5} />
+                <p className="text-sm text-[var(--text-tertiary)]">No suppressed contacts</p>
+                <p className="text-xs text-[var(--text-tertiary)]">Contacts you block from receiving emails appear here</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Campaign Deep Dive */}
@@ -518,9 +693,7 @@ export function AnalyticsDashboardPage() {
                 >
                   <option value="">Choose a campaign...</option>
                   {campaigns.map((c: any) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-tertiary)] pointer-events-none" />
@@ -531,87 +704,50 @@ export function AnalyticsDashboardPage() {
 
         {campaignAnalytics ? (
           <div className="p-6 space-y-6">
-            {/* Campaign stats */}
-            <div className="grid grid-cols-4 gap-4">
-              <div className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
-                    <Send className="h-4 w-4 text-[var(--text-primary)]" />
+            {/* Campaign stats — 5 tiles incl. Suppressed */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {[
+                { icon: Send, label: 'Sent', value: campaignAnalytics.sent, rate: undefined, color: '#6366F1' },
+                { icon: Mail, label: 'Opened', value: campaignAnalytics.opened, rate: campaignAnalytics.open_rate, color: '#818CF8' },
+                { icon: MousePointerClick, label: 'Clicked', value: campaignAnalytics.clicked, rate: campaignAnalytics.click_rate, color: '#A5B4FC' },
+                { icon: MessageSquare, label: 'Replied', value: campaignAnalytics.replied, rate: campaignAnalytics.reply_rate, color: '#10B981' },
+                { icon: AlertTriangle, label: 'Bounced', value: campaignAnalytics.bounced, rate: campaignAnalytics.bounce_rate, color: '#EF4444' },
+              ].map(({ icon: Icon, label, value, rate, color }) => (
+                <div key={label} className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
+                      <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.5} />
+                    </div>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">{label}</span>
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Sent</span>
+                  <p className="stat-value">{fmtNum(value)}</p>
+                  {rate !== undefined && (
+                    <p className="text-xs text-[var(--text-tertiary)] mt-1 font-medium">{fmtRate(rate)}% rate</p>
+                  )}
                 </div>
-                <p className="stat-value">{fmtNum(campaignAnalytics.sent)}</p>
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
-                    <Mail className="h-4 w-4 text-[var(--text-primary)]" />
-                  </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Opened</span>
-                </div>
-                <p className="stat-value">{fmtNum(campaignAnalytics.opened)}</p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1 font-medium">
-                  {fmtRate(campaignAnalytics.open_rate)}% rate
-                </p>
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
-                    <MousePointerClick className="h-4 w-4 text-[var(--text-primary)]" />
-                  </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Clicked</span>
-                </div>
-                <p className="stat-value">{fmtNum(campaignAnalytics.clicked)}</p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1 font-medium">
-                  {fmtRate(campaignAnalytics.click_rate)}% rate
-                </p>
-              </div>
-
-              <div className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
-                    <AlertTriangle className="h-4 w-4 text-[var(--text-primary)]" />
-                  </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Bounced</span>
-                </div>
-                <p className="stat-value">{fmtNum(campaignAnalytics.bounced)}</p>
-                <p className="text-xs text-[var(--text-tertiary)] mt-1 font-medium">
-                  {fmtRate(campaignAnalytics.bounce_rate)}% rate
-                </p>
-              </div>
+              ))}
             </div>
 
-            {/* Bar chart */}
+            {/* Campaign Funnel Bar chart */}
             {chartData.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4">
-                  Campaign Funnel
-                </h4>
+                <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4">Campaign Funnel</h4>
                 <div className="h-56">
                   <ErrorBoundary fallback={<div className="flex items-center justify-center h-full text-sm text-[var(--text-tertiary)]">Chart unavailable</div>}>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} barSize={40}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                         <XAxis
-                          dataKey="name"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }}
-                          dy={8}
+                          dataKey="name" axisLine={false} tickLine={false}
+                          tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} dy={8}
                         />
                         <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }}
-                          dx={-8}
+                          axisLine={false} tickLine={false}
+                          tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} dx={-8}
                         />
                         <Tooltip
-                          contentStyle={tooltipStyle}
-                          itemStyle={tooltipItemStyle}
-                          labelStyle={tooltipLabelStyle}
-                          cursor={{ fill: 'var(--bg-hover)', radius: 8 }}
+                          contentStyle={tooltipStyle} itemStyle={tooltipItemStyle}
+                          labelStyle={tooltipLabelStyle} cursor={{ fill: 'var(--bg-hover)', radius: 8 }}
                         />
                         <Bar dataKey="value" radius={[8, 8, 0, 0]} name="Count">
                           {chartData.map((entry, index) => (
@@ -684,6 +820,7 @@ export function AnalyticsDashboardPage() {
                           variant={
                             c.status === 'replied' ? 'info' :
                             c.status === 'bounced' ? 'danger' :
+                            c.status === 'unsubscribed' ? 'danger' :
                             c.status === 'opened' || c.status === 'clicked' ? 'success' :
                             'default'
                           }
@@ -691,15 +828,9 @@ export function AnalyticsDashboardPage() {
                           {c.status || 'pending'}
                         </Badge>
                       </td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">
-                        {fmtNum(c.sent)}
-                      </td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">
-                        {fmtNum(c.opened)}
-                      </td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">
-                        {fmtNum(c.clicked)}
-                      </td>
+                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.sent)}</td>
+                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.opened)}</td>
+                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.clicked)}</td>
                       <td className="py-3.5 px-4 text-center">
                         {c.replied ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--bg-elevated)] text-[var(--text-primary)]">

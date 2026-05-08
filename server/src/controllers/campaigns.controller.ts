@@ -45,6 +45,14 @@ export const campaignsController = {
     } catch (err) { next(err); }
   },
 
+  // Clone
+  async clone(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const campaign = await campaignsService.clone(req.userId!, req.params.id);
+      res.status(201).json(campaign);
+    } catch (err) { next(err); }
+  },
+
   // Lifecycle
   async launch(req: AuthRequest, res: Response, next: NextFunction) {
     try {
