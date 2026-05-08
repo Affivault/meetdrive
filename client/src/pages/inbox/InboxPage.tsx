@@ -1851,7 +1851,8 @@ export function InboxPage() {
                         </div>
                       )}
                       <RichTextEditor
-                        placeholder={replyMode === 'reply' ? 'Write your reply...' : 'Add a note (optional)...'}
+                        key={replyMode}
+                        placeholder={replyMode === 'reply' ? 'Write your reply...' : 'Write a message...'}
                         onChange={replyEditor.handleChange}
                         templates={templates}
                         minHeight="140px"
