@@ -62,6 +62,25 @@ export const analyticsService = {
       }
     }
 
+    const { count: suppressedCount } = await supabaseAdmin
+      .from('suppression_list')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    const { data: contactMetrics } = await supabaseAdmin
+      .from('contacts')
+      .select('dcs_score, is_bounced')
+      .eq('user_id', userId);
+
+    const dcsScores = (contactMetrics || [])
+      .map((c: any) => c.dcs_score)
+      .filter((s: any) => s !== null && s !== undefined && Number.isFinite(Number(s)));
+    const avgDcsScore = dcsScores.length > 0
+      ? Math.round(dcsScores.reduce((a: number, b: number) => a + Number(b), 0) / dcsScores.length)
+      : 0;
+    const verifiedContacts = (contactMetrics || []).filter((c: any) => Number(c.dcs_score) >= 60).length;
+    const bouncedContacts = (contactMetrics || []).filter((c: any) => c.is_bounced).length;
+
     return {
       total_campaigns: totalCampaigns || 0,
       active_campaigns: activeCampaigns || 0,
@@ -73,6 +92,50 @@ export const analyticsService = {
       avg_open_rate: calcRate(totalOpened, totalSent),
       avg_click_rate: calcRate(totalClicked, totalSent),
       avg_reply_rate: calcRate(totalReplied, totalSent),
+      suppressed_count: suppressedCount || 0,
+      avg_dcs_score: avgDcsScore,
+      verified_contacts: verifiedContacts,
+      bounced_contacts: bouncedContacts,
+    };
+  },
+
+  async deliverability(userId: string) {
+    const { data: contacts } = await supabaseAdmin
+      .from('contacts')
+      .select('dcs_score, is_bounced')
+      .eq('user_id', userId);
+
+    const list = contacts || [];
+    const high = list.filter((c: any) => Number(c.dcs_score) >= 80).length;
+    const medium = list.filter((c: any) => Number(c.dcs_score) >= 50 && Number(c.dcs_score) < 80).length;
+    const low = list.filter((c: any) => c.dcs_score !== null && Number(c.dcs_score) < 50).length;
+    const unscored = list.filter((c: any) => c.dcs_score === null || c.dcs_score === undefined).length;
+    const bounced = list.filter((c: any) => c.is_bounced).length;
+
+    const { data: suppressionRows } = await supabaseAdmin
+      .from('suppression_list')
+      .select('reason')
+      .eq('user_id', userId);
+
+    const reasonCounts: Record<string, number> = { unsubscribed: 0, bounced: 0, complained: 0, manual: 0 };
+    for (const row of suppressionRows || []) {
+      if (row.reason in reasonCounts) reasonCounts[row.reason]++;
+    }
+
+    return {
+      dcs_distribution: [
+        { label: 'High (≥80)', value: high, color: '#10B981' },
+        { label: 'Medium (50–79)', value: medium, color: '#F59E0B' },
+        { label: 'Low (<50)', value: low, color: '#EF4444' },
+        { label: 'Unscored', value: unscored, color: '#94A3B8' },
+      ],
+      bounced_contacts: bounced,
+      suppression_by_reason: [
+        { label: 'Unsubscribed', value: reasonCounts.unsubscribed, color: '#6366F1' },
+        { label: 'Bounced', value: reasonCounts.bounced, color: '#EF4444' },
+        { label: 'Complained', value: reasonCounts.complained, color: '#F59E0B' },
+        { label: 'Manual', value: reasonCounts.manual, color: '#94A3B8' },
+      ],
     };
   },
 
