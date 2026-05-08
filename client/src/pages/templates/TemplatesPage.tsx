@@ -944,9 +944,9 @@ export function TemplatesPage() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               activeCategory === 'all'
-                ? 'bg-[#6366F1] text-white'
+                ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow-[0_1px_4px_rgba(99,102,241,0.3)]'
                 : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -956,9 +956,9 @@ export function TemplatesPage() {
             <button
               key={cat.value}
               onClick={() => setActiveCategory(cat.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 activeCategory === cat.value
-                  ? 'bg-[#6366F1] text-white'
+                  ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow-[0_1px_4px_rgba(99,102,241,0.3)]'
                   : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -979,8 +979,8 @@ export function TemplatesPage() {
           {isEmpty && hasPresets && (
             <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)] p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-6 w-6 text-amber-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgba(99,102,241,0.1)] to-[rgba(139,92,246,0.1)] flex items-center justify-center shrink-0 border border-[rgba(99,102,241,0.15)]">
+                  <Sparkles className="h-6 w-6 text-[#6366F1]" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--text-primary)]">Get started with preset templates</h3>
@@ -1016,10 +1016,10 @@ export function TemplatesPage() {
               {/* Create new card */}
               <button
                 onClick={() => { setEditEmailData(null); setShowEmailEditor(true); }}
-                className="rounded-xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 flex flex-col items-center justify-center gap-3 hover:border-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] transition-all group min-h-[280px]"
+                className="rounded-xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 flex flex-col items-center justify-center gap-3 hover:border-[#6366F1]/40 hover:bg-[rgba(99,102,241,0.03)] transition-all group min-h-[280px]"
               >
-                <div className="w-12 h-12 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-[var(--bg-surface)] transition-colors">
-                  <Plus className="h-6 w-6 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]" />
+                <div className="w-12 h-12 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-[rgba(99,102,241,0.1)] group-hover:to-[rgba(139,92,246,0.1)] transition-colors border border-transparent group-hover:border-[rgba(99,102,241,0.15)]">
+                  <Plus className="h-6 w-6 text-[var(--text-tertiary)] group-hover:text-[#6366F1] transition-colors" />
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Create Template</p>
@@ -1057,10 +1057,10 @@ export function TemplatesPage() {
               {/* Create new card */}
               <button
                 onClick={() => { setEditSequenceData(null); setShowSequenceEditor(true); }}
-                className="rounded-xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 flex flex-col items-center justify-center gap-3 hover:border-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] transition-all group min-h-[300px]"
+                className="rounded-xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 flex flex-col items-center justify-center gap-3 hover:border-[#6366F1]/40 hover:bg-[rgba(99,102,241,0.03)] transition-all group min-h-[300px]"
               >
-                <div className="w-12 h-12 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-[var(--bg-surface)] transition-colors">
-                  <Plus className="h-6 w-6 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]" />
+                <div className="w-12 h-12 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-[rgba(99,102,241,0.1)] group-hover:to-[rgba(139,92,246,0.1)] transition-colors border border-transparent group-hover:border-[rgba(99,102,241,0.15)]">
+                  <Plus className="h-6 w-6 text-[var(--text-tertiary)] group-hover:text-[#6366F1] transition-colors" />
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Create Sequence</p>

@@ -369,7 +369,7 @@ function ComposeModal({ onClose, onSend, onSchedule, sending, smtpAccounts, temp
                 }
               }}
               disabled={!canSend}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#6366F1] text-[var(--bg-app)] text-sm font-semibold hover:bg-[#4F46E5] transition-all disabled:opacity-40 shadow-sm hover:shadow-md"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)]"
             >
               <Send className="h-3.5 w-3.5" />
               {sending ? 'Sending...' : 'Send'}
@@ -430,7 +430,7 @@ function AiAssistBar({ messageId, onInsert }: { messageId: string; onInsert: (ht
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[#6366F1]/5">
+    <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-gradient-to-r from-[rgba(99,102,241,0.05)] to-[rgba(139,92,246,0.05)]">
       <Wand2 className="h-4 w-4 text-[#6366F1] flex-shrink-0" />
       <input
         value={prompt}
@@ -452,7 +452,7 @@ function AiAssistBar({ messageId, onInsert }: { messageId: string; onInsert: (ht
           }
         }}
         disabled={!prompt.trim() || aiMut.isPending}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6366F1] text-white text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-40 shadow-[0_1px_4px_rgba(99,102,241,0.3)]"
       >
         {aiMut.isPending ? (
           <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
@@ -822,7 +822,7 @@ function ScheduleSendPicker({ onSchedule, onClose }: { onSchedule: (date: string
           <CustomTimePicker value={selectedTime} onChange={setSelectedTime} />
           <button
             onClick={handleConfirmSchedule}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[#6366F1] text-[var(--bg-app)] text-[13px] font-semibold hover:bg-[#4F46E5] transition-all shadow-sm hover:shadow-md"
+            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[13px] font-semibold hover:opacity-90 transition-all shadow-[0_2px_8px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.4)]"
           >
             <CalendarClock className="h-3.5 w-3.5" />
             Schedule for {selectedDateLabel} · {selectedTimeLabel}
@@ -1520,7 +1520,7 @@ export function InboxPage() {
           {/* Header: Compose + Search + Actions */}
           <div className="px-3 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowCompose(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#6366F1] text-white text-xs font-semibold hover:bg-[#4F46E5] transition-colors flex-shrink-0">
+              <button onClick={() => setShowCompose(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-semibold hover:opacity-90 transition-all flex-shrink-0 shadow-[0_1px_6px_rgba(99,102,241,0.3)]">
                 <Pencil className="h-3.5 w-3.5" />
                 Compose
               </button>
@@ -1822,7 +1822,7 @@ export function InboxPage() {
                             disabled={
                               (replyMode === 'reply' ? replyEditor.isEmpty || replyMut.isPending : !forwardTo.trim() || forwardMut.isPending)
                             }
-                            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#6366F1] text-[var(--bg-app)] text-sm font-semibold hover:bg-[#4F46E5] transition-all disabled:opacity-40 shadow-sm hover:shadow-md"
+                            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)]"
                           >
                             <Send className="h-3.5 w-3.5" />
                             {replyMut.isPending || forwardMut.isPending ? 'Sending...' : replyMode === 'reply' ? 'Send Reply' : 'Forward'}
