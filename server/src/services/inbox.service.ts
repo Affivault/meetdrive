@@ -18,6 +18,16 @@ async function resolveContactEmail(userId: string, messageId: string): Promise<s
 }
 
 export const inboxService = {
+  async unreadCount(userId: string): Promise<number> {
+    const { count } = await supabaseAdmin
+      .from('inbox_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+      .eq('is_archived', false);
+    return count || 0;
+  },
+
   async list(userId: string, params: {
     page?: number;
     limit?: number;

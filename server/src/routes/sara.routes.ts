@@ -5,6 +5,7 @@ export const saraRoutes = Router();
 
 // Queue management
 saraRoutes.get('/queue', saraController.getQueue);
+saraRoutes.post('/generate-email', saraController.generateEmail);
 saraRoutes.get('/stats', saraController.getStats);
 
 // Classification and actions

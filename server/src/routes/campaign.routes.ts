@@ -10,6 +10,9 @@ campaignRoutes.post('/', campaignsController.create);
 campaignRoutes.put('/:id', campaignsController.update);
 campaignRoutes.delete('/:id', campaignsController.delete);
 
+// Clone
+campaignRoutes.post('/:id/clone', campaignsController.clone);
+
 // Lifecycle
 campaignRoutes.post('/:id/launch', campaignsController.launch);
 campaignRoutes.post('/:id/pause', campaignsController.pause);

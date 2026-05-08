@@ -13,11 +13,15 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  ShieldOff,
+  ShieldCheck,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { SkySendLogo, SkySendLogoMark } from '../SkySendLogo';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 
 const mainNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -35,6 +39,9 @@ const toolsNav = [
 const settingsNav = [
   { name: 'SMTP Accounts', href: '/smtp-accounts', icon: Send },
   { name: 'Domains', href: '/domains', icon: Globe },
+  { name: 'Suppression', href: '/suppression', icon: ShieldOff },
+  { name: 'Verification', href: '/verification', icon: ShieldCheck },
+  { name: 'Team', href: '/team', icon: UserPlus },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -42,10 +49,12 @@ function NavItem({
   item,
   isActive,
   collapsed,
+  badge,
 }: {
   item: { name: string; href: string; icon: React.ElementType };
   isActive: boolean;
   collapsed: boolean;
+  badge?: number;
 }) {
   const Icon = item.icon;
 
@@ -61,8 +70,22 @@ function NavItem({
           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
       )}
     >
-      <Icon className="h-[18px] w-[18px] flex-shrink-0" strokeWidth={1.5} />
-      {!collapsed && <span>{item.name}</span>}
+      <div className="relative flex-shrink-0">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
+        {badge != null && badge > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6366F1] text-white text-[9px] font-bold px-0.5 leading-none">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+      </div>
+      {!collapsed && (
+        <span className="flex-1">{item.name}</span>
+      )}
+      {!collapsed && badge != null && badge > 0 && (
+        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6366F1] text-white text-[10px] font-bold px-1 leading-none">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </NavLink>
   );
 }
@@ -71,10 +94,12 @@ function NavSection({
   title,
   items,
   collapsed,
+  badges,
 }: {
   title?: string;
   items: Array<{ name: string; href: string; icon: React.ElementType }>;
   collapsed: boolean;
+  badges?: Record<string, number>;
 }) {
   const location = useLocation();
 
@@ -97,6 +122,7 @@ function NavSection({
             item={item}
             isActive={location.pathname === item.href || location.pathname.startsWith(item.href + '/')}
             collapsed={collapsed}
+            badge={badges?.[item.href]}
           />
         ))}
       </div>
@@ -108,6 +134,7 @@ export function Sidebar() {
   const { user, signOut: logout } = useAuth();
   const { collapsed, toggle } = useSidebar();
   const workspaceName = user?.email?.split('@')[0] || 'Workspace';
+  const unreadCount = useUnreadCount();
 
   return (
     <aside
@@ -152,7 +179,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className={cn('flex-1 py-3 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
-        <NavSection items={mainNav} collapsed={collapsed} />
+        <NavSection items={mainNav} collapsed={collapsed} badges={{ '/inbox': unreadCount }} />
         <NavSection title="Tools" items={toolsNav} collapsed={collapsed} />
         <NavSection title="Configure" items={settingsNav} collapsed={collapsed} />
       </nav>

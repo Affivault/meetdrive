@@ -258,6 +258,51 @@ export const campaignsService = {
     return data;
   },
 
+  async clone(userId: string, id: string) {
+    const original = await this.get(userId, id);
+
+    const { data: cloned, error } = await supabaseAdmin
+      .from('campaigns')
+      .insert({
+        user_id: userId,
+        name: `${original.name} (Copy)`,
+        from_name: original.from_name,
+        smtp_account_id: original.smtp_account_id,
+        status: 'draft',
+        settings: original.settings,
+      })
+      .select()
+      .single();
+    if (error) throw new AppError(error.message, 500);
+
+    if (original.steps?.length) {
+      const stepRows = original.steps.map((s: any) => ({
+        campaign_id: cloned.id,
+        step_type: s.step_type,
+        step_order: s.step_order,
+        subject: s.subject,
+        subject_b: s.subject_b,
+        body_html: s.body_html,
+        body_html_b: s.body_html_b,
+        body_text: s.body_text,
+        delay_days: s.delay_days,
+        delay_hours: s.delay_hours,
+        delay_minutes: s.delay_minutes,
+        skip_if_replied: s.skip_if_replied,
+        condition_field: s.condition_field,
+        condition_operator: s.condition_operator,
+        condition_value: s.condition_value,
+        false_branch_step: s.false_branch_step,
+        webhook_event: s.webhook_event,
+        webhook_timeout_hours: s.webhook_timeout_hours,
+      }));
+      await supabaseAdmin.from('campaign_steps').insert(stepRows);
+    }
+
+    fireEvent(userId, 'campaign.created', { campaign: cloned }).catch(() => {});
+    return cloned;
+  },
+
   async getStats(campaignId: string) {
     const { count: stepsCount } = await supabaseAdmin
       .from('campaign_steps')

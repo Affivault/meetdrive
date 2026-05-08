@@ -21,6 +21,7 @@ import {
   MessageSquare,
   AlertTriangle,
   Clock,
+  Copy,
 } from 'lucide-react';
 import {
   BarChart,
@@ -93,6 +94,16 @@ export function CampaignDetailPage() {
     },
   });
 
+  const cloneMutation = useMutation({
+    mutationFn: () => campaignsApi.clone(id!),
+    onSuccess: (cloned) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      toast.success('Campaign cloned');
+      navigate(`/campaigns/${cloned.id}`);
+    },
+    onError: () => toast.error('Failed to clone campaign'),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: () => campaignsApi.delete(id!),
     onSuccess: () => {
@@ -152,6 +163,9 @@ export function CampaignDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="secondary" title="Clone campaign" onClick={() => cloneMutation.mutate()}>
+            <Copy className="h-4 w-4" /> Clone
+          </Button>
           {campaign.status === 'draft' && (
             <>
               <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}/edit`)}>

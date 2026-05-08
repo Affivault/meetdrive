@@ -101,6 +101,11 @@ export const campaignsApi = {
     return data;
   },
 
+  clone: async (id: string) => {
+    const { data } = await apiClient.post<Campaign>(`/campaigns/${id}/clone`);
+    return data;
+  },
+
   // Sender pool (rotation)
   getSenderPool: async (campaignId: string) => {
     const { data } = await apiClient.get<string[]>(`/campaigns/${campaignId}/sender-pool`);

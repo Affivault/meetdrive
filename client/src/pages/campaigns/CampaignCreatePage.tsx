@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { campaignsApi } from '../../api/campaigns.api';
 import { smtpApi } from '../../api/smtp.api';
 import { contactsApi, listsApi } from '../../api/contacts.api';
+import { apiClient } from '../../api/client';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -37,6 +38,9 @@ import {
   Plus,
   FolderOpen,
   ListPlus,
+  Sparkles,
+  Loader2,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type {
@@ -135,6 +139,11 @@ export function CampaignCreatePage() {
   const subjectRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const [activeField, setActiveField] = useState<'subject' | 'body'>('body');
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiGoal, setAiGoal] = useState('');
+  const [aiTone, setAiTone] = useState('professional');
+  const [aiProduct, setAiProduct] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   const { data: existingCampaign, isLoading: loadingCampaign } = useQuery({
     queryKey: ['campaigns', id],
@@ -318,6 +327,26 @@ export function CampaignCreatePage() {
 
   const updateStep = (index: number, updates: Partial<CreateStepInput>) => {
     setSteps(steps.map((s, i) => (i === index ? { ...s, ...updates } : s)));
+  };
+
+  const handleGenerateEmail = async () => {
+    if (!aiGoal || editingStep === null) return;
+    setAiGenerating(true);
+    try {
+      const { data } = await apiClient.post('/sara/generate-email', {
+        goal: aiGoal,
+        tone: aiTone,
+        product: aiProduct,
+      });
+      updateStep(editingStep, { subject: data.subject, body_html: data.body_html });
+      setShowAiModal(false);
+      setAiGoal('');
+      toast.success('Email generated');
+    } catch {
+      toast.error('Generation failed');
+    } finally {
+      setAiGenerating(false);
+    }
   };
 
   const toggleContact = (contactId: string) => {
@@ -829,7 +858,17 @@ export function CampaignCreatePage() {
                         </p>
                       </div>
                     </div>
-                    <PersonalizationDropdown onInsert={insertPersonalization} />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAiModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-semibold hover:opacity-90 transition-all"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Generate with AI
+                      </button>
+                      <PersonalizationDropdown onInsert={insertPersonalization} />
+                    </div>
                   </div>
 
                   <div className="p-5 space-y-4">
@@ -927,6 +966,50 @@ export function CampaignCreatePage() {
                       </div>
                       <p className="text-xs text-[var(--text-tertiary)] mt-2.5">
                         50/50 split — half your contacts get Variant A, half get Variant B.
+                      </p>
+                    </div>
+
+                    {/* A/B Body Testing */}
+                    <div className="rounded-xl border border-[var(--border-subtle)] p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                          A/B Body Testing
+                        </p>
+                        {(steps[editingStep] as any).body_html_b && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSteps(steps.map((s, i) => i === editingStep ? ({ ...s, body_html_b: '' } as any) : s))
+                            }
+                            className="text-xs text-[var(--text-tertiary)] hover:text-red-500 transition-colors"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-2.5">
+                        <div>
+                          <label className="block text-xs text-[var(--text-tertiary)] mb-1">Variant A (current body)</label>
+                          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-secondary)] line-clamp-2">
+                            {steps[editingStep].body_html ? steps[editingStep].body_html!.replace(/<[^>]*>/g, '').slice(0, 100) + '...' : 'No body set'}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[var(--text-tertiary)] mb-1">Variant B body</label>
+                          <textarea
+                            value={(steps[editingStep] as any).body_html_b || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSteps(steps.map((s, i) => i === editingStep ? ({ ...s, body_html_b: val } as any) : s));
+                            }}
+                            rows={4}
+                            placeholder="Alternative email body HTML..."
+                            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[#6366F1] focus:outline-none focus:ring-1 focus:ring-[rgba(99,102,241,0.2)] transition-all font-mono resize-y"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-[var(--text-tertiary)] mt-2.5">
+                        50/50 split — uses the same contact assignment as subject A/B.
                       </p>
                     </div>
 
@@ -1531,6 +1614,68 @@ export function CampaignCreatePage() {
           </div>
         </div>
       </Modal>
+
+      {/* AI Email Generation Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-[#6366F1]" />
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Generate Email with AI</h2>
+              </div>
+              <button onClick={() => setShowAiModal(false)} className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">What's the goal of this email? <span className="text-red-400">*</span></label>
+                <input
+                  type="text"
+                  value={aiGoal}
+                  onChange={(e) => setAiGoal(e.target.value)}
+                  placeholder="e.g., Book a demo call, introduce our product..."
+                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Product / Service</label>
+                <input
+                  type="text"
+                  value={aiProduct}
+                  onChange={(e) => setAiProduct(e.target.value)}
+                  placeholder="e.g., SkySend email automation..."
+                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Tone</label>
+                <select
+                  value={aiTone}
+                  onChange={(e) => setAiTone(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
+                >
+                  <option value="professional">Professional</option>
+                  <option value="casual">Casual & Friendly</option>
+                  <option value="formal">Formal</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button variant="secondary" className="flex-1" onClick={() => setShowAiModal(false)}>Cancel</Button>
+              <button
+                disabled={!aiGoal || aiGenerating}
+                onClick={handleGenerateEmail}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {aiGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {aiGenerating ? 'Generating...' : 'Generate Email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
