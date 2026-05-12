@@ -24,23 +24,32 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    // Supabase JWTs are signed with the JWT secret (which is the same as SUPABASE_SERVICE_ROLE_KEY's secret)
-    // We decode without full verification here since Supabase handles token issuance
-    // In production, you'd verify against Supabase's JWT secret
-    const decoded = jwt.decode(token) as {
-      sub: string;
-      email: string;
-      exp: number;
-    } | null;
+    let decoded: { sub: string; email: string; exp: number } | null = null;
+
+    if (env.SUPABASE_JWT_SECRET) {
+      // Verify signature when the JWT secret is configured
+      decoded = jwt.verify(token, env.SUPABASE_JWT_SECRET) as {
+        sub: string;
+        email: string;
+        exp: number;
+      };
+    } else {
+      // Fallback: decode without verification (relies on Supabase token issuance)
+      decoded = jwt.decode(token) as {
+        sub: string;
+        email: string;
+        exp: number;
+      } | null;
+
+      // Manual expiration check when not using jwt.verify()
+      if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
+        res.status(401).json({ error: 'Token expired' });
+        return;
+      }
+    }
 
     if (!decoded || !decoded.sub) {
       res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
-
-    // Check expiration
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      res.status(401).json({ error: 'Token expired' });
       return;
     }
 

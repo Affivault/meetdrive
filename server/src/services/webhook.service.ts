@@ -126,13 +126,17 @@ export async function fireEvent(
   data: Record<string, any>
 ): Promise<void> {
   // Find active endpoints subscribed to this event
-  const { data: endpoints } = await supabaseAdmin
+  const { data: endpoints, error: endpointsError } = await supabaseAdmin
     .from('webhook_endpoints')
     .select('*')
     .eq('user_id', userId)
     .eq('is_active', true)
     .contains('events', [eventType]);
 
+  if (endpointsError) {
+    console.error('[Webhook] Failed to query endpoints:', endpointsError.message);
+    return;
+  }
   if (!endpoints || endpoints.length === 0) return;
 
   const payload: WebhookPayload = {

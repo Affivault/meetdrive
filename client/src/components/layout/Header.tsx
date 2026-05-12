@@ -65,7 +65,7 @@ export function Header() {
             className="flex items-center gap-2 h-8 pl-1.5 pr-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
           >
             <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center text-[10px] font-semibold text-white shadow-sm">
-              {user?.email?.[0].toUpperCase() || 'U'}
+              {user?.email?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <ChevronDown className={cn(
               "h-3 w-3 text-[var(--text-tertiary)] transition-transform duration-150",

@@ -1,13 +1,21 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/utils';
 
 function AppContent() {
   const { collapsed } = useSidebar();
+  const unreadCount = useUnreadCount();
+
+  useEffect(() => {
+    document.title = unreadCount > 0 ? `SkySend (${unreadCount})` : 'SkySend';
+    return () => { document.title = 'SkySend'; };
+  }, [unreadCount]);
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)]">

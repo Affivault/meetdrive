@@ -39,7 +39,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function getInitials(email: string) {
-  return email[0].toUpperCase();
+  return email.charAt(0)?.toUpperCase() || '?';
 }
 
 export function TeamPage() {
@@ -123,6 +123,8 @@ export function TeamPage() {
       setCopiedToken(token);
       toast.success('Invite link copied');
       setTimeout(() => setCopiedToken(null), 2000);
+    }).catch(() => {
+      toast.error('Failed to copy link — please copy it manually');
     });
   };
 

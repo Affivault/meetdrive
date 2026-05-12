@@ -73,6 +73,12 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     });
   }
 
+  if (!html && !text) {
+    return res.status(400).json({
+      error: 'Email must have at least one of: html, text',
+    });
+  }
+
   try {
     // Dynamic import to avoid bundling issues
     const nodemailer = require('nodemailer');

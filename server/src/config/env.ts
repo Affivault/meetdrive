@@ -8,6 +8,7 @@ const envSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  SUPABASE_JWT_SECRET: z.string().optional().default(''),
   REDIS_URL: z.string().optional().default(''),
   API_BASE_URL: z.string().default('http://localhost:3001'),
   CLIENT_URL: z.string().default('http://localhost:5173'),

@@ -62,7 +62,7 @@ export function startInboxWorker() {
         password = decrypt(account.smtp_pass_encrypted);
       } catch (decryptErr: any) {
         console.error(`Failed to decrypt password for SMTP account ${smtpAccountId}:`, decryptErr.message);
-        return;
+        throw decryptErr;
       }
       const emailDomain = account.email_address?.split('@')[1] || '';
 
