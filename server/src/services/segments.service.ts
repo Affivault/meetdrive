@@ -175,19 +175,25 @@ export const segmentsService = {
     // Handle tag field separately (requires join)
     if (field === 'tag') return null;
 
+    // Quote string values so commas and parens inside them don't break PostgREST OR parsing
+    const q = (v: string | null | undefined): string => {
+      const s = String(v ?? '');
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+
     switch (operator) {
       case 'equals':
-        return `${field}.eq.${value}`;
+        return `${field}.eq.${q(value)}`;
       case 'not_equals':
-        return `${field}.neq.${value}`;
+        return `${field}.neq.${q(value)}`;
       case 'contains':
-        return `${field}.ilike.%${value}%`;
+        return `${field}.ilike."%${String(value ?? '').replace(/"/g, '""')}%"`;
       case 'not_contains':
-        return `${field}.not.ilike.%${value}%`;
+        return `${field}.not.ilike."%${String(value ?? '').replace(/"/g, '""')}%"`;
       case 'starts_with':
-        return `${field}.ilike.${value}%`;
+        return `${field}.ilike.${q(`${value ?? ''}%`)}`;
       case 'ends_with':
-        return `${field}.ilike.%${value}`;
+        return `${field}.ilike.${q(`%${value ?? ''}`)}`;
       case 'is_empty':
         return `${field}.is.null`;
       case 'is_not_empty':

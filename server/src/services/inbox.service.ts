@@ -156,11 +156,13 @@ export const inboxService = {
     }
 
     // Step 3: Find ALL messages with this contact (both directions)
+    // Quote the email so values containing commas/parens don't break PostgREST OR parsing
+    const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
     const { data, error } = await supabaseAdmin
       .from('inbox_messages')
       .select('*, contacts(first_name, last_name, email), smtp_accounts(id, email_address, label)')
       .eq('user_id', userId)
-      .or(`from_email.eq.${contactEmail},to_email.eq.${contactEmail}`)
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`)
       .order('received_at', { ascending: true });
 
     if (error) throw new AppError(error.message, 500);
@@ -259,33 +261,36 @@ export const inboxService = {
   async archiveThread(userId: string, messageId: string) {
     const contactEmail = await resolveContactEmail(userId, messageId);
     if (!contactEmail) return inboxService.archive(userId, messageId);
+    const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
     const { error } = await supabaseAdmin
       .from('inbox_messages')
       .update({ is_archived: true })
       .eq('user_id', userId)
-      .or(`from_email.eq.${contactEmail},to_email.eq.${contactEmail}`);
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
     if (error) throw new AppError(error.message, 500);
   },
 
   async unarchiveThread(userId: string, messageId: string) {
     const contactEmail = await resolveContactEmail(userId, messageId);
     if (!contactEmail) return inboxService.unarchive(userId, messageId);
+    const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
     const { error } = await supabaseAdmin
       .from('inbox_messages')
       .update({ is_archived: false })
       .eq('user_id', userId)
-      .or(`from_email.eq.${contactEmail},to_email.eq.${contactEmail}`);
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
     if (error) throw new AppError(error.message, 500);
   },
 
   async markThreadRead(userId: string, messageId: string) {
     const contactEmail = await resolveContactEmail(userId, messageId);
     if (!contactEmail) return inboxService.markRead(userId, messageId);
+    const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
     const { error } = await supabaseAdmin
       .from('inbox_messages')
       .update({ is_read: true })
       .eq('user_id', userId)
-      .or(`from_email.eq.${contactEmail},to_email.eq.${contactEmail}`);
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
     if (error) throw new AppError(error.message, 500);
   },
 

@@ -251,7 +251,8 @@ export function startEmailWorker() {
             // Use random delay between min-max seconds. Falls back to legacy single value.
             const delayMin = campaign.delay_between_emails_min ?? campaign.delay_between_emails ?? 60;
             const delayMax = campaign.delay_between_emails_max ?? campaign.delay_between_emails ?? 60;
-            const delaySecs = delayMin + Math.floor(Math.random() * (delayMax - delayMin + 1));
+            const effectiveMax = Math.max(delayMin, delayMax);
+            const delaySecs = delayMin + Math.floor(Math.random() * (effectiveMax - delayMin + 1));
             const nextSendAt = new Date(Date.now() + delaySecs * 1000);
             console.log(`[Email] Next step in ${delaySecs}s (range: ${delayMin}-${delayMax}s)`);
             await supabaseAdmin

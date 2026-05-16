@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatDate, cn } from '../../lib/utils';
-import { Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare, Copy } from 'lucide-react';
+import { Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare, Copy, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { CampaignWithStats } from '@lemlist/shared';
 import { DEFAULT_PAGE_SIZE } from '../../lib/constants';
@@ -230,6 +230,15 @@ export function CampaignsListPage() {
                       </div>
                       <span className="font-bold text-[var(--text-primary)]">{campaign.replied_count}</span> replied
                     </span>
+                    {campaign.bounced_count > 0 && (
+                      <span className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-lg bg-[rgba(239,68,68,0.1)] flex items-center justify-center">
+                          <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+                        </div>
+                        <span className="font-bold text-red-500">{campaign.bounced_count}</span>
+                        <span className="text-red-400">bounced</span>
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

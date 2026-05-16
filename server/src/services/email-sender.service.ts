@@ -319,7 +319,8 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
     if (hasMoreSteps) {
       const delayMin = campaign.delay_between_emails_min ?? campaign.delay_between_emails ?? 60;
       const delayMax = campaign.delay_between_emails_max ?? campaign.delay_between_emails ?? 60;
-      const delaySecs = delayMin + Math.floor(Math.random() * (delayMax - delayMin + 1));
+      const effectiveMax = Math.max(delayMin, delayMax);
+      const delaySecs = delayMin + Math.floor(Math.random() * (effectiveMax - delayMin + 1));
       const nextSendAt = new Date(Date.now() + delaySecs * 1000);
       console.log(`[EmailSender] Next step in ${delaySecs}s (range: ${delayMin}-${delayMax}s)`);
       await supabaseAdmin
