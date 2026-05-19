@@ -33,6 +33,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import toast from 'react-hot-toast';
 import type { CampaignStep } from '@lemlist/shared';
@@ -49,18 +50,26 @@ export function CampaignDetailPage() {
     queryKey: ['campaigns', id],
     queryFn: () => campaignsApi.get(id!),
     enabled: !!id,
+    refetchInterval: (query) => {
+      const status = (query.state.data as any)?.status;
+      return status === 'running' ? 10_000 : false;
+    },
   });
+
+  const isLive = campaign?.status === 'running';
 
   const { data: analytics } = useQuery({
     queryKey: ['analytics', 'campaign', id],
     queryFn: () => analyticsApi.campaign(id!),
     enabled: !!id,
+    refetchInterval: isLive ? 10_000 : false,
   });
 
   const { data: campaignContacts } = useQuery({
     queryKey: ['campaign-contacts', id],
     queryFn: () => campaignsApi.getContacts(id!, { limit: 100 }),
     enabled: !!id && activeTab === 'contacts',
+    refetchInterval: isLive && activeTab === 'contacts' ? 10_000 : false,
   });
 
   const launchMutation = useMutation({
@@ -158,6 +167,15 @@ export function CampaignDetailPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-primary">{campaign.name}</h1>
             <StatusBadge status={campaign.status} type="campaign" />
+            {isLive && (
+              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                Live
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-secondary">
             Created {formatDate(campaign.created_at)}
@@ -254,7 +272,11 @@ export function CampaignDetailPage() {
                           contentStyle={{ backgroundColor: '#111113', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', color: '#fff' }}
                           cursor={{ fill: 'rgba(255,255,255,0.03)' }}
                         />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

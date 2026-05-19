@@ -307,7 +307,7 @@ export async function approveReply(
   editedReply?: string
 ): Promise<void> {
   const update: Record<string, any> = {
-    sara_status: editedReply ? SaraStatus.Approved : SaraStatus.Approved,
+    sara_status: SaraStatus.Approved,
     sara_reviewed_at: new Date().toISOString(),
     sara_reviewed_by: userId,
   };

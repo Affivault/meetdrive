@@ -39,17 +39,17 @@ function injectTrackingPixel(html: string, trackingId: string): string {
  * Skips mailto: links and unsubscribe links.
  */
 function wrapLinks(html: string, trackingId: string): string {
-  // Match href="..." in anchor tags
+  // Match href="..." or href='...' in anchor tags
   return html.replace(
-    /href="(https?:\/\/[^"]+)"/gi,
-    (_match, url) => {
+    /href=(["'])(https?:\/\/[^"']+)\1/gi,
+    (_match, quote, url) => {
       // Don't wrap unsubscribe or tracking URLs
       if (url.includes('/api/track/') || url.includes('unsubscribe')) {
-        return `href="${url}"`;
+        return `href=${quote}${url}${quote}`;
       }
       const encoded = Buffer.from(url).toString('base64url');
       const trackUrl = `${env.TRACKING_BASE_URL}/api/track/click/${trackingId}?url=${encoded}`;
-      return `href="${trackUrl}"`;
+      return `href=${quote}${trackUrl}${quote}`;
     }
   );
 }
