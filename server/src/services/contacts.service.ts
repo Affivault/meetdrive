@@ -154,6 +154,16 @@ export const contactsService = {
 
     if (error) throw new AppError(error.message, 500);
     if (!data) throw new AppError('Contact not found', 404);
+
+    // Apply tag updates when tag_ids is explicitly provided
+    if (Array.isArray(tag_ids)) {
+      await supabaseAdmin.from('contact_tags').delete().eq('contact_id', id);
+      if (tag_ids.length > 0) {
+        const tagRows = tag_ids.map((tagId: string) => ({ contact_id: id, tag_id: tagId }));
+        await supabaseAdmin.from('contact_tags').insert(tagRows);
+      }
+    }
+
     fireEvent(userId, 'contact.updated', { contact: data }).catch(() => {});
     return data;
   },
@@ -240,15 +250,14 @@ export const contactsService = {
       .in('id', contactIds);
 
     const validIds = (contacts || []).map((c: any) => c.id);
+    if (validIds.length === 0) return;
 
-    for (const contactId of validIds) {
-      const { error } = await supabaseAdmin
-        .from('contact_tags')
-        .delete()
-        .eq('contact_id', contactId)
-        .in('tag_id', tagIds);
-      if (error) throw new AppError(error.message, 500);
-    }
+    const { error } = await supabaseAdmin
+      .from('contact_tags')
+      .delete()
+      .in('contact_id', validIds)
+      .in('tag_id', tagIds);
+    if (error) throw new AppError(error.message, 500);
   },
 
   async bulkDelete(userId: string, contactIds: string[]) {

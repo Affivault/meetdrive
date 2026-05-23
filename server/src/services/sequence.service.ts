@@ -3,6 +3,7 @@ import { fireEvent } from './webhook.service.js';
 import { classifyReply } from './sara.service.js';
 import { sendCampaignEmail } from './email-sender.service.js';
 import { suppressionService } from './suppression.service.js';
+import * as sse from './sse.service.js';
 
 /**
  * Sequence Engine Service
@@ -346,6 +347,11 @@ async function processEmailStep(cc: any, step: any): Promise<void> {
         .from('contacts')
         .update({ is_bounced: true })
         .eq('id', cc.contact_id);
+
+      // Decrement SMTP account health score on hard bounce
+      if (cc.campaigns?.smtp_account_id) {
+        sse.recordBounce(cc.campaigns.smtp_account_id).catch(() => {});
+      }
     }
 
     // Record error activity
