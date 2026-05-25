@@ -242,6 +242,7 @@ router.get('/unsubscribe/:trackingId', async (req: Request, res: Response) => {
           campaign_id: cc.campaign_id,
           campaign_contact_id: campaignContactId,
           contact_id: cc.contact_id,
+          step_id: stepId,
           activity_type: 'unsubscribed',
           metadata: { method: 'link_click' },
         });
@@ -258,12 +259,32 @@ router.get('/unsubscribe/:trackingId', async (req: Request, res: Response) => {
   }
 
   return res.send(`<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unsubscribed</title>
-<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f9fafb;color:#111}
-.card{text-align:center;padding:3rem;max-width:420px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-h1{font-size:1.25rem;margin:0 0 .75rem}p{color:#6b7280;font-size:.9rem;line-height:1.5;margin:0}</style>
-</head><body><div class="card"><h1>You've been unsubscribed</h1><p>You won't receive any more emails from this campaign. If this was a mistake, please contact the sender directly.</p></div></body></html>`);
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unsubscribed — SkySend</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#f0f0ff 0%,#f9fafb 50%,#fff5f5 100%);color:#111;padding:1rem}
+  .card{text-align:center;padding:2.5rem 2rem;max-width:420px;width:100%;background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(99,102,241,.08),0 1px 4px rgba(0,0,0,.06)}
+  .icon-wrap{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+  .icon-wrap svg{width:32px;height:32px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:1.3rem;font-weight:700;color:#111;margin-bottom:.625rem;letter-spacing:-.01em}
+  p{color:#6b7280;font-size:.875rem;line-height:1.6}
+  .divider{width:48px;height:2px;background:linear-gradient(90deg,#6366F1,#8B5CF6);border-radius:2px;margin:1.25rem auto}
+  .footer{margin-top:2rem;font-size:.75rem;color:#9ca3af}
+  .footer a{color:#6366F1;text-decoration:none;font-weight:500}
+</style>
+</head><body>
+<div class="card">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>You're unsubscribed</h1>
+  <div class="divider"></div>
+  <p>You've been successfully removed from this mailing list and won't receive any more emails from this campaign.</p>
+  <p style="margin-top:.75rem">If this was a mistake, please reply directly to the sender's email to be re-added.</p>
+</div>
+<div class="footer">Powered by <a href="https://skysend.io" target="_blank" rel="noopener">SkySend</a></div>
+</body></html>`);
 });
 
 export { router as trackingRoutes };
