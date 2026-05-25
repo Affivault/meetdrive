@@ -4,6 +4,8 @@ import { AppError } from '../middleware/error.middleware.js';
 import { getPagination, formatPaginatedResponse } from '../utils/pagination.js';
 import { decrypt } from '../utils/encryption.js';
 import { sendViaSmtp } from './email-sender.service.js';
+import { fireEvent } from './webhook.service.js';
+import { processReply } from './sara.service.js';
 
 async function resolveContactEmail(userId: string, messageId: string): Promise<string | null> {
   const { data: msg } = await supabaseAdmin
@@ -798,7 +800,34 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
               inboxRow.contact_id = matchedActivity.contact_id;
             }
 
-            await supabaseAdmin.from('inbox_messages').insert(inboxRow);
+            const { data: saved } = await supabaseAdmin
+              .from('inbox_messages')
+              .insert(inboxRow)
+              .select('id')
+              .single();
+
+            // If matched to a campaign, record replied activity + fire webhook + run SARA
+            if (matchedActivity && saved?.id) {
+              await supabaseAdmin.from('campaign_activities').insert({
+                campaign_id: matchedActivity.campaign_id,
+                campaign_contact_id: matchedActivity.campaign_contact_id,
+                contact_id: matchedActivity.contact_id,
+                step_id: matchedActivity.step_id || null,
+                activity_type: 'replied',
+                message_id: messageId || null,
+                metadata: { from: fromEmail, subject, inbox_message_id: saved.id },
+              });
+
+              fireEvent(userId, 'email.replied', {
+                campaign_id: matchedActivity.campaign_id,
+                contact_id: matchedActivity.contact_id,
+                from: fromEmail,
+                subject,
+              }).catch(() => {});
+
+              try { await processReply(saved.id); } catch (e) { console.error('[InboxSync] SARA error:', e); }
+            }
+
             newCount++;
           }
 

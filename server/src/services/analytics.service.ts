@@ -242,34 +242,37 @@ export const analyticsService = {
       .select('contact_id, status, contacts(email, first_name, last_name)')
       .eq('campaign_id', campaignId);
 
-    const contacts = await Promise.all(
-      (campaignContacts || []).map(async (cc: any) => {
-        const { data: activities } = await supabaseAdmin
-          .from('campaign_activities')
-          .select('activity_type')
-          .eq('campaign_id', campaignId)
-          .eq('contact_id', cc.contact_id);
+    // Fetch all activities for this campaign in one query, then group by contact_id
+    const { data: allActivities } = await supabaseAdmin
+      .from('campaign_activities')
+      .select('contact_id, activity_type')
+      .eq('campaign_id', campaignId);
 
-        const counts = { sent: 0, opened: 0, clicked: 0, replied: false };
-        for (const a of activities || []) {
-          switch (a.activity_type) {
-            case 'sent': counts.sent++; break;
-            case 'opened': counts.opened++; break;
-            case 'clicked': counts.clicked++; break;
-            case 'replied': counts.replied = true; break;
-          }
-        }
+    const activityByContact = new Map<string, { sent: number; opened: number; clicked: number; replied: boolean }>();
+    for (const a of allActivities || []) {
+      if (!activityByContact.has(a.contact_id)) {
+        activityByContact.set(a.contact_id, { sent: 0, opened: 0, clicked: 0, replied: false });
+      }
+      const c = activityByContact.get(a.contact_id)!;
+      switch (a.activity_type) {
+        case 'sent': c.sent++; break;
+        case 'opened': c.opened++; break;
+        case 'clicked': c.clicked++; break;
+        case 'replied': c.replied = true; break;
+      }
+    }
 
-        return {
-          contact_id: cc.contact_id,
-          email: cc.contacts?.email || '',
-          first_name: cc.contacts?.first_name || null,
-          last_name: cc.contacts?.last_name || null,
-          status: cc.status,
-          ...counts,
-        };
-      })
-    );
+    const contacts = (campaignContacts || []).map((cc: any) => {
+      const counts = activityByContact.get(cc.contact_id) || { sent: 0, opened: 0, clicked: 0, replied: false };
+      return {
+        contact_id: cc.contact_id,
+        email: cc.contacts?.email || '',
+        first_name: cc.contacts?.first_name || null,
+        last_name: cc.contacts?.last_name || null,
+        status: cc.status,
+        ...counts,
+      };
+    });
 
     return { contacts };
   },
