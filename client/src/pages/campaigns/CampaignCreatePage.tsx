@@ -254,6 +254,15 @@ export function CampaignCreatePage() {
         : await campaignsApi.create(campaignForm);
       const campaignId = isEdit ? id! : campaign.id;
 
+      // Delete steps that have been removed from the sequence during editing.
+      if (isEdit && existingCampaign?.steps) {
+        const currentStepIds = new Set(steps.map(s => s.id).filter(Boolean));
+        const stepsToDelete = (existingCampaign.steps as CampaignStep[]).filter(s => !currentStepIds.has(s.id));
+        for (const step of stepsToDelete) {
+          await campaignsApi.deleteStep(campaignId, step.id);
+        }
+      }
+
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         const stepData = { ...step, step_order: i };
@@ -280,6 +289,15 @@ export function CampaignCreatePage() {
       isEdit ? campaignsApi.update(id!, input) : campaignsApi.create(input),
     onSuccess: async (campaign) => {
       const campaignId = isEdit ? id! : campaign.id;
+
+      // Delete steps that have been removed from the sequence during editing.
+      if (isEdit && existingCampaign?.steps) {
+        const currentStepIds = new Set(steps.map(s => s.id).filter(Boolean));
+        const stepsToDelete = (existingCampaign.steps as CampaignStep[]).filter(s => !currentStepIds.has(s.id));
+        for (const step of stepsToDelete) {
+          await campaignsApi.deleteStep(campaignId, step.id);
+        }
+      }
 
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
@@ -923,6 +941,26 @@ export function CampaignCreatePage() {
                         placeholder={`<p>Hi {{first_name}},</p>\n\n<p>I noticed that {{company}} is…</p>`}
                         className="w-full min-h-[200px] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[#6366F1] focus:outline-none focus:ring-2 focus:ring-[rgba(99,102,241,0.2)] transition-all font-mono resize-y"
                       />
+                      {(() => {
+                        const rawText = (steps[editingStep].body_html || '')
+                          .replace(/<[^>]*>/g, ' ')
+                          .replace(/\s+/g, ' ')
+                          .trim();
+                        const words = rawText ? rawText.split(/\s+/).filter(Boolean).length : 0;
+                        if (words === 0) return null;
+                        const quality =
+                          words <= 100
+                            ? { label: 'Concise length', color: 'text-green-500' }
+                            : words <= 200
+                            ? { label: 'Good length', color: 'text-amber-500' }
+                            : { label: 'Long — consider trimming', color: 'text-red-400' };
+                        return (
+                          <div className="flex items-center justify-between mt-1.5 px-1">
+                            <span className={`text-[11px] font-medium ${quality.color}`}>{quality.label}</span>
+                            <span className="text-[11px] tabular-nums text-[var(--text-tertiary)]">{words} words</span>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Skip if replied */}

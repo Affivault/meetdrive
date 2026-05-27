@@ -253,20 +253,30 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
     } : {}),
   };
 
-  const sendResult = await sendViaSmtp({
-    smtpHost: smtpAccount.smtp_host,
-    smtpPort: smtpAccount.smtp_port,
-    smtpSecure: smtpAccount.smtp_secure,
-    smtpUser: smtpAccount.smtp_user,
-    smtpPass: smtpPassword,
-    from: smtpAccount.email_address,
-    to,
-    subject,
-    html: finalHtml,
-    text: bodyText,
-    messageId,
-    headers: emailHeaders,
-  });
+  let sendResult;
+  try {
+    sendResult = await sendViaSmtp({
+      smtpHost: smtpAccount.smtp_host,
+      smtpPort: smtpAccount.smtp_port,
+      smtpSecure: smtpAccount.smtp_secure,
+      smtpUser: smtpAccount.smtp_user,
+      smtpPass: smtpPassword,
+      from: smtpAccount.email_address,
+      to,
+      subject,
+      html: finalHtml,
+      text: bodyText,
+      messageId,
+      headers: emailHeaders,
+    });
+  } catch (err: any) {
+    // Annotate the error with the account that attempted the send so callers
+    // can record the bounce/failure against the correct SMTP account rather
+    // than falling back to campaign.smtp_account_id (which may differ when
+    // SSE selected a different sender).
+    err.smtpAccountId = smtpAccount.id;
+    throw err;
+  }
 
   console.log(`[EmailSender] Sent to ${to} via ${smtpAccount.label || smtpAccount.smtp_host} — messageId: ${sendResult.messageId}`);
 
