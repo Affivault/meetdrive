@@ -351,9 +351,11 @@ async function processEmailStep(cc: any, step: any): Promise<void> {
         .update({ is_bounced: true })
         .eq('id', cc.contact_id);
 
-      // Decrement SMTP account health score on hard bounce
-      if (cc.campaigns?.smtp_account_id) {
-        sse.recordBounce(cc.campaigns.smtp_account_id).catch(() => {});
+      // Use the account that actually attempted the send (annotated by sendCampaignEmail).
+      // Fall back to campaign.smtp_account_id only if SSE didn't annotate the error.
+      const bounceAccountId = err.smtpAccountId || cc.campaigns?.smtp_account_id;
+      if (bounceAccountId) {
+        sse.recordBounce(bounceAccountId).catch(() => {});
       }
     }
 
