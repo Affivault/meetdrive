@@ -22,6 +22,7 @@ export interface UserSettings {
   sara_auto_unsubscribe: boolean;
   sara_auto_bounce: boolean;
   sara_draft_replies: boolean;
+  ai_tagging_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +46,7 @@ const DEFAULTS: Omit<UserSettings, 'id' | 'user_id' | 'created_at' | 'updated_at
   sara_auto_unsubscribe: true,
   sara_auto_bounce: true,
   sara_draft_replies: true,
+  ai_tagging_enabled: true,
 };
 
 export const settingsService = {

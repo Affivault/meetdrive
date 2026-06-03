@@ -21,6 +21,7 @@ export interface UserSettings {
   sara_auto_unsubscribe: boolean;
   sara_auto_bounce: boolean;
   sara_draft_replies: boolean;
+  ai_tagging_enabled: boolean;
   created_at: string;
   updated_at: string;
 }

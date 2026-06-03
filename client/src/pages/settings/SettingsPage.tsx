@@ -103,7 +103,7 @@ export function SettingsPage() {
       setReplyNotifications(settings.reply_notifications ?? true);
       setWeeklyDigest(settings.weekly_digest ?? false);
       setDefaultSignature(settings.default_signature || '');
-      setAiTaggingEnabled(settings.sara_enabled ?? true);
+      setAiTaggingEnabled((settings as any).ai_tagging_enabled ?? settings.sara_enabled ?? true);
       setAiAutoClassify(settings.sara_auto_classify ?? true);
       setAiAutoUnsubscribe(settings.sara_auto_unsubscribe ?? true);
       setAiAutoBounce(settings.sara_auto_bounce ?? true);
@@ -147,6 +147,7 @@ export function SettingsPage() {
       sara_auto_unsubscribe: aiAutoUnsubscribe,
       sara_auto_bounce: aiAutoBounce,
       sara_draft_replies: false,
+      ai_tagging_enabled: aiTaggingEnabled,
     });
   };
 

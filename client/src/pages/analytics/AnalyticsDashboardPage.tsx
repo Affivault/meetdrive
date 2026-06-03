@@ -9,6 +9,8 @@ import { Badge } from '../../components/ui/Badge';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { useTheme } from '../../context/ThemeContext';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { cn } from '../../lib/utils';
 import {
   BarChart,
   Bar,
@@ -16,6 +18,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -38,6 +41,7 @@ import {
   ShieldCheck,
   Activity,
   TrendingUp,
+  BarChart3,
 } from 'lucide-react';
 
 function safeNum(v: unknown): number {
@@ -856,6 +860,171 @@ export function AnalyticsDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Campaign Comparison */}
+      <CampaignComparison campaigns={campaigns} />
+    </div>
+  );
+}
+
+/* ─── Campaign Comparison ──────────────────────────────────────── */
+
+function CampaignComparison({ campaigns }: { campaigns: any[] }) {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const { data: comparisonData = [], isLoading } = useQuery({
+    queryKey: ['analytics', 'compare', selectedIds],
+    queryFn: async () => {
+      const results = await Promise.all(selectedIds.map((id) => analyticsApi.campaign(id)));
+      return results.map((res, i) => ({ ...res, campaign: campaigns.find((c) => c.id === selectedIds[i]) }));
+    },
+    enabled: selectedIds.length > 0,
+  });
+
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 4) {
+        toast.error('Select up to 4 campaigns to compare');
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const colors = ['#6366F1', '#10B981', '#F59E0B', '#EC4899'];
+
+  return (
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="p-6 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-heading-sm text-[var(--text-primary)]">Compare Campaigns</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+              Select up to 4 campaigns to see their performance side by side.
+            </p>
+          </div>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setSelectedIds([])}
+              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1"
+            >
+              Clear ({selectedIds.length})
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {campaigns.map((c: any) => {
+            const active = selectedIds.includes(c.id);
+            const idx = selectedIds.indexOf(c.id);
+            return (
+              <button
+                key={c.id}
+                onClick={() => toggleId(c.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                  active
+                    ? 'border-transparent text-white'
+                    : 'border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                )}
+                style={active ? { background: colors[idx] } : undefined}
+              >
+                {active && <span className="mr-1.5 text-[10px] opacity-80">#{idx + 1}</span>}
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {selectedIds.length === 0 ? (
+        <div className="p-12 text-center text-[var(--text-tertiary)]">
+          <BarChart3 className="h-10 w-10 mx-auto mb-2" />
+          <p className="text-sm">Pick at least 2 campaigns above to start comparing.</p>
+        </div>
+      ) : isLoading ? (
+        <div className="p-12 text-center"><Spinner size="md" /></div>
+      ) : (
+        <div className="p-6 space-y-6">
+          {/* Stat comparison table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
+                <tr>
+                  <th className="text-left py-2 font-medium">Campaign</th>
+                  <th className="text-right py-2 font-medium">Sent</th>
+                  <th className="text-right py-2 font-medium">Opened</th>
+                  <th className="text-right py-2 font-medium">Open %</th>
+                  <th className="text-right py-2 font-medium">Clicked</th>
+                  <th className="text-right py-2 font-medium">Click %</th>
+                  <th className="text-right py-2 font-medium">Replied</th>
+                  <th className="text-right py-2 font-medium">Reply %</th>
+                  <th className="text-right py-2 font-medium">Bounced</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonData.map((d: any, i: number) => (
+                  <tr key={d.campaign_id} className="border-b border-[var(--border-subtle)]">
+                    <td className="py-3 font-medium text-[var(--text-primary)]">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ background: colors[i] }} />
+                        <span className="truncate max-w-[200px]">{d.campaign?.name || '...'}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.sent || 0).toLocaleString()}</td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.opened || 0).toLocaleString()}</td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.open_rate || 0).toFixed(1)}%</td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.clicked || 0).toLocaleString()}</td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.click_rate || 0).toFixed(1)}%</td>
+                    <td className="py-3 text-right tabular-nums text-[var(--text-secondary)]">{(d.replied || 0).toLocaleString()}</td>
+                    <td className="py-3 text-right tabular-nums font-semibold text-[#10B981]">{(d.reply_rate || 0).toFixed(1)}%</td>
+                    <td className="py-3 text-right tabular-nums text-red-500">{(d.bounced || 0).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Bar chart comparison */}
+          {comparisonData.length >= 2 && (
+            <div>
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-3">Engagement rates</h4>
+              <div className="h-64">
+                <ErrorBoundary fallback={<div className="text-sm text-[var(--text-tertiary)]">Chart unavailable</div>}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={['Open %', 'Click %', 'Reply %'].map((metric, i) => {
+                        const row: any = { metric };
+                        comparisonData.forEach((d: any, ci: number) => {
+                          row[d.campaign?.name || `C${ci + 1}`] = i === 0 ? d.open_rate : i === 1 ? d.click_rate : d.reply_rate;
+                        });
+                        return row;
+                      })}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                      <XAxis dataKey="metric" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} unit="%" />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-default)',
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      {comparisonData.map((d: any, i: number) => (
+                        <Bar key={d.campaign_id} dataKey={d.campaign?.name || `C${i + 1}`} fill={colors[i]} radius={[4, 4, 0, 0]} />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ErrorBoundary>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
