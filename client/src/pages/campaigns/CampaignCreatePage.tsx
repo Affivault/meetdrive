@@ -1113,6 +1113,16 @@ export function CampaignCreatePage() {
                       })()}
                     </div>
 
+                    {/* Recipient inbox preview */}
+                    {steps[editingStep].body_html && (
+                      <RecipientPreview
+                        subject={steps[editingStep].subject || '(no subject)'}
+                        bodyHtml={steps[editingStep].body_html || ''}
+                        fromName={smtpAccounts?.find((a: any) => a.id === campaignForm.smtp_account_id)?.label || 'Your Name'}
+                        fromEmail={smtpAccounts?.find((a: any) => a.id === campaignForm.smtp_account_id)?.email_address || 'you@example.com'}
+                      />
+                    )}
+
                     {/* Skip if replied */}
                     <ToggleSwitch
                       checked={steps[editingStep].skip_if_replied !== false}
@@ -1958,6 +1968,96 @@ export function CampaignCreatePage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Recipient Inbox Preview ─────────────────────────────────────
+ * Renders the email exactly as it would appear in a recipient's
+ * inbox: header bar with sender / subject / avatar, then the body
+ * in a sandboxed iframe so HTML from the editor can't break the page.
+ */
+function RecipientPreview({ subject, bodyHtml, fromName, fromEmail }: {
+  subject: string;
+  bodyHtml: string;
+  fromName: string;
+  fromEmail: string;
+}) {
+  const initials = (fromName || fromEmail)
+    .split(/[\s@]/)[0]
+    .slice(0, 2)
+    .toUpperCase();
+
+  // Strip {{vars}} from preview so the user sees a realistic-looking email
+  const previewHtml = (bodyHtml || '').replace(/\{\{(\w+)\}\}/g, (_, k) => {
+    const fillers: Record<string, string> = {
+      first_name: 'Sarah',
+      last_name: 'Chen',
+      company: 'Acme Inc',
+      job_title: 'Head of Sales',
+      industry: 'SaaS',
+    };
+    return fillers[k] || `[${k}]`;
+  });
+
+  const previewSubject = subject.replace(/\{\{(\w+)\}\}/g, (_, k) => {
+    const fillers: Record<string, string> = {
+      first_name: 'Sarah', last_name: 'Chen', company: 'Acme Inc',
+    };
+    return fillers[k] || `[${k}]`;
+  });
+
+  return (
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)]">
+        <Eye className="h-3.5 w-3.5 text-[#6366F1]" />
+        <span className="text-xs font-semibold text-[var(--text-primary)]">Recipient inbox preview</span>
+        <span className="ml-auto text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
+          merged with sample data
+        </span>
+      </div>
+
+      {/* Email header — mimics Gmail/Outlook */}
+      <div className="bg-white text-gray-900 px-4 py-3 border-b border-gray-200">
+        <h3 className="text-[15px] font-semibold text-gray-900 mb-2 leading-snug">
+          {previewSubject}
+        </h3>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center text-white text-[11px] font-semibold flex-shrink-0">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] text-gray-900 truncate">
+              <span className="font-semibold">{fromName}</span>{' '}
+              <span className="text-gray-500">&lt;{fromEmail}&gt;</span>
+            </div>
+            <div className="text-[11px] text-gray-500">to Sarah Chen — now</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Email body — sandboxed iframe */}
+      <iframe
+        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><base target="_blank"><style>
+          html,body{margin:0;padding:16px;background:#fff;color:#111;
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            font-size:14px;line-height:1.6;word-break:break-word;}
+          a{color:#1a73e8;text-decoration:none}
+          img{max-width:100%;height:auto}
+          p{margin:0 0 12px}
+          h1,h2,h3{margin:16px 0 8px}
+        </style></head><body>${previewHtml}</body></html>`}
+        sandbox="allow-same-origin"
+        style={{
+          width: '100%',
+          height: '280px',
+          border: 'none',
+          display: 'block',
+          backgroundColor: '#fff',
+          pointerEvents: 'none',
+        }}
+        title="Recipient inbox preview"
+      />
     </div>
   );
 }

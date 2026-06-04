@@ -176,7 +176,7 @@ export const segmentsService = {
     if (field === 'tag') return null;
 
     // Quote string values so commas and parens inside them don't break PostgREST OR parsing
-    const q = (v: string | null | undefined): string => {
+    const q = (v: unknown): string => {
       const s = String(v ?? '');
       return `"${s.replace(/"/g, '""')}"`;
     };
@@ -191,9 +191,9 @@ export const segmentsService = {
       case 'not_contains':
         return `${field}.not.ilike."%${String(value ?? '').replace(/"/g, '""')}%"`;
       case 'starts_with':
-        return `${field}.ilike.${q(`${value ?? ''}%`)}`;
+        return `${field}.ilike.${q(`${String(value ?? '')}%`)}`;
       case 'ends_with':
-        return `${field}.ilike.${q(`%${value ?? ''}`)}`;
+        return `${field}.ilike.${q(`%${String(value ?? '')}`)}`;
       case 'is_empty':
         return `${field}.is.null`;
       case 'is_not_empty':

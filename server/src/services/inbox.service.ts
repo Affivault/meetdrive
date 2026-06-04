@@ -5,6 +5,7 @@ import { getPagination, formatPaginatedResponse } from '../utils/pagination.js';
 import { decrypt } from '../utils/encryption.js';
 import { sendViaSmtp } from './email-sender.service.js';
 import { processReply } from './sara.service.js';
+import { fireEvent } from './webhook.service.js';
 
 async function isAiTaggingEnabled(userId: string): Promise<boolean> {
   const { data } = await supabaseAdmin
@@ -28,6 +29,125 @@ function categoriseImapError(message: string): string {
   if (m.includes('certificate') || m.includes('self signed'))
     return 'TLS certificate problem — IMAP server certificate is invalid.';
   return message;
+}
+
+/**
+ * Two-way archive sync: archive (or unarchive) messages on the remote
+ * IMAP server so the change is reflected in Gmail / Outlook etc.
+ *
+ * For Gmail: move to "[Gmail]/All Mail" to archive, copy back to INBOX
+ * to unarchive (Gmail keeps a single canonical copy in All Mail).
+ * For everyone else: move to a standard "Archive" folder, fall back to
+ * "INBOX.Archive" or whatever the server supports.
+ *
+ * Best-effort. Failures are logged but never break the DB-level archive.
+ */
+async function syncArchiveToImap(
+  userId: string,
+  inboxMessageIds: string[],
+  archive: boolean
+): Promise<void> {
+  if (inboxMessageIds.length === 0) return;
+
+  // Lazy-load IMAP — sync may be deployed where IMAP isn't installed
+  let ImapFlow: any;
+  try {
+    ({ ImapFlow } = await import('imapflow'));
+  } catch {
+    return;
+  }
+
+  // Fetch messages with their UIDs + account info
+  const { data: messages } = await supabaseAdmin
+    .from('inbox_messages')
+    .select('id, imap_uid, imap_folder, smtp_account_id')
+    .in('id', inboxMessageIds)
+    .eq('user_id', userId)
+    .not('imap_uid', 'is', null);
+
+  if (!messages || messages.length === 0) return;
+
+  // Group by SMTP account so we only open one IMAP connection per account
+  const byAccount = new Map<string, any[]>();
+  for (const m of messages) {
+    if (!m.smtp_account_id) continue;
+    if (!byAccount.has(m.smtp_account_id)) byAccount.set(m.smtp_account_id, []);
+    byAccount.get(m.smtp_account_id)!.push(m);
+  }
+
+  for (const [accountId, msgs] of byAccount) {
+    const { data: account } = await supabaseAdmin
+      .from('smtp_accounts')
+      .select('smtp_host, smtp_user, smtp_pass_encrypted, email_address')
+      .eq('id', accountId)
+      .single();
+    if (!account) continue;
+
+    const password = decrypt(account.smtp_pass_encrypted);
+    const host = account.smtp_host || '';
+    const isGmail = host.includes('gmail') || (account.email_address || '').endsWith('@gmail.com');
+    const isOutlook = host.includes('outlook') || host.includes('office365');
+
+    let imapHost: string;
+    if (isGmail) imapHost = 'imap.gmail.com';
+    else if (isOutlook) imapHost = 'outlook.office365.com';
+    else if (host.startsWith('smtp.')) imapHost = host.replace('smtp.', 'imap.');
+    else imapHost = `imap.${(account.email_address || '').split('@')[1] || ''}`;
+
+    const client = new ImapFlow({
+      host: imapHost,
+      port: 993,
+      secure: true,
+      auth: { user: account.smtp_user || account.email_address, pass: password },
+      logger: false,
+    });
+
+    try {
+      await Promise.race([
+        client.connect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('connect timeout')), 12000)),
+      ]);
+
+      const sourceFolder = archive ? 'INBOX' : (isGmail ? '[Gmail]/All Mail' : 'Archive');
+      const targetFolder = archive ? (isGmail ? '[Gmail]/All Mail' : 'Archive') : 'INBOX';
+
+      await client.mailboxOpen(sourceFolder);
+
+      for (const m of msgs) {
+        if (!m.imap_uid) continue;
+        try {
+          // imapflow's messageMove handles cross-folder moves.
+          // { uid: true } means the first arg is a UID, not a sequence number.
+          await client.messageMove(String(m.imap_uid), targetFolder, { uid: true });
+          // Update DB to track new folder + clear UID since it changes after move
+          await supabaseAdmin
+            .from('inbox_messages')
+            .update({ imap_folder: targetFolder, imap_uid: null })
+            .eq('id', m.id);
+        } catch (moveErr: any) {
+          // Common fallback: target folder doesn't exist on this server.
+          // Try a couple of common Archive folder names.
+          if (!archive) continue;
+          const fallbacks = ['INBOX.Archive', 'Archived', 'All Mail'];
+          let moved = false;
+          for (const fb of fallbacks) {
+            try {
+              await client.messageMove(String(m.imap_uid), fb, { uid: true });
+              await supabaseAdmin
+                .from('inbox_messages')
+                .update({ imap_folder: fb, imap_uid: null })
+                .eq('id', m.id);
+              moved = true;
+              break;
+            } catch { /* try next */ }
+          }
+          if (!moved) console.warn('[IMAP archive] All folder names failed for uid', m.imap_uid, ':', moveErr.message);
+        }
+      }
+    } finally {
+      try { await client.logout(); } catch { /* ignore */ }
+    }
+  }
 }
 
 async function resolveContactEmail(userId: string, messageId: string): Promise<string | null> {
@@ -272,6 +392,10 @@ export const inboxService = {
       .eq('id', id)
       .eq('user_id', userId);
     if (error) throw new AppError(error.message, 500);
+    // Two-way sync: archive on the remote IMAP server in the background.
+    syncArchiveToImap(userId, [id], true).catch((e) =>
+      console.warn('[Archive→IMAP]', e?.message || e)
+    );
   },
 
   async unarchive(userId: string, id: string) {
@@ -281,30 +405,55 @@ export const inboxService = {
       .eq('id', id)
       .eq('user_id', userId);
     if (error) throw new AppError(error.message, 500);
+    syncArchiveToImap(userId, [id], false).catch((e) =>
+      console.warn('[Unarchive→IMAP]', e?.message || e)
+    );
   },
 
   async archiveThread(userId: string, messageId: string) {
     const contactEmail = await resolveContactEmail(userId, messageId);
     if (!contactEmail) return inboxService.archive(userId, messageId);
     const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
+    const { data: affected } = await supabaseAdmin
+      .from('inbox_messages')
+      .select('id')
+      .eq('user_id', userId)
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
+    const ids = (affected || []).map((r: any) => r.id);
     const { error } = await supabaseAdmin
       .from('inbox_messages')
       .update({ is_archived: true })
       .eq('user_id', userId)
       .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
     if (error) throw new AppError(error.message, 500);
+    if (ids.length > 0) {
+      syncArchiveToImap(userId, ids, true).catch((e) =>
+        console.warn('[ArchiveThread→IMAP]', e?.message || e)
+      );
+    }
   },
 
   async unarchiveThread(userId: string, messageId: string) {
     const contactEmail = await resolveContactEmail(userId, messageId);
     if (!contactEmail) return inboxService.unarchive(userId, messageId);
     const emailQ = `"${contactEmail.replace(/"/g, '""')}"`;
+    const { data: affected } = await supabaseAdmin
+      .from('inbox_messages')
+      .select('id')
+      .eq('user_id', userId)
+      .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
+    const ids = (affected || []).map((r: any) => r.id);
     const { error } = await supabaseAdmin
       .from('inbox_messages')
       .update({ is_archived: false })
       .eq('user_id', userId)
       .or(`from_email.eq.${emailQ},to_email.eq.${emailQ}`);
     if (error) throw new AppError(error.message, 500);
+    if (ids.length > 0) {
+      syncArchiveToImap(userId, ids, false).catch((e) =>
+        console.warn('[UnarchiveThread→IMAP]', e?.message || e)
+      );
+    }
   },
 
   async markThreadRead(userId: string, messageId: string) {
@@ -740,7 +889,7 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
 
           for await (const msg of client.fetch(
             { since: sinceDate },
-            { envelope: true, source: true }
+            { envelope: true, source: true, uid: true }
           )) {
             const envelope = msg.envelope;
             if (!envelope) continue;
@@ -750,6 +899,7 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
             const subject = envelope.subject || '';
             const messageId = envelope.messageId || '';
             const inReplyTo = envelope.inReplyTo || '';
+            const imapUid = msg.uid || null;
 
             // Skip if already stored
             if (messageId) {
@@ -820,6 +970,8 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
               direction: 'inbound',
               is_read: false,
               received_at: envelope.date || new Date().toISOString(),
+              imap_uid: imapUid,
+              imap_folder: 'INBOX',
             };
             if (matchedActivity) {
               inboxRow.campaign_id = matchedActivity.campaign_id;
@@ -827,14 +979,20 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
               inboxRow.campaign_contact_id = matchedActivity.campaign_contact_id;
             }
 
-            const { data: saved } = await supabaseAdmin
+            const { data: saved, error: insErr } = await supabaseAdmin
               .from('inbox_messages')
               .insert(inboxRow)
               .select('id')
               .single();
 
-            // If matched to a campaign, record replied activity + fire webhook + run SARA
-            if (matchedActivity && saved?.id) {
+            if (insErr || !saved?.id) {
+              console.error('[InboxSync] Insert failed:', insErr?.message);
+              continue;
+            }
+            newCount++;
+
+            // If matched to a campaign, record replied activity + fire webhook
+            if (matchedActivity) {
               const { error: actErr } = await supabaseAdmin.from('campaign_activities').insert({
                 campaign_id: matchedActivity.campaign_id,
                 campaign_contact_id: matchedActivity.campaign_contact_id,
@@ -854,22 +1012,13 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
                 from: fromEmail,
                 subject,
               }).catch(() => {});
-
-              try { await processReply(saved.id); } catch (e) { console.error('[InboxSync] SARA error:', e); }
             }
 
-            const { data: inserted } = await supabaseAdmin
-              .from('inbox_messages')
-              .insert(inboxRow)
-              .select('id')
-              .single();
-            newCount++;
-
-            // Auto-classify with SARA if AI tagging is enabled for this user.
+            // Auto-classify with SARA when AI tagging is enabled for this user.
             // Never block sync if classification fails.
-            if (inserted?.id && aiTaggingOn) {
-              processReply(inserted.id).catch((e: any) => {
-                console.warn('[InboxSync] AI tag failed for', inserted.id, ':', e.message);
+            if (aiTaggingOn) {
+              processReply(saved.id).catch((e: any) => {
+                console.warn('[InboxSync] AI tag failed for', saved.id, ':', e.message);
               });
             }
           }

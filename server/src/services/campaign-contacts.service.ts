@@ -139,7 +139,7 @@ export const campaignContactsService = {
 
     if (error) throw new AppError(error.message, 500);
 
-    const { count } = await supabaseAdmin
+    const { count, error: countError } = await supabaseAdmin
       .from('campaign_contacts')
       .select('*', { count: 'exact', head: true })
       .eq('campaign_id', campaignId);
