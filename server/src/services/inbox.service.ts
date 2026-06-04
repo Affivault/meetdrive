@@ -108,40 +108,58 @@ async function syncArchiveToImap(
         new Promise((_, reject) => setTimeout(() => reject(new Error('connect timeout')), 12000)),
       ]);
 
-      const sourceFolder = archive ? 'INBOX' : (isGmail ? '[Gmail]/All Mail' : 'Archive');
-      const targetFolder = archive ? (isGmail ? '[Gmail]/All Mail' : 'Archive') : 'INBOX';
+      // Candidate target folders (first one that works wins).
+      const archiveTargets = isGmail
+        ? ['[Gmail]/All Mail']
+        : ['Archive', 'INBOX.Archive', 'Archived', 'All Mail'];
+      const targetCandidates = archive ? archiveTargets : ['INBOX'];
 
-      await client.mailboxOpen(sourceFolder);
-
+      // Group messages by source folder so we open each mailbox once.
+      // On archive, source is always INBOX. On unarchive, source is whichever
+      // folder we previously moved the message to (stored on the row).
+      const bySource = new Map<string, any[]>();
       for (const m of msgs) {
         if (!m.imap_uid) continue;
+        const src = archive
+          ? 'INBOX'
+          : (m.imap_folder && m.imap_folder !== 'INBOX' ? m.imap_folder : archiveTargets[0]);
+        if (!bySource.has(src)) bySource.set(src, []);
+        bySource.get(src)!.push(m);
+      }
+
+      for (const [sourceFolder, sourceMsgs] of bySource) {
         try {
-          // imapflow's messageMove handles cross-folder moves.
-          // { uid: true } means the first arg is a UID, not a sequence number.
-          await client.messageMove(String(m.imap_uid), targetFolder, { uid: true });
-          // Update DB to track new folder + clear UID since it changes after move
-          await supabaseAdmin
-            .from('inbox_messages')
-            .update({ imap_folder: targetFolder, imap_uid: null })
-            .eq('id', m.id);
-        } catch (moveErr: any) {
-          // Common fallback: target folder doesn't exist on this server.
-          // Try a couple of common Archive folder names.
-          if (!archive) continue;
-          const fallbacks = ['INBOX.Archive', 'Archived', 'All Mail'];
+          await client.mailboxOpen(sourceFolder);
+        } catch (openErr: any) {
+          console.warn('[IMAP archive] cannot open source folder', sourceFolder, openErr?.message);
+          continue;
+        }
+
+        for (const m of sourceMsgs) {
           let moved = false;
-          for (const fb of fallbacks) {
+          for (const target of targetCandidates) {
+            if (target === sourceFolder) continue;
             try {
-              await client.messageMove(String(m.imap_uid), fb, { uid: true });
+              const result: any = await client.messageMove(String(m.imap_uid), target, { uid: true });
+              // imapflow returns { path, destination, uidMap: Map<srcUid, dstUid> }
+              // Capture the new UID so future archive/unarchive on this row still works.
+              let newUid: number | null = null;
+              const map = result?.uidMap;
+              if (map && typeof map.get === 'function') {
+                const mapped = map.get(Number(m.imap_uid)) ?? map.get(m.imap_uid);
+                if (typeof mapped === 'number') newUid = mapped;
+              }
               await supabaseAdmin
                 .from('inbox_messages')
-                .update({ imap_folder: fb, imap_uid: null })
+                .update({ imap_folder: target, imap_uid: newUid })
                 .eq('id', m.id);
               moved = true;
               break;
-            } catch { /* try next */ }
+            } catch { /* try next target */ }
           }
-          if (!moved) console.warn('[IMAP archive] All folder names failed for uid', m.imap_uid, ':', moveErr.message);
+          if (!moved) {
+            console.warn('[IMAP archive] no target folder worked for uid', m.imap_uid, 'from', sourceFolder);
+          }
         }
       }
     } finally {
