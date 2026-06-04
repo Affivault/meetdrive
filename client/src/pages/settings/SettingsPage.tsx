@@ -263,13 +263,13 @@ export function SettingsPage() {
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 shadow-lg">
             {/* ═══ Profile Tab ═══ */}
             {activeTab === 'profile' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-[var(--text-primary)]">Profile Information</h2>
                   <p className="text-sm text-[var(--text-secondary)] mt-1">Update your personal details</p>
                 </div>
 
-                <div className="flex items-center gap-4 p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center text-white text-lg font-semibold">
                     {(firstName || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
@@ -369,7 +369,7 @@ export function SettingsPage() {
 
             {/* ═══ Account Tab ═══ */}
             {activeTab === 'account' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-[var(--text-primary)]">Account Security</h2>
                   <p className="text-sm text-[var(--text-secondary)] mt-1">Manage your password and security settings</p>
@@ -542,7 +542,7 @@ export function SettingsPage() {
 
             {/* ═══ Notifications Tab ═══ */}
             {activeTab === 'notifications' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-[var(--text-primary)]">Notifications</h2>
                   <p className="text-sm text-[var(--text-secondary)] mt-1">Choose what notifications you receive</p>
@@ -579,7 +579,7 @@ export function SettingsPage() {
 
             {/* ═══ Preferences Tab ═══ */}
             {activeTab === 'preferences' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-[var(--text-primary)]">Preferences</h2>
                   <p className="text-sm text-[var(--text-secondary)] mt-1">Customize your experience</p>
@@ -629,7 +629,7 @@ export function SettingsPage() {
 
             {/* ═══ AI Features Tab ═══ */}
             {activeTab === 'ai' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-[var(--text-primary)]">AI Features</h2>
                   <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -730,7 +730,7 @@ export function SettingsPage() {
               <button
                 onClick={handleSave}
                 disabled={saveMutation.isPending || !hasChanges}
-                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold transition-all ${
+                className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-[var(--indigo)] text-white text-[13px] font-medium hover:bg-[var(--indigo-hover)] transition-all ${
                   hasChanges ? 'shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:opacity-90' : 'opacity-50 cursor-not-allowed'
                 }`}
               >

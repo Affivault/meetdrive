@@ -86,7 +86,7 @@ export function SaraQueuePage() {
   const messages = queue?.messages || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -206,7 +206,7 @@ export function SaraQueuePage() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--text-primary)] border-t-transparent" />
         </div>
       ) : messages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center border border-[var(--border-subtle)] rounded-lg">
+        <div className="flex flex-col items-center justify-center py-10 text-center border border-[var(--border-subtle)] rounded-lg">
           <Mail className="h-10 w-10 text-[var(--text-tertiary)] mb-4" strokeWidth={1.5} />
           <h3 className="text-sm font-medium text-[var(--text-primary)] mb-1">No messages in queue</h3>
           <p className="text-sm text-[var(--text-secondary)]">

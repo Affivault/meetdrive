@@ -46,7 +46,7 @@ export function SseDashboardPage() {
   const warmupCount = accounts?.filter(a => a.warmup_mode).length || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export function SseDashboardPage() {
             <Shield className="h-5 w-5 text-[var(--text-primary)]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Smart-Sharding Engine</h1>
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Smart-Sharding Engine</h1>
             <p className="text-sm text-[var(--text-secondary)]">Sender reputation health and rotation management</p>
           </div>
         </div>
@@ -74,14 +74,14 @@ export function SseDashboardPage() {
             <Server className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">Total Senders</span>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">{totalAccounts}</p>
+          <p className="text-[18px] font-semibold text-[var(--text-primary)]">{totalAccounts}</p>
         </div>
         <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-4">
           <div className="flex items-center gap-2 text-emerald-400 mb-1">
             <CheckCircle2 className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">Available</span>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">
+          <p className="text-[18px] font-semibold text-[var(--text-primary)]">
             {availableAccounts}
             <span className="text-sm font-normal text-[var(--text-secondary)] ml-1">/ {totalAccounts}</span>
           </p>
@@ -91,14 +91,14 @@ export function SseDashboardPage() {
             <Activity className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">Avg Health</span>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">{avgHealth}</p>
+          <p className="text-[18px] font-semibold text-[var(--text-primary)]">{avgHealth}</p>
         </div>
         <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-4">
           <div className="flex items-center gap-2 text-amber-400 mb-1">
             <Flame className="h-4 w-4" />
             <span className="text-xs font-medium uppercase tracking-wider">Warming Up</span>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">{warmupCount}</p>
+          <p className="text-[18px] font-semibold text-[var(--text-primary)]">{warmupCount}</p>
         </div>
       </div>
 
@@ -220,12 +220,12 @@ export function SseDashboardPage() {
       )}
 
       {/* How SSE Works */}
-      <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-6">
+      <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-4">
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
           <Zap className="h-4 w-4 text-[var(--text-secondary)]" />
           How Smart-Sharding Works
         </h3>
-        <div className="grid grid-cols-3 gap-6 text-sm text-[var(--text-secondary)]">
+        <div className="grid grid-cols-3 gap-4 text-sm text-[var(--text-secondary)]">
           <div>
             <p className="font-medium text-[var(--text-secondary)] mb-1">1. Score Calculation</p>
             <p>Each sender is scored using a weighted formula: (health x 0.6) + (remaining capacity x 0.4).</p>

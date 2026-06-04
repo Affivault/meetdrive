@@ -278,7 +278,7 @@ export function SmtpAccountsPage() {
   const passwordPlaceholder = activePreset?.password_hint || (editId ? 'Leave blank to keep current' : 'Enter password or app key');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -301,7 +301,7 @@ export function SmtpAccountsPage() {
       </div>
 
       {/* Quick Connect */}
-      <div className="rounded-lg border border-subtle bg-surface p-5">
+      <div className="rounded-lg border border-subtle bg-surface p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-sm font-medium text-primary flex items-center gap-2">
@@ -404,7 +404,7 @@ export function SmtpAccountsPage() {
           {accounts.map((account: SmtpAccount) => (
             <div
               key={account.id}
-              className="group rounded-lg border border-subtle bg-surface p-5 transition-colors hover:bg-hover"
+              className="group rounded-lg border border-subtle bg-surface p-4 transition-colors hover:bg-hover"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">

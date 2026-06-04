@@ -274,7 +274,7 @@ export function DomainsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -331,7 +331,7 @@ export function DomainsPage() {
               {/* Domain row */}
               <button
                 onClick={() => setExpandedId(expandedId === domain.id ? null : domain.id)}
-                className="w-full flex items-center justify-between p-5 hover:bg-hover transition-colors text-left"
+                className="w-full flex items-center justify-between p-4 hover:bg-hover transition-colors text-left"
               >
                 <div className="flex items-center gap-4">
                   <div className={`flex items-center justify-center w-10 h-10 rounded-md ${
@@ -389,7 +389,7 @@ export function DomainsPage() {
 
               {/* Expanded detail */}
               {expandedId === domain.id && (
-                <div className="border-t border-subtle p-5 bg-[var(--bg-primary)]">
+                <div className="border-t border-subtle p-4 bg-[var(--bg-primary)]">
                   <DomainDetailPanel domain={domain} onClose={() => setExpandedId(null)} />
                 </div>
               )}

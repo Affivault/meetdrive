@@ -129,7 +129,7 @@ export function DeveloperPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
         <h1 className="text-xl font-semibold text-[var(--text-primary)]">Developer</h1>
@@ -173,7 +173,7 @@ export function DeveloperPage() {
           </div>
 
           {showCreateWebhook && (
-            <div className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] p-5 space-y-4">
+            <div className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-[var(--text-primary)]">New Webhook Endpoint</h3>
                 <button onClick={() => setShowCreateWebhook(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X className="h-4 w-4" /></button>
@@ -318,7 +318,7 @@ export function DeveloperPage() {
           )}
 
           {showCreateKey && !newRawKey && (
-            <div className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] p-5 space-y-4">
+            <div className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-[var(--text-primary)]">New API Key</h3>
                 <button onClick={() => setShowCreateKey(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X className="h-4 w-4" /></button>

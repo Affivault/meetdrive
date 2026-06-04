@@ -294,7 +294,7 @@ export function SmtpGuidePage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
         <Link to="/smtp-accounts" className="inline-flex items-center gap-1.5 text-sm text-secondary hover:text-primary mb-4 transition-colors">
@@ -333,7 +333,7 @@ export function SmtpGuidePage() {
       <div className="rounded-lg border border-default bg-surface">
         <button
           onClick={() => setShowDns(!showDns)}
-          className="w-full flex items-center justify-between p-5 text-left hover:bg-hover transition-colors rounded-lg"
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-hover transition-colors rounded-lg"
         >
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-elevated border border-subtle">
@@ -425,7 +425,7 @@ export function SmtpGuidePage() {
             </div>
           </div>
 
-          <div className="p-5 space-y-6">
+          <div className="p-5 space-y-4">
             {/* Connection Details */}
             <div>
               <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-3">Connection Details</h4>
@@ -540,7 +540,7 @@ export function SmtpGuidePage() {
       </div>
 
       {/* CTA */}
-      <div className="rounded-lg border border-subtle bg-surface p-6 text-center">
+      <div className="rounded-lg border border-subtle bg-surface p-4 text-center">
         <h3 className="font-medium text-primary mb-2">Ready to connect?</h3>
         <p className="text-sm text-secondary mb-4">Add your SMTP credentials to start sending campaigns.</p>
         <Link

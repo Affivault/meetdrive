@@ -956,7 +956,7 @@ export function CampaignCreatePage() {
           STEP 2 — Sequence Builder
       ════════════════════════════════════════════════════════ */}
       {wizardStep === 1 && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Quick action bar */}
           {steps.length === 0 && sequenceTemplates.length > 0 && (
             <div className="rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-4 flex items-center justify-between">
@@ -975,7 +975,7 @@ export function CampaignCreatePage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Flow Canvas */}
             <div className="lg:col-span-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-card flex flex-col">
               <CardHeader
@@ -1003,7 +1003,7 @@ export function CampaignCreatePage() {
                   </div>
                 }
               />
-              <div className="flex-1 p-5 min-h-[420px] overflow-y-auto">
+              <div className="flex-1 p-4 min-h-[420px] overflow-y-auto">
                 <FlowBuilder
                   steps={steps}
                   onStepsChange={setSteps}
@@ -1017,7 +1017,7 @@ export function CampaignCreatePage() {
             <div className="lg:col-span-2">
               {editingStep !== null && steps[editingStep]?.step_type === 'email' ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] sticky top-20 overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                  <div className="px-5 py-2.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <Mail className="h-4 w-4 text-[var(--text-tertiary)]" />
                       <div>
@@ -1277,7 +1277,7 @@ export function CampaignCreatePage() {
                 </div>
               ) : editingStep !== null && steps[editingStep]?.step_type === 'delay' ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] sticky top-20 overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] flex items-center gap-2.5">
+                  <div className="px-5 py-2.5 border-b border-[var(--border-subtle)] flex items-center gap-2.5">
                     <Clock className="h-4 w-4 text-[var(--text-tertiary)]" />
                     <div>
                       <p className="text-sm font-semibold text-[var(--text-primary)]">Wait / Delay</p>
@@ -1310,7 +1310,7 @@ export function CampaignCreatePage() {
                                 [key]: parseInt(e.target.value) || 0,
                               } as any)
                             }
-                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-3 text-center text-xl font-bold text-[var(--text-primary)] focus:border-[#6366F1] focus:outline-none focus:ring-2 focus:ring-[rgba(99,102,241,0.2)] transition-all"
+                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-3 text-center text-[15px] font-semibold text-[var(--text-primary)] focus:border-[#6366F1] focus:outline-none focus:ring-2 focus:ring-[rgba(99,102,241,0.2)] transition-all"
                           />
                         </div>
                       ))}
@@ -1387,7 +1387,7 @@ export function CampaignCreatePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
                     <div className="flex items-center gap-4">
                       <CheckCircle2 className="h-5 w-5 text-[var(--text-secondary)] flex-shrink-0" />
                       <div>
@@ -1473,7 +1473,7 @@ export function CampaignCreatePage() {
             <div className="max-w-4xl mx-auto space-y-5">
               {/* Warnings */}
               {warnings.length > 0 && (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-5">
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-4">
                   <div className="flex items-center gap-2.5 mb-3">
                     <AlertTriangle className="h-5 w-5 text-red-500" />
                     <h3 className="text-sm font-semibold text-red-600">Resolve before launching</h3>
@@ -1499,16 +1499,16 @@ export function CampaignCreatePage() {
                 ].map(({ label, value, icon: Icon }) => (
                   <div
                     key={label}
-                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5"
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4"
                   >
                     <Icon className="h-4 w-4 text-[var(--text-tertiary)] mb-3" />
-                    <p className="text-2xl font-bold text-[var(--text-primary)]">{value}</p>
+                    <p className="text-[18px] font-semibold text-[var(--text-primary)]">{value}</p>
                     <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{label}</p>
                   </div>
                 ))}
-                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5">
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4">
                   <Timer className="h-4 w-4 text-[var(--text-tertiary)] mb-3" />
-                  <p className="text-2xl font-bold text-[var(--text-primary)]">{estLabel}</p>
+                  <p className="text-[18px] font-semibold text-[var(--text-primary)]">{estLabel}</p>
                   <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Est. Completion</p>
                 </div>
               </div>
@@ -1639,7 +1639,7 @@ export function CampaignCreatePage() {
               )}
 
               {/* Launch Area */}
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
                     <h3 className="font-semibold text-[var(--text-primary)]">
@@ -1863,7 +1863,7 @@ export function CampaignCreatePage() {
       {/* AI Email Generation Modal */}
       {showAiModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-6">
+          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-[#6366F1]" />
@@ -1933,7 +1933,7 @@ export function CampaignCreatePage() {
               </div>
               <button onClick={() => setShowTemplatePicker(false)} className="p-1 rounded hover:bg-[var(--bg-hover)]"><X className="h-4 w-4 text-[var(--text-tertiary)]" /></button>
             </div>
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className="flex-1 overflow-y-auto p-4">
               {sequenceTemplates.length === 0 ? (
                 <div className="text-center py-12">
                   <Layers className="h-10 w-10 mx-auto text-[var(--text-tertiary)] mb-2" />

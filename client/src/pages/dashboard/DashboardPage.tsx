@@ -184,7 +184,7 @@ export function DashboardPage() {
   const templates = Array.isArray(emailTemplates) ? emailTemplates : [];
   const trend = Array.isArray(trendData) ? trendData : [];
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* ── Header ── */}
       <div className="flex items-end justify-between">
         <div>
@@ -212,7 +212,7 @@ export function DashboardPage() {
             </div>
             <ArrowRight className="h-3.5 w-3.5 text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
-          <span className="block text-2xl font-bold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_sent)}</span>
+          <span className="block text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_sent)}</span>
           <span className="block text-xs text-[var(--text-tertiary)] mt-1">Emails Sent</span>
         </Link>
 
@@ -226,7 +226,7 @@ export function DashboardPage() {
               {fmtPct(stats.avg_open_rate)}
             </span>
           </div>
-          <span className="block text-2xl font-bold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_opened)}</span>
+          <span className="block text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_opened)}</span>
           <span className="block text-xs text-[var(--text-tertiary)] mt-1">Opens</span>
         </Link>
 
@@ -240,7 +240,7 @@ export function DashboardPage() {
               {fmtPct(stats.avg_click_rate)}
             </span>
           </div>
-          <span className="block text-2xl font-bold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_clicked)}</span>
+          <span className="block text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_clicked)}</span>
           <span className="block text-xs text-[var(--text-tertiary)] mt-1">Clicks</span>
         </Link>
 
@@ -254,7 +254,7 @@ export function DashboardPage() {
               {fmtPct(stats.avg_reply_rate)}
             </span>
           </div>
-          <span className="block text-2xl font-bold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_replied)}</span>
+          <span className="block text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{fmtNum(stats.total_replied)}</span>
           <span className="block text-xs text-[var(--text-tertiary)] mt-1">Replies</span>
         </Link>
       </div>
@@ -262,7 +262,7 @@ export function DashboardPage() {
       {/* ── Sending Trend + Active Campaigns ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Trend chart */}
-        <div className="lg:col-span-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-5">
+        <div className="lg:col-span-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-sm font-semibold text-[var(--text-primary)]">Sending Activity</h2>
@@ -361,7 +361,7 @@ export function DashboardPage() {
                   <button
                     key={campaign.id}
                     onClick={() => navigate(`/campaigns/${campaign.id}`)}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--bg-hover)] transition-colors text-left border-b border-[var(--border-subtle)] last:border-b-0 group"
+                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-[var(--bg-hover)] transition-colors text-left border-b border-[var(--border-subtle)] last:border-b-0 group"
                   >
                     <div className={cn('p-1.5 rounded-md', sc.bg)}>
                       <StatusIcon className={cn('h-3.5 w-3.5', sc.text)} strokeWidth={2} />

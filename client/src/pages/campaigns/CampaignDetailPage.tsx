@@ -151,7 +151,7 @@ export function CampaignDetailPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <button
         onClick={() => navigate('/campaigns')}
         className="flex items-center gap-1 text-sm text-secondary hover:text-primary transition-colors"
@@ -238,7 +238,7 @@ export function CampaignDetailPage() {
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {analytics && (
             <>
               <div className="grid grid-cols-5 gap-4">
@@ -250,7 +250,7 @@ export function CampaignDetailPage() {
               </div>
 
               {chartData.some((d) => d.value > 0) && (
-                <div className="rounded-2xl border border-subtle bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)] p-5">
+                <div className="rounded-2xl border border-subtle bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)] p-4">
                   <h3 className="mb-4 text-base font-semibold text-primary">Performance</h3>
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
@@ -273,7 +273,7 @@ export function CampaignDetailPage() {
 
           <ContactProgressCard campaign={campaign} />
 
-          <div className="rounded-2xl border border-subtle bg-surface p-5 shadow-[var(--shadow-sm)]">
+          <div className="rounded-2xl border border-subtle bg-surface p-4 shadow-[var(--shadow-sm)]">
             <h3 className="mb-4 text-base font-semibold text-primary">Campaign Settings</h3>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl bg-[var(--bg-elevated)] p-3">
@@ -426,7 +426,7 @@ function ContactProgressCard({ campaign }: { campaign: any }) {
   const pending = Math.max(0, total - accounted);
 
   return (
-    <div className="rounded-2xl border border-subtle bg-surface p-5 shadow-[var(--shadow-sm)]">
+    <div className="rounded-2xl border border-subtle bg-surface p-4 shadow-[var(--shadow-sm)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-primary">Contact Progress</h3>
         <span className="text-sm text-secondary">{total} total</span>
@@ -492,14 +492,14 @@ function StatCard({ icon: Icon, label, value, rate, isNegative, colorVariant }: 
 }) {
   const iconBg = colorVariant ? (STAT_CARD_ICON_BG[colorVariant] || STAT_CARD_ICON_BG.sent) : (isNegative ? STAT_CARD_ICON_BG.bounced : STAT_CARD_ICON_BG.sent);
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
           <Icon className="h-5 w-5 text-white" />
         </div>
         <span className="text-sm text-secondary">{label}</span>
       </div>
-      <p className="text-3xl font-bold text-primary">{value}</p>
+      <p className="text-[22px] font-bold text-primary">{value}</p>
       {rate !== undefined && rate > 0 && (
         <span className="inline-block mt-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-[rgba(99,102,241,0.08)] text-[#6366F1]">{rate}%</span>
       )}

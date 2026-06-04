@@ -140,11 +140,12 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg-app);
     color: var(--text-primary);
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13.5px;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
   }
 
   ::selection {
@@ -168,9 +169,15 @@
   }
 
   *:focus-visible {
-    outline: 2px solid var(--indigo);
-    outline-offset: 2px;
-    border-radius: 4px;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg-app), 0 0 0 4px rgba(99, 102, 241, 0.4);
+    border-radius: 6px;
+  }
+  /* Inputs already have their own focus ring */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    box-shadow: none;
   }
 }
 
@@ -207,75 +214,88 @@
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-150;
-    background: var(--indigo);
-    color: #ffffff;
-    border-radius: var(--radius-md);
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+  /* Shared button base — kept on each variant so utilities like w-full still work */
+  .btn-primary,
+  .btn-brand,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 h-8 text-[13px] font-medium transition-[background-color,border-color,box-shadow,transform,opacity] duration-150 ease-out;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
   }
-  .btn-primary:hover {
-    background: var(--indigo-hover);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
-  }
-  .btn-primary:active {
-    opacity: 0.9;
-  }
-  .btn-primary:disabled {
-    opacity: 0.4;
+  .btn-primary:disabled,
+  .btn-brand:disabled,
+  .btn-secondary:disabled,
+  .btn-ghost:disabled,
+  .btn-danger:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
   }
 
+  .btn-primary,
   .btn-brand {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-150;
     background: var(--indigo);
     color: #ffffff;
-    border-radius: var(--radius-md);
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(67, 56, 202, 0.35);
   }
+  .btn-primary:hover,
   .btn-brand:hover {
     background: var(--indigo-hover);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 2px 6px rgba(67, 56, 202, 0.42);
   }
+  .btn-primary:active,
   .btn-brand:active {
-    opacity: 0.9;
-  }
-  .btn-brand:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+    transform: translateY(0.5px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 1px 1px rgba(67, 56, 202, 0.3);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-150;
     background: var(--bg-surface);
     color: var(--text-primary);
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.015);
   }
   .btn-secondary:hover {
     background: var(--bg-hover);
     border-color: var(--border-strong);
   }
+  .btn-secondary:active {
+    background: var(--bg-active);
+  }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-150;
     background: transparent;
     color: var(--text-secondary);
-    border-radius: var(--radius-md);
   }
   .btn-ghost:hover {
     background: var(--bg-hover);
     color: var(--text-primary);
   }
+  .btn-ghost:active {
+    background: var(--bg-active);
+  }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-150;
     background: var(--error);
     color: white;
-    border-radius: var(--radius-md);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(220, 38, 38, 0.3);
   }
   .btn-danger:hover {
-    opacity: 0.9;
+    background: #DC2626;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 2px 6px rgba(220, 38, 38, 0.4);
   }
 
   .card {
@@ -299,26 +319,33 @@
   }
 
   .input-field {
-    @apply w-full px-3 py-2.5 text-sm transition-all duration-150;
+    @apply w-full px-2.5 h-8 text-[13px] transition-[border-color,box-shadow] duration-150 ease-out;
     background: var(--bg-app);
     color: var(--text-primary);
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
   }
   .input-field::placeholder {
     color: var(--text-tertiary);
   }
+  .input-field:hover:not(:focus) {
+    border-color: var(--border-strong);
+  }
   .input-field:focus {
     outline: none;
     border-color: var(--indigo);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  }
+  /* Allow textarea + multi-line input-field to grow naturally */
+  textarea.input-field {
+    @apply h-auto py-2;
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-medium leading-none;
     background: var(--bg-elevated);
     color: var(--text-secondary);
-    border-radius: 9999px;
+    border-radius: var(--radius-sm);
   }
   .badge-success {
     background: var(--success-bg);
@@ -338,11 +365,11 @@
   }
 
   .table-header {
-    @apply text-xs font-medium uppercase tracking-wider;
+    @apply text-[11px] font-medium uppercase tracking-wider;
     color: var(--text-tertiary);
   }
   .table-cell {
-    @apply py-3.5 text-sm;
+    @apply py-2.5 text-[13px];
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -356,14 +383,16 @@
   .stat-value {
     @apply text-2xl font-semibold tracking-tight;
     color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
   .stat-label {
-    @apply text-sm;
+    @apply text-[12px];
     color: var(--text-secondary);
   }
 
   .section-title {
-    @apply text-sm font-semibold tracking-tight;
+    @apply text-[13px] font-semibold tracking-tight;
     color: var(--text-primary);
   }
 
@@ -383,18 +412,19 @@
   }
 
   .empty-state {
-    @apply flex flex-col items-center justify-center py-16 text-center;
+    @apply flex flex-col items-center justify-center py-12 text-center;
   }
   .empty-state-icon {
-    @apply mb-4;
+    @apply mb-3;
     color: var(--text-tertiary);
   }
   .empty-state-title {
-    @apply text-sm font-medium mb-1;
+    @apply text-[13px] font-semibold mb-1;
     color: var(--text-primary);
+    letter-spacing: -0.005em;
   }
   .empty-state-description {
-    @apply text-sm;
+    @apply text-[13px];
     color: var(--text-secondary);
   }
 
@@ -406,36 +436,60 @@
   }
 
   .toggle {
-    @apply relative w-11 h-6 rounded-full transition-colors duration-150 cursor-pointer;
+    @apply relative w-9 h-5 rounded-full transition-colors duration-150 cursor-pointer;
     background: var(--border-default);
   }
   .toggle.active {
     background: var(--indigo);
   }
   .toggle-thumb {
-    @apply absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-150;
-  }
-  .dark .toggle-thumb {
-    @apply bg-[#09090B];
+    @apply absolute top-[2px] left-[2px] w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200;
   }
   .toggle.active .toggle-thumb {
-    transform: translateX(20px);
+    transform: translateX(16px);
   }
 
   .tab-bar {
-    @apply flex gap-1 border-b border-subtle;
+    @apply flex gap-0.5 border-b border-subtle;
   }
   .tab-item {
-    @apply px-4 py-2.5 text-sm font-medium transition-all duration-150 border-b-2 -mb-px;
+    @apply px-3 py-2 text-[13px] font-medium transition-colors duration-150 border-b-2 -mb-px;
     border-color: transparent;
     color: var(--text-tertiary);
   }
   .tab-item:hover {
     color: var(--text-primary);
+    background: var(--bg-hover);
+    border-top-left-radius: var(--radius-sm);
+    border-top-right-radius: var(--radius-sm);
   }
   .tab-item.active {
     border-color: var(--indigo);
-    color: var(--indigo);
+    color: var(--text-primary);
+  }
+
+  /* Compact icon button — used in toolbars / cell actions */
+  .icon-btn {
+    @apply inline-flex items-center justify-center h-7 w-7 transition-colors duration-150;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+  }
+  .icon-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  .icon-btn:active {
+    background: var(--bg-active);
+  }
+
+  /* Keyboard shortcut chip */
+  .kbd {
+    @apply inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10.5px] font-medium leading-none;
+    background: var(--bg-elevated);
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    font-family: 'Inter', -apple-system, sans-serif;
   }
 }
 

@@ -43,7 +43,7 @@ export function ForgotPasswordPage() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <Mail className="h-6 w-6 text-green-600" />
             </div>
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">Check your email</h2>
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Check your email</h2>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
               We sent a password reset link to <strong>{email}</strong>. It expires in 1 hour.
             </p>
@@ -71,7 +71,7 @@ export function ForgotPasswordPage() {
           /* Form state */
           <>
             <div className="mb-8 text-center">
-              <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+              <h1 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
                 Reset your password
               </h1>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -79,7 +79,7 @@ export function ForgotPasswordPage() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">

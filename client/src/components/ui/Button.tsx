@@ -10,28 +10,28 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
     const variants = {
       primary:
-        'bg-[var(--accent)] text-[var(--bg-app)] hover:bg-[var(--accent-hover)] shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0',
-      secondary:
-        'bg-transparent border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]',
-      danger:
-        'bg-[var(--error)] text-white hover:opacity-90',
-      ghost:
-        'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]',
+        'bg-[var(--indigo)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(67,56,202,0.35)] hover:bg-[var(--indigo-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_2px_6px_rgba(67,56,202,0.42)] active:translate-y-[0.5px]',
       brand:
-        'bg-[var(--accent)] text-[var(--bg-app)] hover:bg-[var(--accent-hover)] shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0',
+        'bg-[var(--indigo)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(67,56,202,0.35)] hover:bg-[var(--indigo-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_2px_6px_rgba(67,56,202,0.42)] active:translate-y-[0.5px]',
+      secondary:
+        'bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] shadow-[0_1px_0_rgba(0,0,0,0.015)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] active:bg-[var(--bg-active)]',
+      ghost:
+        'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)]',
+      danger:
+        'bg-[var(--error)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(220,38,38,0.3)] hover:bg-[#DC2626] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_2px_6px_rgba(220,38,38,0.4)] active:translate-y-[0.5px]',
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-xs',
-      md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base',
+      sm: 'h-7 px-2.5 text-[12px] gap-1',
+      md: 'h-8 px-3 text-[13px] gap-1.5',
+      lg: 'h-9 px-4 text-[13.5px] gap-2',
     };
 
     return (
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+          'inline-flex items-center justify-center font-medium whitespace-nowrap rounded-md transition-[background-color,border-color,box-shadow,transform,opacity] duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--indigo)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--bg-app)] disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none',
           variants[variant],
           sizes[size],
           className

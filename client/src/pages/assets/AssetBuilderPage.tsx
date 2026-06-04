@@ -216,7 +216,7 @@ export function AssetBuilderPage() {
   const isEditing = isCreating || selectedTemplate;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -224,7 +224,7 @@ export function AssetBuilderPage() {
             <Image className="h-5 w-5 text-[var(--text-primary)]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Dynamic Assets</h1>
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Dynamic Assets</h1>
             <p className="text-sm text-[var(--text-secondary)]">Build personalized images for email campaigns</p>
           </div>
         </div>
@@ -284,7 +284,7 @@ export function AssetBuilderPage() {
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--border-default)] border-t-transparent" />
             </div>
           ) : !templates || templates.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--bg-surface)] mb-4">
                 <Image className="h-8 w-8 text-[var(--text-tertiary)]" />
               </div>
@@ -328,7 +328,7 @@ export function AssetBuilderPage() {
 
       {/* Editor */}
       {isEditing && (
-        <div className="grid grid-cols-5 gap-6">
+        <div className="grid grid-cols-5 gap-4">
           {/* Preview Panel */}
           <div className="col-span-3 space-y-4">
             <div className="rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-4">

@@ -73,10 +73,10 @@ export function SuppressionPage() {
   const totalPages = data?.total_pages || 1;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Suppression List</h1>
+          <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Suppression List</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
             Emails on this list will never receive campaign emails{data?.total !== undefined ? ` · ${data.total} total` : ''}
           </p>
@@ -191,7 +191,7 @@ export function SuppressionPage() {
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-6">
+          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Add to Suppression List</h2>
             <div className="space-y-4">
               <div>
@@ -245,7 +245,7 @@ export function SuppressionPage() {
       {/* Bulk Import Modal */}
       {showBulkModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-6">
+          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Bulk Import</h2>
             <div className="space-y-4">
               <div>

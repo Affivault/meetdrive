@@ -554,7 +554,7 @@ export function ContactsListPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">{currentListName}</h1>
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">{currentListName}</h1>
             <p className="text-sm text-[var(--text-secondary)] mt-1.5">
               {totalContacts === 0
                 ? 'No contacts yet -- start building your audience'
@@ -682,7 +682,7 @@ export function ContactsListPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
-                  <th className="px-5 py-3.5 w-12">
+                  <th className="px-5 py-2.5 w-12">
                     <input
                       type="checkbox"
                       checked={allSelected}
@@ -690,22 +690,22 @@ export function ContactsListPage() {
                       className="rounded border-[var(--border-default)] cursor-pointer"
                     />
                   </th>
-                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Contact
                   </th>
-                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Email
                   </th>
-                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Company
                   </th>
-                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Added
                   </th>
-                  <th className="px-4 py-3.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
                     Health
                   </th>
-                  <th className="px-4 py-3.5 w-20"></th>
+                  <th className="px-4 py-2.5 w-20"></th>
                 </tr>
               </thead>
               <tbody>
@@ -723,7 +723,7 @@ export function ContactsListPage() {
                           : "hover:bg-[var(--bg-hover)]"
                       )}
                     >
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-2.5">
                         <input
                           type="checkbox"
                           checked={selectedContacts.has(contact.id)}
@@ -731,7 +731,7 @@ export function ContactsListPage() {
                           className="rounded border-[var(--border-default)] cursor-pointer"
                         />
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         <button
                           onClick={() => navigate(`/contacts/${contact.id}`)}
                           className="flex items-center gap-3 group/name"
@@ -753,10 +753,10 @@ export function ContactsListPage() {
                           </div>
                         </button>
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         <span className="text-sm text-[var(--text-secondary)]">{contact.email}</span>
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         {contact.company ? (
                           <span className="inline-flex items-center text-sm text-[var(--text-secondary)]">
                             {contact.company}
@@ -765,12 +765,12 @@ export function ContactsListPage() {
                           <span className="text-sm text-[var(--text-muted)]">---</span>
                         )}
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         <span className="text-[12px] text-[var(--text-tertiary)]">
                           {formatDate(contact.created_at)}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         {contact.is_bounced ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border text-red-700 bg-red-50 border-red-200" title="Hard bounce — will not be emailed">
                             <ShieldX className="h-3 w-3" />
@@ -802,7 +802,7 @@ export function ContactsListPage() {
                           <span className="text-[11px] text-[var(--text-muted)]">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-2.5">
                         <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                           <button
                             onClick={() => openEdit(contact)}

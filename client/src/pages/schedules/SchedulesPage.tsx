@@ -51,7 +51,7 @@ export function SchedulesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <h1 className="text-[18px] font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <CalendarClock className="h-6 w-6 text-[#6366F1]" />
             Sending Schedules
           </h1>
@@ -66,9 +66,9 @@ export function SchedulesPage() {
 
       {/* List */}
       {isLoading ? (
-        <div className="text-center py-16 text-[var(--text-secondary)]">Loading schedules...</div>
+        <div className="text-center py-10 text-[var(--text-secondary)]">Loading schedules...</div>
       ) : schedules.length === 0 && !creating ? (
-        <div className="text-center py-16 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
+        <div className="text-center py-10 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
           <CalendarClock className="h-12 w-12 mx-auto text-[var(--text-tertiary)] mb-3" />
           <h3 className="font-semibold text-[var(--text-primary)] mb-1">No schedules yet</h3>
           <p className="text-sm text-[var(--text-secondary)] mb-4">Create a reusable send-time window to apply to campaigns in one click.</p>
@@ -117,7 +117,7 @@ function ScheduleCard({ schedule, onEdit, onDelete, onMakeDefault }: {
   onMakeDefault: () => void;
 }) {
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-5 hover:border-[#6366F1]/30 transition-colors">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 hover:border-[#6366F1]/30 transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
@@ -198,7 +198,7 @@ function ScheduleEditor({ initial, onCancel, onSave, loading }: {
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] border-2 border-[#6366F1]/30 rounded-xl p-5">
+    <div className="bg-[var(--bg-surface)] border-2 border-[#6366F1]/30 rounded-xl p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-[var(--text-primary)]">{initial ? 'Edit schedule' : 'New schedule'}</h3>
         <button onClick={onCancel} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)]">

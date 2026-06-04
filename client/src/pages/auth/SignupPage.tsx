@@ -66,7 +66,7 @@ export function SignupPage() {
           </div>
 
           {/* Feature bullets */}
-          <div className="mt-12 space-y-6">
+          <div className="mt-12 space-y-4">
             <div className="flex items-start gap-4">
               <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
                 <svg className="h-4 w-4" style={{ color: '#818CF8' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -111,7 +111,7 @@ export function SignupPage() {
 
         {/* Testimonial */}
         <div className="relative z-10 mt-auto pt-12">
-          <div className="rounded-2xl backdrop-blur-sm p-6" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
+          <div className="rounded-2xl backdrop-blur-sm p-4" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
             <p className="text-white/90 text-sm leading-relaxed italic">
               "We onboarded our entire SDR team in a single afternoon. The templates and AI suggestions made it incredibly easy to get started."
             </p>
@@ -140,7 +140,7 @@ export function SignupPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
               Create your account
             </h1>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -179,7 +179,7 @@ export function SignupPage() {
           </div>
 
           {/* Form Card */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">

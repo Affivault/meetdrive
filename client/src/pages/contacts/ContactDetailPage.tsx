@@ -137,7 +137,7 @@ export function ContactDetailPage() {
   const nonMemberLists = (contactLists || []).filter((l: any) => !l.is_member);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Back link */}
       <button
         onClick={() => navigate('/contacts')}
@@ -186,10 +186,10 @@ export function ContactDetailPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Contact Info */}
-        <div className="space-y-6">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-5">
+        <div className="space-y-4">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-4">
             <h2 className="text-sm font-medium text-[var(--text-primary)] mb-4">Contact Info</h2>
             <div className="space-y-3">
               <InfoRow icon={Mail} label="Email" value={contact.email} />
@@ -207,7 +207,7 @@ export function ContactDetailPage() {
           </div>
 
           {/* Lists Section */}
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-5">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium text-[var(--text-primary)]">Lists</h2>
               <div className="relative">
@@ -289,7 +289,7 @@ export function ContactDetailPage() {
         </div>
 
         {/* Activity Timeline */}
-        <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-5">
+        <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-md p-4">
           <h2 className="text-sm font-medium text-[var(--text-primary)] mb-4">Activity</h2>
           {!timeline || timeline.length === 0 ? (
             <p className="text-sm text-[var(--text-secondary)]">No activity yet</p>

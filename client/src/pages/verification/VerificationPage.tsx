@@ -26,7 +26,7 @@ function VerificationResultCard({ result }: { result: DcsVerificationResult }) {
   const passed = result.score >= 60;
   return (
     <div className={cn(
-      'rounded-2xl border-2 p-5 space-y-3',
+      'rounded-2xl border-2 p-4 space-y-3',
       passed ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/50'
     )}>
       <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export function VerificationPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Email Verification</h1>
+        <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Email Verification</h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Verify email deliverability with our 3-layer pipeline: syntax → DNS → SMTP handshake
         </p>
@@ -115,7 +115,7 @@ export function VerificationPage() {
           ].map((stat) => (
             <div key={stat.label} className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4">
               <p className="text-xs text-[var(--text-tertiary)] mb-1">{stat.label}</p>
-              <p className={cn('text-2xl font-bold', stat.color)}>{stat.value}</p>
+              <p className={cn('text-[18px] font-semibold', stat.color)}>{stat.value}</p>
             </div>
           ))}
         </div>
@@ -123,7 +123,7 @@ export function VerificationPage() {
 
       {/* Score distribution */}
       {stats?.score_distribution && stats.score_distribution.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5">
+        <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4">
           <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 uppercase tracking-wider">DCS Score Distribution</h2>
           <div className="space-y-2">
             {stats.score_distribution.map((bucket) => {
@@ -148,7 +148,7 @@ export function VerificationPage() {
       )}
 
       {/* Single verify */}
-      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5 space-y-4">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 space-y-4">
         <h2 className="text-base font-semibold text-[var(--text-primary)]">Verify a single address</h2>
         <div className="flex gap-3">
           <div className="relative flex-1">
@@ -176,7 +176,7 @@ export function VerificationPage() {
       </div>
 
       {/* Batch verify */}
-      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-base font-semibold text-[var(--text-primary)]">Batch verify all contacts</h2>

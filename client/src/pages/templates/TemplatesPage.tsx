@@ -394,7 +394,7 @@ function EmailEditorModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Email Template Editor" size="2xl">
-      <div className="flex gap-6 min-h-[500px]">
+      <div className="flex gap-4 min-h-[500px]">
         {/* Editor side */}
         <div className="flex-1 space-y-3 min-w-0">
           <div className="grid grid-cols-2 gap-3">
@@ -684,7 +684,7 @@ function PreviewModal({
       )}
 
       {type === 'sequence' && sequenceTemplate && steps && (
-        <div className="flex gap-6">
+        <div className="flex gap-4">
           {/* Timeline */}
           <div className="w-[240px] shrink-0">
             <div className="mb-3">
@@ -879,7 +879,7 @@ export function TemplatesPage() {
   const isEmpty = tab === 'emails' ? (!emailTemplates || emailTemplates.length === 0) : (!sequenceTemplates || sequenceTemplates.length === 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -977,7 +977,7 @@ export function TemplatesPage() {
         <>
           {/* Preset banner for empty state */}
           {isEmpty && hasPresets && (
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)] p-6">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)] p-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgba(99,102,241,0.1)] to-[rgba(139,92,246,0.1)] flex items-center justify-center shrink-0 border border-[rgba(99,102,241,0.15)]">
                   <Sparkles className="h-6 w-6 text-[#6366F1]" />

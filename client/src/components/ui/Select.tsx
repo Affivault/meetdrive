@@ -4,16 +4,17 @@ import { cn } from '../../lib/utils';
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
+  hint?: string;
   options: { value: string; label: string }[];
   placeholder?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, id, options, placeholder, ...props }, ref) => {
+  ({ className, label, error, hint, id, options, placeholder, ...props }, ref) => {
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {label && (
-          <label htmlFor={id} className="block text-sm font-medium text-secondary">
+          <label htmlFor={id} className="block text-[12px] font-medium text-[var(--text-secondary)]">
             {label}
           </label>
         )}
@@ -21,8 +22,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={id}
           className={cn(
-            'block w-full rounded-md border border-default bg-surface px-3 py-2 text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/10 transition-colors',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/30',
+            'block w-full h-8 rounded-md border border-[var(--border-default)] bg-[var(--bg-app)] px-2.5 text-[13px] text-[var(--text-primary)] transition-[border-color,box-shadow] duration-150 ease-out hover:border-[var(--border-strong)] focus:border-[var(--indigo)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] cursor-pointer',
+            error && 'border-[var(--error)] hover:border-[var(--error)] focus:border-[var(--error)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]',
             className
           )}
           {...props}
@@ -38,7 +39,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-[11.5px] text-[var(--error)] leading-tight">{error}</p>}
+        {hint && !error && <p className="text-[11.5px] text-[var(--text-tertiary)] leading-tight">{hint}</p>}
       </div>
     );
   }

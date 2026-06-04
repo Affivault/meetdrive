@@ -68,7 +68,7 @@ export function ResetPasswordPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">Link expired or invalid</h2>
+          <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Link expired or invalid</h2>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
             This password reset link has expired or already been used.
           </p>
@@ -97,7 +97,7 @@ export function ResetPasswordPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(99,102,241,0.1)' }}>
             <KeyRound className="h-6 w-6" style={{ color: '#818CF8' }} />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
             Set new password
           </h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -105,7 +105,7 @@ export function ResetPasswordPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">

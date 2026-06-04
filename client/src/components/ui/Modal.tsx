@@ -1,31 +1,28 @@
 import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  description?: string;
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  footer?: ReactNode;
 }
 
-export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
-  // Lock body scroll while open, restoring whatever was there before
+export function Modal({ isOpen, onClose, title, description, children, size = 'md', footer }: ModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = original;
-    };
+    return () => { document.body.style.overflow = original; };
   }, [isOpen]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
@@ -33,38 +30,59 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   if (!isOpen) return null;
 
   const sizes = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    '2xl': 'max-w-6xl',
+    sm:  'max-w-sm',
+    md:  'max-w-md',
+    lg:  'max-w-xl',
+    xl:  'max-w-3xl',
+    '2xl': 'max-w-5xl',
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay with backdrop blur */}
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
         onClick={onClose}
       />
-      {/* Modal container */}
+
+      {/* Panel */}
       <div
-        className={`relative w-full ${sizes[size]} max-h-[90vh] overflow-y-auto rounded-2xl bg-surface border border-subtle shadow-xl animate-slide-up`}
+        className={cn(
+          'relative w-full max-h-[90vh] flex flex-col rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xl animate-slide-in',
+          sizes[size]
+        )}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-subtle bg-surface rounded-t-2xl px-6 py-4">
-          <h2 className="text-lg font-semibold tracking-tight text-primary">{title}</h2>
+        <div className="flex items-start justify-between px-4 pt-4 pb-3 border-b border-[var(--border-subtle)] flex-shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight leading-tight">
+              {title}
+            </h2>
+            {description && (
+              <p className="text-[12px] text-[var(--text-secondary)] mt-0.5 leading-snug">
+                {description}
+              </p>
+            )}
+          </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-tertiary hover:bg-hover hover:text-primary transition-all duration-200"
+            className="ml-3 flex-shrink-0 rounded-md p-1 text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors duration-150 -mr-0.5"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
+
         {/* Body */}
-        <div className="px-6 py-5">
+        <div className="px-4 py-4 overflow-y-auto flex-1">
           {children}
         </div>
+
+        {/* Footer — only if provided */}
+        {footer && (
+          <div className="px-4 py-3 border-t border-[var(--border-subtle)] flex items-center justify-end gap-2 flex-shrink-0 bg-[var(--bg-elevated)]/60">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

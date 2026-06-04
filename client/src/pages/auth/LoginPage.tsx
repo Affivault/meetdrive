@@ -54,7 +54,7 @@ export function LoginPage() {
           </div>
 
           {/* Feature bullets */}
-          <div className="mt-12 space-y-6">
+          <div className="mt-12 space-y-4">
             <div className="flex items-start gap-4">
               <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
                 <svg className="h-4 w-4" style={{ color: '#818CF8' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,7 +101,7 @@ export function LoginPage() {
 
         {/* Testimonial */}
         <div className="relative z-10 mt-auto pt-12">
-          <div className="rounded-2xl p-6" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', backdropFilter: 'blur(12px)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', backdropFilter: 'blur(12px)' }}>
             <p className="text-white/80 text-sm leading-relaxed italic">
               "SkySend transformed our outbound strategy. We went from 2% to 18% reply rates in just two weeks. The automation saves our team 20+ hours per week."
             </p>
@@ -130,7 +130,7 @@ export function LoginPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
               Welcome back
             </h1>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -169,7 +169,7 @@ export function LoginPage() {
           </div>
 
           {/* Form Card */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">

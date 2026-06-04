@@ -136,7 +136,7 @@ export function TeamPage() {
     <div className="space-y-8 max-w-3xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Team</h1>
+          <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Team</h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">Manage your organisation members and invite collaborators</p>
         </div>
         {isOwner && (
@@ -151,7 +151,7 @@ export function TeamPage() {
       </div>
 
       {/* Org Name */}
-      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Organisation</p>
@@ -193,7 +193,7 @@ export function TeamPage() {
 
       {/* Members */}
       <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] flex items-center gap-2">
+        <div className="px-5 py-2.5 border-b border-[var(--border-subtle)] flex items-center gap-2">
           <Users className="h-4 w-4 text-[var(--text-tertiary)]" />
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">Members</h2>
           <span className="ml-auto text-xs text-[var(--text-tertiary)]">{members.length}</span>
@@ -203,7 +203,7 @@ export function TeamPage() {
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
             {members.map((member) => (
-              <div key={member.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--bg-elevated)] transition-colors">
+              <div key={member.id} className="flex items-center gap-4 px-5 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors">
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center flex-shrink-0">
                   <span className="text-xs font-bold text-white">{getInitials(member.email)}</span>
                 </div>
@@ -242,7 +242,7 @@ export function TeamPage() {
       {/* Pending Invites */}
       {(invites.length > 0 || isOwner) && (
         <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] flex items-center gap-2">
+          <div className="px-5 py-2.5 border-b border-[var(--border-subtle)] flex items-center gap-2">
             <Mail className="h-4 w-4 text-[var(--text-tertiary)]" />
             <h2 className="text-sm font-semibold text-[var(--text-primary)]">Pending Invites</h2>
             <span className="ml-auto text-xs text-[var(--text-tertiary)]">{invites.length}</span>
@@ -254,7 +254,7 @@ export function TeamPage() {
           ) : (
             <div className="divide-y divide-[var(--border-subtle)]">
               {invites.map((invite) => (
-                <div key={invite.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--bg-elevated)] transition-colors">
+                <div key={invite.id} className="flex items-center gap-4 px-5 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors">
                   <div className="h-9 w-9 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-default)] flex items-center justify-center flex-shrink-0">
                     <Mail className="h-4 w-4 text-[var(--text-tertiary)]" />
                   </div>
@@ -291,7 +291,7 @@ export function TeamPage() {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-6">
+          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">Invite Team Member</h2>
               <button onClick={() => setShowInviteModal(false)} className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] transition-colors">

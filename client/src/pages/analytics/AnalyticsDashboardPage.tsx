@@ -100,7 +100,7 @@ function StatCard({
 }) {
   const inner = (
     <div
-      className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 transition-all duration-300 hover:border-[var(--border-default)] hover:translate-y-[-2px] group h-full"
+      className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 transition-all duration-300 hover:border-[var(--border-default)] hover:translate-y-[-2px] group h-full"
       style={{ boxShadow: 'var(--shadow-card)' }}
     >
       <div className="relative flex items-center justify-between mb-4">
@@ -134,11 +134,11 @@ function EngagementRing({ data, colors }: { data: { name: string; value: number 
   const total = data.reduce((sum, item) => sum + safeNum(item.value), 0);
   return (
     <div
-      className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition-all duration-300 hover:border-[var(--border-default)]"
+      className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 transition-all duration-300 hover:border-[var(--border-default)]"
       style={{ boxShadow: 'var(--shadow-card)' }}
     >
       <h3 className="text-heading-sm text-[var(--text-primary)] mb-5">Engagement Breakdown</h3>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <div className="w-44 h-44 flex-shrink-0">
           <ErrorBoundary fallback={<div className="flex items-center justify-center h-full text-xs text-[var(--text-tertiary)]">Chart unavailable</div>}>
             <ResponsiveContainer width="100%" height="100%">
@@ -428,9 +428,9 @@ export function AnalyticsDashboardPage() {
       )}
 
       {/* Performance Trend + Engagement Ring */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-4">
         <div
-          className="col-span-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition-all duration-300 hover:border-[var(--border-default)]"
+          className="col-span-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 transition-all duration-300 hover:border-[var(--border-default)]"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
           <div className="flex items-center justify-between mb-6">
@@ -512,7 +512,7 @@ export function AnalyticsDashboardPage() {
           <EngagementRing data={pieData} colors={COLORS} />
         ) : (
           <div
-            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 flex items-center justify-center"
+            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 flex items-center justify-center"
             style={{ boxShadow: 'var(--shadow-card)' }}
           >
             <p className="text-sm text-[var(--text-tertiary)]">No engagement data yet</p>
@@ -543,7 +543,7 @@ export function AnalyticsDashboardPage() {
           </div>
         </div>
 
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* DCS Gauge + summary */}
           <div className="flex flex-col items-center justify-center gap-4 py-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)]">
             <DcsScoreGauge score={safeNum(overview?.avg_dcs_score)} />
@@ -707,7 +707,7 @@ export function AnalyticsDashboardPage() {
         </div>
 
         {campaignAnalytics ? (
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-4">
             {/* Campaign stats — 5 tiles incl. Suppressed */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {[
@@ -717,7 +717,7 @@ export function AnalyticsDashboardPage() {
                 { icon: MessageSquare, label: 'Replied', value: campaignAnalytics.replied, rate: campaignAnalytics.reply_rate, color: '#10B981' },
                 { icon: AlertTriangle, label: 'Bounced', value: campaignAnalytics.bounced, rate: campaignAnalytics.bounce_rate, color: '#EF4444' },
               ].map(({ icon: Icon, label, value, rate, color }) => (
-                <div key={label} className="relative overflow-hidden p-5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
+                <div key={label} className="relative overflow-hidden p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all duration-200 hover:border-[var(--border-default)] group">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-surface)]">
                       <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.5} />
@@ -804,7 +804,7 @@ export function AnalyticsDashboardPage() {
                       key={c.contact_id}
                       className="border-t border-[var(--border-subtle)] transition-colors duration-150 hover:bg-[var(--bg-hover)]"
                     >
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-primary)] text-xs font-semibold border border-[var(--border-subtle)]">
                             {(c.first_name?.[0] || c.email?.[0] || '?').toUpperCase()}
@@ -819,7 +819,7 @@ export function AnalyticsDashboardPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-4">
                         <Badge
                           variant={
                             c.status === 'replied' ? 'info' :
@@ -832,10 +832,10 @@ export function AnalyticsDashboardPage() {
                           {c.status || 'pending'}
                         </Badge>
                       </td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.sent)}</td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.opened)}</td>
-                      <td className="py-3.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.clicked)}</td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-2.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.sent)}</td>
+                      <td className="py-2.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.opened)}</td>
+                      <td className="py-2.5 px-4 text-center text-[var(--text-secondary)] font-medium">{fmtNum(c.clicked)}</td>
+                      <td className="py-2.5 px-4 text-center">
                         {c.replied ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--bg-elevated)] text-[var(--text-primary)]">
                             <MessageSquare className="h-3 w-3" />
@@ -946,7 +946,7 @@ function CampaignComparison({ campaigns }: { campaigns: any[] }) {
       ) : isLoading ? (
         <div className="p-12 text-center"><Spinner size="md" /></div>
       ) : (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-4">
           {/* Stat comparison table */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

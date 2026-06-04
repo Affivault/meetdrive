@@ -313,7 +313,7 @@ function ComposeModal({ onClose, onSend, onSchedule, sending, smtpAccounts, temp
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex ${expanded ? 'items-center justify-center' : 'items-end justify-end'} p-6`}>
+    <div className={`fixed inset-0 z-50 flex ${expanded ? 'items-center justify-center' : 'items-end justify-end'} p-4`}>
       <div className="fixed inset-0 bg-black/20" onClick={onClose} />
       <div
         className={`relative bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] shadow-2xl flex flex-col transition-all duration-200 ${
@@ -1073,7 +1073,7 @@ function ScheduledEmailsPanel({ onCancel }: { onCancel: (id: string) => void }) 
   });
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-16"><Spinner size="md" /></div>;
+    return <div className="flex items-center justify-center py-10"><Spinner size="md" /></div>;
   }
 
   const emails = scheduled || [];
@@ -1647,10 +1647,10 @@ export function InboxPage() {
           {/* Message List — grouped as conversation threads */}
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
-              <div className="flex items-center justify-center py-16"><Spinner size="md" /></div>
+              <div className="flex items-center justify-center py-10"><Spinner size="md" /></div>
             ) : folder === 'scheduled' ? (
               /* Scheduled folder: empty sidebar, detail panel shows scheduled list */
-              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <div className="flex flex-col items-center justify-center py-10 text-center px-6">
                 <div className="w-12 h-12 rounded-2xl bg-[#6366F1]/10 flex items-center justify-center mb-3 border border-[#6366F1]/20">
                   <Clock className="h-5 w-5 text-[#6366F1]" />
                 </div>
@@ -1658,7 +1658,7 @@ export function InboxPage() {
                 <p className="text-xs text-[var(--text-tertiary)] mt-1">View and manage your scheduled emails in the panel</p>
               </div>
             ) : conversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <div className="flex flex-col items-center justify-center py-10 text-center px-6">
                 <div className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] flex items-center justify-center mb-3 border border-[var(--border-subtle)]">
                   <MailOpen className="h-5 w-5 text-[var(--text-tertiary)]" />
                 </div>
