@@ -10,9 +10,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
     const variants = {
       primary:
-        'bg-[var(--indigo)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(67,56,202,0.35)] hover:bg-[var(--indigo-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_2px_6px_rgba(67,56,202,0.42)] active:translate-y-[0.5px]',
+        '[background:var(--indigo-grad)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(67,56,202,0.35)] hover:[background:var(--indigo-grad-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_2px_8px_rgba(67,56,202,0.45)] active:translate-y-[0.5px]',
       brand:
-        'bg-[var(--indigo)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(67,56,202,0.35)] hover:bg-[var(--indigo-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_2px_6px_rgba(67,56,202,0.42)] active:translate-y-[0.5px]',
+        '[background:var(--indigo-grad)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(67,56,202,0.35)] hover:[background:var(--indigo-grad-hover)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_2px_8px_rgba(67,56,202,0.45)] active:translate-y-[0.5px]',
       secondary:
         'bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] shadow-[0_1px_0_rgba(0,0,0,0.015)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] active:bg-[var(--bg-active)]',
       ghost:
