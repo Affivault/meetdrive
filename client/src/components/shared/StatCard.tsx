@@ -95,8 +95,8 @@ export function StatCard({
     <div
       onClick={onClick}
       className={cn(
-        'group surface p-4 transition-all duration-200',
-        onClick && 'cursor-pointer hover:shadow-[var(--shadow-md)] hover:border-[var(--border-default)]',
+        'group surface p-4 transition-all duration-[var(--dur-base)] ease-[var(--ease-out)]',
+        onClick && 'cursor-pointer hover:shadow-[var(--shadow-card-hover)] hover:border-[var(--border-default)] hover:-translate-y-0.5 active:translate-y-0',
         className
       )}
     >

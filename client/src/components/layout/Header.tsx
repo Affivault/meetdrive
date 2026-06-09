@@ -13,29 +13,33 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useCommandPalette } from '../../context/CommandPaletteContext';
 import { cn } from '../../lib/utils';
 
 export function Header() {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { openPalette } = useCommandPalette();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-30 flex h-[52px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/90 backdrop-blur-xl px-6 gap-4">
-      {/* Search */}
-      <div className="relative flex items-center h-7 w-64 rounded-md border border-[var(--border-default)] bg-[var(--bg-inset)] hover:border-[var(--border-strong)] transition-colors focus-within:border-[var(--indigo)] focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.12)]">
+      {/* Search — opens the command palette */}
+      <button
+        type="button"
+        onClick={openPalette}
+        className="group relative flex items-center h-7 w-64 rounded-md border border-[var(--border-default)] bg-[var(--bg-inset)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-hover)] transition-colors text-left"
+      >
         <Search className="h-3.5 w-3.5 text-[var(--text-tertiary)] ml-2.5 flex-shrink-0" />
-        <input
-          type="text"
-          placeholder="Search…"
-          className="w-full h-full bg-transparent px-2 text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none"
-        />
-        <div className="flex items-center gap-0.5 mr-2 px-1 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[10px] text-[var(--text-tertiary)] font-medium flex-shrink-0">
+        <span className="flex-1 px-2 text-[12.5px] text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] transition-colors">
+          Search or jump to…
+        </span>
+        <span className="flex items-center gap-0.5 mr-2 px-1 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[10px] text-[var(--text-tertiary)] font-medium flex-shrink-0">
           <Command className="h-2.5 w-2.5" />
           <span>K</span>
-        </div>
-      </div>
+        </span>
+      </button>
 
       {/* Right controls */}
       <div className="flex items-center gap-0.5 ml-auto">
