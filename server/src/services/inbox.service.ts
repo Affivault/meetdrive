@@ -913,10 +913,11 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
 
           // Add connection timeout (15 seconds)
           const connectPromise = client.connect();
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('IMAP connection timed out')), 15000)
-          );
-          await Promise.race([connectPromise, timeoutPromise]);
+          let connectTimeoutId: ReturnType<typeof setTimeout>;
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            connectTimeoutId = setTimeout(() => reject(new Error('IMAP connection timed out')), 15000);
+          });
+          await Promise.race([connectPromise, timeoutPromise]).finally(() => clearTimeout(connectTimeoutId));
 
           await client.mailboxOpen('INBOX');
 

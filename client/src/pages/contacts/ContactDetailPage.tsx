@@ -52,10 +52,6 @@ export function ContactDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showAddToListDropdown, setShowAddToListDropdown] = useState(false);
-
-  if (!id) {
-    return <div className="text-center py-12 text-[var(--text-secondary)]">Invalid contact URL.</div>;
-  }
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moveFromListId, setMoveFromListId] = useState<string | null>(null);
   const [moveToListId, setMoveToListId] = useState<string | null>(null);
@@ -120,6 +116,10 @@ export function ContactDetailPage() {
     },
     onError: () => toast.error('Failed to move contact'),
   });
+
+  if (!id) {
+    return <div className="text-center py-12 text-[var(--text-secondary)]">Invalid contact URL.</div>;
+  }
 
   if (isLoading) {
     return (
