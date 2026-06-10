@@ -371,7 +371,7 @@ function ComposeModal({ onClose, onSend, onSchedule, sending, smtpAccounts, temp
                 }
               }}
               disabled={!canSend}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)]"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[var(--indigo)] text-white text-sm font-semibold hover:bg-[var(--indigo-hover)] transition-colors disabled:opacity-40 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_2px_rgba(67,56,202,0.35)]"
             >
               <Send className="h-3.5 w-3.5" />
               {sending ? 'Sending...' : 'Send'}
@@ -432,8 +432,8 @@ function AiAssistBar({ messageId, onInsert }: { messageId: string; onInsert: (ht
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-gradient-to-r from-[rgba(99,102,241,0.05)] to-[rgba(139,92,246,0.05)]">
-      <Wand2 className="h-4 w-4 text-[#6366F1] flex-shrink-0" />
+    <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--indigo-subtle)]">
+      <Wand2 className="h-4 w-4 text-[var(--indigo)] flex-shrink-0" />
       <input
         value={prompt}
         onChange={e => setPrompt(e.target.value)}
@@ -454,7 +454,7 @@ function AiAssistBar({ messageId, onInsert }: { messageId: string; onInsert: (ht
           }
         }}
         disabled={!prompt.trim() || aiMut.isPending}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-40 shadow-[0_1px_4px_rgba(99,102,241,0.3)]"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--indigo)] text-white text-xs font-medium hover:bg-[var(--indigo-hover)] transition-colors disabled:opacity-40 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
       >
         {aiMut.isPending ? (
           <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
@@ -824,7 +824,7 @@ function ScheduleSendPicker({ onSchedule, onClose }: { onSchedule: (date: string
           <CustomTimePicker value={selectedTime} onChange={setSelectedTime} />
           <button
             onClick={handleConfirmSchedule}
-            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[13px] font-semibold hover:opacity-90 transition-all shadow-[0_2px_8px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.4)]"
+            className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-[var(--indigo)] text-white text-[13px] font-semibold hover:bg-[var(--indigo-hover)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_2px_rgba(67,56,202,0.35)]"
           >
             <CalendarClock className="h-3.5 w-3.5" />
             Schedule for {selectedDateLabel} · {selectedTimeLabel}
@@ -1016,7 +1016,7 @@ function CollapsibleThread({ thread, selectedId }: { thread: Message[]; selected
                 {/* Avatar */}
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                   isOutbound
-                    ? 'bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white'
+                    ? 'bg-[var(--indigo)] text-white'
                     : 'bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-primary)]'
                 }`}>
                   {isOutbound ? <SendHorizontal className="h-3 w-3" /> : (
@@ -2023,7 +2023,7 @@ export function InboxPage() {
                             disabled={
                               (replyMode === 'reply' ? replyEditor.isEmpty || replyMut.isPending : !forwardTo.trim() || forwardMut.isPending)
                             }
-                            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)]"
+                            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[var(--indigo)] text-white text-sm font-semibold hover:bg-[var(--indigo-hover)] transition-colors disabled:opacity-40 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_2px_rgba(67,56,202,0.35)]"
                           >
                             <Send className="h-3.5 w-3.5" />
                             {replyMut.isPending || forwardMut.isPending ? 'Sending...' : replyMode === 'reply' ? 'Send Reply' : 'Forward'}
