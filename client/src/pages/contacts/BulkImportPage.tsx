@@ -77,6 +77,7 @@ export function BulkImportPage() {
     durationMs: number;
   } | null>(null);
   const cancelRef = useRef(false);
+  const [cancelRequested, setCancelRequested] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   // Stop the import loop if the user navigates away mid-import
@@ -176,6 +177,7 @@ export function BulkImportPage() {
   const startImport = useCallback(async () => {
     if (!mappingValid) return;
     cancelRef.current = false;
+    setCancelRequested(false);
     setStep('importing');
     const startedAt = Date.now();
 
@@ -251,12 +253,14 @@ export function BulkImportPage() {
 
   const cancel = () => {
     cancelRef.current = true;
+    setCancelRequested(true);
     toast('Cancelling after current batch…', { icon: '⏸' });
   };
 
   // Reset to start over
   const reset = () => {
     cancelRef.current = false;
+    setCancelRequested(false);
     setFile(null);
     setParseError(null);
     setHeaders([]);
@@ -282,7 +286,7 @@ export function BulkImportPage() {
     a.href = url;
     a.download = `import-errors-${Date.now()}.csv`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   };
 
   // Steps strip
@@ -684,7 +688,7 @@ export function BulkImportPage() {
             </p>
             <button
               onClick={cancel}
-              disabled={cancelRef.current}
+              disabled={cancelRequested}
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-rose-500/30 text-[12px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 disabled:opacity-40 transition-all"
             >
               <X className="h-3.5 w-3.5" />

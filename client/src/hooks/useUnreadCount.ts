@@ -29,6 +29,11 @@ export function useUnreadCount() {
   }, [count]);
 
   useEffect(() => {
+    document.title = count > 0 ? `(${count}) SkySend` : 'SkySend';
+    return () => { document.title = 'SkySend'; };
+  }, [count]);
+
+  useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {});
     }
