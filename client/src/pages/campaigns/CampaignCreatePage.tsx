@@ -63,7 +63,7 @@ function ToggleSwitch({
       className={cn(
         'flex items-start gap-3 p-3.5 rounded-xl border bg-[var(--bg-surface)] text-left transition-all',
         checked
-          ? 'border-[var(--indigo)]/30 bg-[var(--indigo-subtle)]/40 shadow-[0_0_0_1px_var(--indigo-subtle)]'
+          ? 'border-[var(--indigo-subtle)] bg-[var(--indigo-subtle)] shadow-[0_0_0_1px_var(--indigo-subtle)]'
           : 'border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)]'
       )}
     >
@@ -148,7 +148,7 @@ function Field({ label, hint, children }: { label: React.ReactNode; hint?: strin
 }
 
 const inputCls =
-  'w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo)]/15 transition-all';
+  'w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all';
 
 /* ─── Main component ─────────────────────────────────────────────── */
 
@@ -810,7 +810,7 @@ export function CampaignCreatePage() {
                       value={campaignForm.name}
                       onChange={(e) => setCampaignForm({ ...campaignForm, name: e.target.value })}
                       placeholder="e.g. Q1 Enterprise Outreach"
-                      className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3.5 py-2.5 text-[14px] font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:font-normal focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo)]/15 transition-all"
+                      className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3.5 py-2.5 text-[14px] font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] placeholder:font-normal focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all"
                     />
                   </Field>
 
@@ -856,7 +856,7 @@ export function CampaignCreatePage() {
                               className={cn(
                                 'flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer transition-all border',
                                 isSelected
-                                  ? 'bg-[var(--indigo-subtle)]/40 border-[var(--indigo)]/30'
+                                  ? 'bg-[var(--indigo-subtle)] border-[var(--indigo-subtle)]'
                                   : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--border-default)]'
                               )}
                             >
@@ -905,7 +905,7 @@ export function CampaignCreatePage() {
                 >
                   <div className="space-y-4">
                     {savedSchedules.length > 0 && (
-                      <div className="rounded-lg border border-[var(--indigo)]/20 bg-[var(--indigo-subtle)]/40 p-2.5">
+                      <div className="rounded-lg border border-[var(--indigo-subtle)] bg-[var(--indigo-subtle)] p-2.5">
                         <label className="block text-[10.5px] font-bold uppercase tracking-wider text-[var(--indigo)] mb-1.5">
                           Quick apply saved schedule
                         </label>
@@ -1100,7 +1100,7 @@ export function CampaignCreatePage() {
                   {sequenceTemplates.length > 0 && (
                     <button
                       onClick={() => setShowTemplatePicker(true)}
-                      className="group text-left p-4 rounded-xl border border-[var(--indigo)]/20 bg-[var(--indigo-subtle)]/30 hover:border-[var(--indigo)]/35 hover:bg-[var(--indigo-subtle)]/50 transition-all"
+                      className="group text-left p-4 rounded-xl border border-[var(--indigo-subtle)] bg-[var(--indigo-subtle)] hover:border-[var(--indigo-subtle)] hover:bg-[var(--indigo-subtle)] transition-all"
                     >
                       <div className="flex items-center gap-2.5 mb-2">
                         <div className="h-8 w-8 rounded-lg bg-[var(--indigo)] flex items-center justify-center text-white">
@@ -1234,7 +1234,7 @@ export function CampaignCreatePage() {
                             onChange={(e) => updateStep(editingStep, { body_html: e.target.value })}
                             onFocus={() => setActiveField('body')}
                             placeholder={`<p>Hi {{first_name}},</p>\n\n<p>I noticed that {{company}} is…</p>`}
-                            className="w-full min-h-[180px] rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2.5 text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo)]/15 transition-all font-mono resize-y"
+                            className="w-full min-h-[180px] rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2.5 text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all font-mono resize-y"
                           />
                           {(() => {
                             const rawText = (steps[editingStep].body_html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -1307,7 +1307,7 @@ export function CampaignCreatePage() {
                                 value={testEmailTo}
                                 onChange={(e) => setTestEmailTo(e.target.value)}
                                 placeholder="your@email.com"
-                                className="flex-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo)]/15 transition-all"
+                                className="flex-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all"
                               />
                               <button
                                 type="button"
@@ -1366,7 +1366,7 @@ export function CampaignCreatePage() {
                                 type="number" min="0" max={max}
                                 value={(steps[editingStep] as any)[key] || 0}
                                 onChange={(e) => updateStep(editingStep, { [key]: parseInt(e.target.value) || 0 } as any)}
-                                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 py-2 text-center text-[14px] font-bold text-[var(--text-primary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo)]/15 transition-all tabular"
+                                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 py-2 text-center text-[14px] font-bold text-[var(--text-primary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all tabular"
                               />
                             </div>
                           ))}
@@ -1455,7 +1455,7 @@ export function CampaignCreatePage() {
                           {emailSteps.length}
                         </p>
                       </div>
-                      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--indigo-subtle)]/40 p-3">
+                      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--indigo-subtle)] p-3">
                         <p className="text-[10.5px] uppercase tracking-wider text-[var(--indigo)] font-bold">Total sends</p>
                         <p className="text-[20px] font-bold text-[var(--indigo)] tabular leading-tight mt-0.5">
                           {(emailSteps.length * selectedContactIds.length).toLocaleString()}
@@ -1817,7 +1817,7 @@ export function CampaignCreatePage() {
                   placeholder="Search by name, email, or company…"
                   value={contactSearch}
                   onChange={(e) => setContactSearch(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] pl-9 pr-3 py-2 text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo)]/15 transition-all"
+                  className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] pl-9 pr-3 py-2 text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all"
                 />
               </div>
               <div className="max-h-[350px] overflow-y-auto rounded-lg border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
@@ -1829,7 +1829,7 @@ export function CampaignCreatePage() {
                       key={contact.id}
                       className={cn(
                         'flex cursor-pointer items-center gap-2.5 px-3 py-2 transition-colors',
-                        isSelected ? 'bg-[var(--indigo-subtle)]/30' : 'hover:bg-[var(--bg-hover)]'
+                        isSelected ? 'bg-[var(--indigo-subtle)]' : 'hover:bg-[var(--bg-hover)]'
                       )}
                     >
                       <input
@@ -2011,7 +2011,7 @@ export function CampaignCreatePage() {
                     <button
                       key={t.id}
                       onClick={() => loadTemplate(t.id)}
-                      className="text-left p-4 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--indigo)]/30 hover:bg-[var(--indigo-subtle)]/20 transition-all group"
+                      className="text-left p-4 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--indigo-subtle)] hover:bg-[var(--indigo-subtle)] transition-all group"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className="text-[13px] font-semibold text-[var(--text-primary)] group-hover:text-[var(--indigo)] transition-colors flex-1 min-w-0 truncate">
@@ -2110,7 +2110,7 @@ function ABSection({
               onChange={(e) => onChangeB(e.target.value)}
               rows={3}
               placeholder={variantBPlaceholder}
-              className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo)]/15 transition-all font-mono resize-y"
+              className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all font-mono resize-y"
             />
           ) : (
             <input
@@ -2118,7 +2118,7 @@ function ABSection({
               value={variantB}
               onChange={(e) => onChangeB(e.target.value)}
               placeholder={variantBPlaceholder}
-              className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo)]/15 transition-all"
+              className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all"
             />
           )}
         </div>

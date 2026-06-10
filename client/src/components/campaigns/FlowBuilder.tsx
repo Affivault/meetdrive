@@ -94,9 +94,9 @@ function AddStepMenu({ onAdd, showAbove }: AddStepMenuProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--bg-surface)] border border-dashed border-[var(--indigo)]/30 hover:border-[var(--indigo)] hover:bg-[var(--indigo-subtle)] transition-all my-2"
+        className="group relative z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--bg-surface)] border border-dashed border-[var(--indigo-subtle)] hover:border-[var(--indigo)] hover:bg-[var(--indigo-subtle)] transition-all my-2"
       >
-        <Plus className="h-3 w-3 text-[var(--indigo)]/50 group-hover:text-[var(--indigo)]" />
+        <Plus className="h-3 w-3 text-[var(--indigo-subtle)] group-hover:text-[var(--indigo)]" />
       </button>
 
       {isOpen && (
@@ -252,7 +252,7 @@ function FlowNode({
           'group relative mx-auto max-w-xl rounded-xl border bg-[var(--bg-surface)] transition-all duration-200 overflow-hidden',
           stepColors.borderColor,
           isEditing
-            ? 'border-[var(--indigo)]/40 shadow-[0_0_0_2px_var(--indigo-subtle),0_4px_12px_rgba(91,91,245,0.12)]'
+            ? 'border-[var(--indigo-subtle)] shadow-[0_0_0_2px_var(--indigo-subtle),0_4px_12px_rgba(91,91,245,0.12)]'
             : 'border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:shadow-[0_2px_8px_rgba(15,15,25,0.06)]'
         )}
       >
@@ -372,7 +372,7 @@ function FlowNode({
                       <select
                         value={step.false_branch_step ?? ''}
                         onChange={(e) => onUpdate({ false_branch_step: e.target.value === '' ? undefined : Number(e.target.value) })}
-                        className="w-full h-7 rounded border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 text-xs focus:border-[#6366F1] outline-none"
+                        className="w-full h-7 rounded border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 text-xs focus:border-[var(--indigo)] outline-none"
                       >
                         <option value="">Skip to end</option>
                         {Array.from({ length: totalSteps }, (_, i) => i).filter((i) => i !== index).map((i) => (

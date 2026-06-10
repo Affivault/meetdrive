@@ -1000,7 +1000,7 @@ export function AnalyticsDashboardPage() {
           <Eye className="h-3.5 w-3.5" />
           Campaign Deep Dive
           {selectedCampaign && (
-            <span className="text-[10.5px] font-semibold bg-[var(--indigo)]/20 text-[var(--indigo)] px-1.5 py-0.5 rounded-full">
+            <span className="text-[10.5px] font-semibold bg-[var(--indigo-subtle)] text-[var(--indigo)] px-1.5 py-0.5 rounded-full">
               {selectedCampaign.name.slice(0, 14)}{selectedCampaign.name.length > 14 ? '…' : ''}
             </span>
           )}
