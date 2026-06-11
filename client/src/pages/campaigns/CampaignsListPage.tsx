@@ -16,10 +16,25 @@ import {
   Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare, Copy,
   Folder, FolderPlus, FolderOpen, X, Pencil, Trash2,
   BarChart3, Layers, Play, Pause, Search, AlertTriangle, MoreVertical,
+  ChevronUp, ChevronDown, ChevronsUpDown,
 } from 'lucide-react';
 
 /* Shared column template so the header and every row stay perfectly aligned */
-const ROW_GRID = 'grid grid-cols-[minmax(200px,1fr)_72px_72px_72px_72px_150px_96px] items-center gap-x-3';
+const ROW_GRID = 'grid grid-cols-[minmax(220px,1fr)_84px_84px_84px_84px_170px_96px] items-center gap-x-3';
+
+/* Sortable columns for the campaigns table */
+type SortKey = 'name' | 'sent' | 'open' | 'click' | 'reply' | 'created';
+function sortValue(c: any, key: SortKey): number | string {
+  const sent = c.sent_count || 0;
+  switch (key) {
+    case 'name':  return (c.name || '').toLowerCase();
+    case 'sent':  return sent;
+    case 'open':  return sent ? (c.opened_count || 0) / sent : -1;
+    case 'click': return sent ? (c.clicked_count || 0) / sent : -1;
+    case 'reply': return sent ? (c.replied_count || 0) / sent : -1;
+    default:      return new Date(c.created_at || 0).getTime();
+  }
+}
 import toast from 'react-hot-toast';
 import type { CampaignWithStats } from '@lemlist/shared';
 
@@ -75,7 +90,15 @@ export function CampaignsListPage() {
 
   const allCampaigns: CampaignWithStats[] = (campaignsResp?.data || []) as any;
 
-  // Filter campaigns by selected folder and search query
+  // Column sorting
+  const [sortKey, setSortKey] = useState<SortKey>('created');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'));
+    else { setSortKey(key); setSortDir(key === 'name' ? 'asc' : 'desc'); }
+  };
+
+  // Filter campaigns by selected folder and search query, then sort
   const visibleCampaigns = useMemo(() => {
     let result = allCampaigns;
     if (activeFolderId !== 'all') {
@@ -87,8 +110,14 @@ export function CampaignsListPage() {
       const q = searchQuery.toLowerCase();
       result = result.filter((c: any) => c.name?.toLowerCase().includes(q));
     }
-    return result;
-  }, [allCampaigns, activeFolderId, searchQuery]);
+    const dir = sortDir === 'desc' ? -1 : 1;
+    return [...result].sort((a: any, b: any) => {
+      const av = sortValue(a, sortKey);
+      const bv = sortValue(b, sortKey);
+      if (typeof av === 'string' && typeof bv === 'string') return av.localeCompare(bv) * dir;
+      return ((av as number) - (bv as number)) * dir;
+    });
+  }, [allCampaigns, activeFolderId, searchQuery, sortKey, sortDir]);
 
   const activeFolder = folders.find((f) => f.id === activeFolderId);
 
@@ -292,13 +321,30 @@ export function CampaignsListPage() {
             <div className="panel overflow-hidden">
               <div className="overflow-x-auto">
                 <div className="min-w-[760px]">
-                  {/* Column header */}
+                  {/* Column header — click to sort */}
                   <div className={cn(ROW_GRID, 'px-4 h-9 border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40')}>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)]">Campaign</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] text-right">Sent</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] text-right">Open</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] text-right">Click</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] text-right">Reply</span>
+                    {([
+                      { key: 'name' as SortKey,  label: 'Campaign', right: false },
+                      { key: 'sent' as SortKey,  label: 'Sent',     right: true },
+                      { key: 'open' as SortKey,  label: 'Open',     right: true },
+                      { key: 'click' as SortKey, label: 'Click',    right: true },
+                      { key: 'reply' as SortKey, label: 'Reply',    right: true },
+                    ]).map((col) => (
+                      <button
+                        key={col.key}
+                        onClick={() => toggleSort(col.key)}
+                        className={cn(
+                          'group/sort inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.07em] transition-colors select-none',
+                          col.right && 'justify-end',
+                          sortKey === col.key ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                        )}
+                      >
+                        {col.label}
+                        {sortKey === col.key
+                          ? (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 text-[var(--indigo)]" /> : <ChevronUp className="h-3 w-3 text-[var(--indigo)]" />)
+                          : <ChevronsUpDown className="h-3 w-3 opacity-0 group-hover/sort:opacity-60 transition-opacity" />}
+                      </button>
+                    ))}
                     <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)]">Pipeline</span>
                     <span />
                   </div>
@@ -465,7 +511,7 @@ function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, on
 
   const metric = (v: string, strong = false) => (
     <span className={cn(
-      'text-[12.5px] tabular text-right',
+      'text-[13.5px] tabular text-right',
       strong ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'
     )}>{v}</span>
   );
@@ -474,14 +520,14 @@ function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, on
     <div
       onClick={onOpen}
       onContextMenu={onContextMenu}
-      className={cn(ROW_GRID, 'group px-4 py-[13px] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors')}
+      className={cn(ROW_GRID, 'group px-4 py-3.5 cursor-pointer hover:bg-[var(--bg-hover)] transition-colors')}
     >
       {/* Identity */}
       <div className="min-w-0 flex items-center gap-2.5">
         <span className={cn('h-1.5 w-1.5 rounded-full flex-shrink-0', STATUS_DOT[campaign.status] || 'bg-slate-400')} />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-[13px] font-semibold text-[var(--text-primary)] truncate tracking-[-0.005em]">{campaign.name}</h3>
+            <h3 className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate tracking-[-0.005em]">{campaign.name}</h3>
             <StatusBadge status={campaign.status} type="campaign" />
             {bounced > 0 && (
               <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-rose-500 flex-shrink-0" title={`${bounced} bounces — check deliverability`}>

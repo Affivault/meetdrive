@@ -10,6 +10,11 @@ import {
   User,
   ChevronDown,
   Command,
+  Plus,
+  Megaphone,
+  Upload,
+  FileText,
+  CalendarClock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,7 +26,15 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const { openPalette } = useCommandPalette();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const navigate = useNavigate();
+
+  const createItems = [
+    { label: 'New campaign', desc: 'Build an outbound sequence', icon: Megaphone, to: '/campaigns/new' },
+    { label: 'Import contacts', desc: 'Upload a CSV of leads', icon: Upload, to: '/contacts/import' },
+    { label: 'New template', desc: 'Reusable email content', icon: FileText, to: '/templates' },
+    { label: 'New schedule', desc: 'Sending window preset', icon: CalendarClock, to: '/schedules' },
+  ];
 
   return (
     <header className="sticky top-0 z-30 flex h-[52px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/90 backdrop-blur-xl px-6 gap-4">
@@ -43,6 +56,41 @@ export function Header() {
 
       {/* Right controls */}
       <div className="flex items-center gap-1 ml-auto">
+        {/* Global quick-create */}
+        <div className="relative mr-1.5">
+          <button
+            onClick={() => setCreateOpen(!createOpen)}
+            className="flex items-center gap-1 h-7 pl-2 pr-1.5 rounded-md bg-[var(--indigo)] text-white text-[12px] font-semibold hover:bg-[var(--indigo-hover)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_2px_rgba(67,56,202,0.35)]"
+          >
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.4} />
+            Create
+            <ChevronDown className={cn('h-3 w-3 opacity-80 transition-transform duration-150', createOpen && 'rotate-180')} />
+          </button>
+
+          {createOpen && (
+            <>
+              <div className="fixed inset-0" onClick={() => setCreateOpen(false)} />
+              <div className="absolute right-0 top-full mt-1.5 w-60 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1 shadow-[var(--shadow-xl)] animate-slide-in z-50">
+                {createItems.map((item) => (
+                  <button
+                    key={item.to + item.label}
+                    onClick={() => { setCreateOpen(false); navigate(item.to); }}
+                    className="w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left hover:bg-[var(--bg-hover)] transition-colors"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--indigo-subtle)] flex-shrink-0 mt-px">
+                      <item.icon className="h-3.5 w-3.5 text-[var(--indigo)]" strokeWidth={2} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[12.5px] font-medium text-[var(--text-primary)] leading-tight">{item.label}</span>
+                      <span className="block text-[11px] text-[var(--text-tertiary)] leading-tight mt-0.5">{item.desc}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Notifications */}
         <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors">
           <Bell className="h-[15px] w-[15px]" strokeWidth={1.9} />

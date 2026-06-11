@@ -40,7 +40,9 @@ function AppContent() {
         collapsed ? 'pl-[60px]' : 'pl-[244px]'
       )}>
         <Header />
-        <main className="px-8 py-7 max-w-[1440px] mx-auto">
+        {/* Generous workspace width — effectively full-bleed on laptops so data
+            tables breathe, while capping ultrawide so forms stay readable. */}
+        <main className="px-8 py-7 max-w-[1760px] mx-auto">
           <ErrorBoundary>
             <Outlet />
           </ErrorBoundary>

@@ -10,7 +10,7 @@ import { Avatar } from '../../components/shared/Avatar';
 import {
   Plus, Send, MailOpen, MousePointerClick, MessageSquare, Inbox,
   ChevronRight, ArrowUp, ArrowDown, Download, ShieldCheck, Megaphone,
-  Users, Activity, Filter, BarChart3,
+  Users, Activity, Filter, BarChart3, Trophy, AlertTriangle, Zap,
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -157,11 +157,42 @@ function Kpi({ label, value, hint, delta, icon: Icon, spark, onClick }: {
         </span>
         <Delta value={delta} />
       </div>
-      <div className="mt-3 text-[26px] font-semibold text-[var(--text-primary)] tabular leading-none tracking-[-0.03em]">
+      <div className="mt-3.5 text-[34px] font-semibold text-[var(--text-primary)] tabular leading-none tracking-[-0.035em]">
         {value}
       </div>
-      <div className="mt-1.5 text-[11.5px] text-[var(--text-tertiary)] truncate">{hint}</div>
+      <div className="mt-2 text-[12px] text-[var(--text-tertiary)] truncate">{hint}</div>
       <div className="mt-3 -mx-1 opacity-90"><Spark data={spark} /></div>
+    </button>
+  );
+}
+
+/* ─── Insight card — auto-computed "what's working / what's not" ─── */
+const INSIGHT_TONES = {
+  good:    { dot: '#10B981', text: 'text-emerald-600 dark:text-emerald-400' },
+  bad:     { dot: '#F43F5E', text: 'text-rose-600 dark:text-rose-400' },
+  neutral: { dot: ACCENT,    text: 'text-[var(--indigo)]' },
+} as const;
+
+function InsightCard({ tone, icon: Icon, label, name, metric, context, onClick }: {
+  tone: keyof typeof INSIGHT_TONES; icon: any; label: string;
+  name: string; metric: string; context: string; onClick: () => void;
+}) {
+  const t = INSIGHT_TONES[tone];
+  return (
+    <button onClick={onClick} className="group text-left panel panel-hover p-4">
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{label}</span>
+        <Icon className="h-3 w-3 text-[var(--text-muted)] ml-auto" strokeWidth={2} />
+      </div>
+      <p className="text-[14px] font-semibold text-[var(--text-primary)] tracking-[-0.01em] truncate">{name}</p>
+      <div className="mt-1.5 flex items-baseline gap-2">
+        <span className={cn('text-[24px] font-semibold tabular leading-none tracking-[-0.03em]', t.text)}>{metric}</span>
+        <span className="text-[11.5px] text-[var(--text-tertiary)]">{context}</span>
+      </div>
+      <span className="mt-2.5 inline-flex items-center gap-0.5 text-[11.5px] font-medium text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">
+        View campaign <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+      </span>
     </button>
   );
 }
@@ -419,6 +450,15 @@ export function DashboardPage() {
   const topCampaigns = [...campaigns].sort((a, b) => b.sent - a.sent).slice(0, 5);
   const maxSent = Math.max(...topCampaigns.map((c) => c.sent), 1);
 
+  // ── Signals: surface what's working and what isn't, from real data ──
+  const qualified = campaigns.filter((c) => c.sent >= 10);
+  const topPerformer = [...qualified].filter((c) => c.reply_rate > 0).sort((a, b) => b.reply_rate - a.reply_rate)[0];
+  const needsAttention =
+    [...qualified].filter((c) => c.bounce_rate >= 2).sort((a, b) => b.bounce_rate - a.bounce_rate)[0] ||
+    [...qualified].filter((c) => c.open_rate < 10).sort((a, b) => a.open_rate - b.open_rate)[0];
+  const mostActive = [...campaigns].filter((c) => c.sent > 0).sort((a, b) => b.sent - a.sent)[0];
+  const hasSignals = Boolean(topPerformer || needsAttention || mostActive);
+
   const recentMessages = Array.isArray(inboxData?.data) ? inboxData.data : [];
   const name = user?.email?.split('@')[0] || 'there';
 
@@ -480,6 +520,37 @@ export function DashboardPage() {
           delta={s.replied_change} spark={spark('replied')} onClick={() => navigate('/inbox')} />
       </div>
 
+      {/* ── Signals — what's working, what's not ── */}
+      {hasSignals && (
+        <section>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--text-tertiary)]">Signals</span>
+            <div className="flex-1 h-px bg-[var(--border-subtle)]" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {topPerformer && (
+              <InsightCard tone="good" icon={Trophy} label="Top performer"
+                name={topPerformer.name} metric={fmtPct(topPerformer.reply_rate)}
+                context={`reply rate · ${fmtFull(topPerformer.sent)} sent`}
+                onClick={() => navigate(`/campaigns/${topPerformer.id}`)} />
+            )}
+            {needsAttention && needsAttention.id !== topPerformer?.id && (
+              <InsightCard tone="bad" icon={AlertTriangle} label="Needs attention"
+                name={needsAttention.name}
+                metric={needsAttention.bounce_rate >= 2 ? fmtPct(needsAttention.bounce_rate) : fmtPct(needsAttention.open_rate)}
+                context={needsAttention.bounce_rate >= 2 ? `bounce rate · check deliverability` : `open rate · review subject lines`}
+                onClick={() => navigate(`/campaigns/${needsAttention.id}`)} />
+            )}
+            {mostActive && (
+              <InsightCard tone="neutral" icon={Zap} label="Highest volume"
+                name={mostActive.name} metric={fmtNum(mostActive.sent)}
+                context={`sent · ${fmtPct(mostActive.open_rate)} opens`}
+                onClick={() => navigate(`/campaigns/${mostActive.id}`)} />
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ── Performance + inbox health ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <section className={cn('panel lg:col-span-2 overflow-hidden transition-opacity duration-300', refreshing && 'opacity-60')}>
@@ -494,7 +565,7 @@ export function DashboardPage() {
           </div>
           <div className="px-4 pt-3.5">
             <div className="flex items-end gap-2.5">
-              <span className="text-[28px] font-semibold text-[var(--text-primary)] tabular leading-none tracking-[-0.03em]">{fmtFull(metricTotal)}</span>
+              <span className="text-[32px] font-semibold text-[var(--text-primary)] tabular leading-none tracking-[-0.035em]">{fmtFull(metricTotal)}</span>
               <Delta value={metricChange} className="mb-0.5" />
             </div>
             <p className="mt-1 text-[11.5px] text-[var(--text-tertiary)]">{METRICS[metric].label.toLowerCase()} · vs previous {period} days</p>
