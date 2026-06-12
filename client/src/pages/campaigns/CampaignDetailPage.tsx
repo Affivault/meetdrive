@@ -331,11 +331,11 @@ export function CampaignDetailPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
-                    <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">Contact</th>
-                    <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">Status</th>
-                    <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">Progress</th>
-                    <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">Next Send</th>
-                    <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest">Error</th>
+                    <th className="px-4 py-2.5 text-left font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Contact</th>
+                    <th className="px-4 py-2.5 text-left font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Status</th>
+                    <th className="px-4 py-2.5 text-left font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Progress</th>
+                    <th className="px-4 py-2.5 text-left font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Next Send</th>
+                    <th className="px-4 py-2.5 text-left font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Error</th>
                   </tr>
                 </thead>
                 <tbody>

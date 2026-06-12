@@ -57,7 +57,7 @@ function SortableHeader({
       onClick={() => onSort(colKey)}
       className={`flex items-center gap-1 group/sort transition-colors ${active ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
     >
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em]">{label}</span>
       {active
         ? (sortDir === 'asc'
             ? <ChevronUp className="h-3 w-3 flex-shrink-0" />

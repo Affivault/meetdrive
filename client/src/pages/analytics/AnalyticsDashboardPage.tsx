@@ -345,13 +345,13 @@ function CampaignLeaderboard({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--border-subtle)]">
-            <th className="text-left py-2.5 px-4 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">
+            <th className="text-left py-2.5 px-4 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">
               Campaign
             </th>
             {cols.map((c) => (
               <th
                 key={c.key}
-                className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => toggleSort(c.key)}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -360,7 +360,7 @@ function CampaignLeaderboard({
                 </span>
               </th>
             ))}
-            <th className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold w-32">
+            <th className="text-left py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium w-32">
               Volume
             </th>
             <th className="w-10" />
@@ -640,10 +640,10 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-[var(--bg-elevated)] border-b border-[var(--border-subtle)]">
-              <th className="text-left py-2.5 px-4 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">Contact</th>
-              <th className="text-left py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">Status</th>
+              <th className="text-left py-2.5 px-4 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Contact</th>
+              <th className="text-left py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Status</th>
               <th
-                className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('score'); setSortDir(sortKey === 'score' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -651,7 +651,7 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('sent'); setSortDir(sortKey === 'sent' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -659,7 +659,7 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('opened'); setSortDir(sortKey === 'opened' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -667,15 +667,15 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('clicked'); setSortDir(sortKey === 'clicked' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
                   Clicks <SortIcon col="clicked" sortKey={sortKey} sortDir={sortDir} />
                 </span>
               </th>
-              <th className="text-center py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">Reply</th>
-              <th className="text-right py-2.5 px-3 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">DCS</th>
+              <th className="text-center py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Reply</th>
+              <th className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">DCS</th>
             </tr>
           </thead>
           <tbody>
@@ -1337,7 +1337,7 @@ export function AnalyticsDashboardPage() {
                             <tr className="border-b border-[var(--border-subtle)]">
                               {['Step', 'Subject', 'Delay', 'Sent', 'Opened', 'Open %', 'Clicked', 'Click %', 'Replied', 'Reply %', 'Bounced'].map((h) => (
                                 <th key={h} className={cn(
-                                  'py-2 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold',
+                                  'py-2 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium',
                                   h === 'Subject' ? 'text-left px-3' : 'text-right px-2'
                                 )}>{h}</th>
                               ))}

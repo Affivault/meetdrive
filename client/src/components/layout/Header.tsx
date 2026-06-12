@@ -70,7 +70,7 @@ export function Header() {
           {createOpen && (
             <>
               <div className="fixed inset-0" onClick={() => setCreateOpen(false)} />
-              <div className="absolute right-0 top-full mt-1.5 w-60 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1 shadow-[var(--shadow-xl)] animate-slide-in z-50">
+              <div className="absolute right-0 top-full mt-1.5 w-60 rounded-xl glass p-1 shadow-[var(--shadow-xl)] animate-slide-in z-50">
                 {createItems.map((item) => (
                   <button
                     key={item.to + item.label}
@@ -130,7 +130,7 @@ export function Header() {
           {menuOpen && (
             <>
               <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1 shadow-[var(--shadow-xl)] animate-slide-in z-50">
+              <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl glass p-1 shadow-[var(--shadow-xl)] animate-slide-in z-50">
                 {/* Account info */}
                 <div className="px-2.5 py-2 mb-0.5 border-b border-[var(--border-subtle)]">
                   <p className="text-[12.5px] font-semibold text-[var(--text-primary)] truncate">

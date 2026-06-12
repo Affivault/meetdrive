@@ -334,7 +334,7 @@ export function CampaignsListPage() {
                         key={col.key}
                         onClick={() => toggleSort(col.key)}
                         className={cn(
-                          'group/sort inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.07em] transition-colors select-none',
+                          'group/sort inline-flex items-center gap-1 font-data text-[10px] font-medium uppercase tracking-[0.07em] transition-colors select-none',
                           col.right && 'justify-end',
                           sortKey === col.key ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                         )}
@@ -345,7 +345,7 @@ export function CampaignsListPage() {
                           : <ChevronsUpDown className="h-3 w-3 opacity-0 group-hover/sort:opacity-60 transition-opacity" />}
                       </button>
                     ))}
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)]">Pipeline</span>
+                    <span className="font-data text-[10px] font-medium uppercase tracking-[0.07em] text-[var(--text-tertiary)]">Pipeline</span>
                     <span />
                   </div>
                   <div className="divide-y divide-[var(--border-subtle)]">

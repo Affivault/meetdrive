@@ -479,11 +479,14 @@ export function DashboardPage() {
   }));
 
   return (
-    <div className="animate-fade-in pb-6 space-y-4">
+    <div className="stagger pb-6 space-y-4">
       {/* ── Header ── */}
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-[22px] font-semibold text-[var(--text-primary)] tracking-[-0.025em] leading-tight">
+          <p className="eyebrow !text-[var(--text-tertiary)] mb-2">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] tracking-[-0.025em] leading-tight">
             {greeting()}, <span className="capitalize">{name}</span>
           </h1>
           <div className="mt-1.5 flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[12.5px] text-[var(--text-tertiary)]">

@@ -41,16 +41,17 @@ export function Modal({ isOpen, onClose, title, description, children, size = 'm
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in"
+        className="fixed inset-0 bg-black/40 backdrop-blur-[3px] animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel — frosted glass over the dimmed workspace */}
       <div
         className={cn(
-          'relative w-full max-h-[90vh] flex flex-col rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xl animate-slide-in',
+          'relative w-full max-h-[90vh] flex flex-col rounded-[14px] glass shadow-[var(--shadow-xl)]',
           sizes[size]
         )}
+        style={{ animation: 'cmdkIn 200ms var(--ease-out) both' }}
       >
         {/* Header */}
         <div className="flex items-start justify-between px-4 pt-4 pb-3 border-b border-[var(--border-subtle)] flex-shrink-0">

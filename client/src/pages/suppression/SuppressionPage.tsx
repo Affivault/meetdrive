@@ -148,10 +148,10 @@ export function SuppressionPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60">
-                  <th className="text-left px-4 py-2.5 text-[10.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Email</th>
-                  <th className="text-left px-4 py-2.5 text-[10.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Reason</th>
-                  <th className="text-left px-4 py-2.5 text-[10.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Notes</th>
-                  <th className="text-left px-4 py-2.5 text-[10.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Added</th>
+                  <th className="text-left px-4 py-2.5 font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Email</th>
+                  <th className="text-left px-4 py-2.5 font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Reason</th>
+                  <th className="text-left px-4 py-2.5 font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Notes</th>
+                  <th className="text-left px-4 py-2.5 font-data text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Added</th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>

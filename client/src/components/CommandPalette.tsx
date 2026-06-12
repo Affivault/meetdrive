@@ -141,7 +141,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="relative w-full max-w-[560px] overflow-hidden rounded-[14px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-xl)]"
+        className="relative w-full max-w-[560px] overflow-hidden rounded-[14px] glass shadow-[var(--shadow-xl)]"
         style={{ animation: 'cmdkIn 200ms var(--ease-out) both' }}
       >
         {/* Search row */}

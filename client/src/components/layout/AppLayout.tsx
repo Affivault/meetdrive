@@ -1,24 +1,69 @@
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CommandPalette } from '../CommandPalette';
+import { ShortcutsOverlay } from '../ShortcutsOverlay';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 import { CommandPaletteProvider, useCommandPalette } from '../../context/CommandPaletteContext';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
 import { cn } from '../../lib/utils';
 
+/* Route → page name, used for document titles (wayfinding) */
+const PAGE_TITLES: [prefix: string, name: string][] = [
+  ['/dashboard', 'Dashboard'],
+  ['/campaigns', 'Campaigns'],
+  ['/inbox', 'Unibox'],
+  ['/analytics', 'Analytics'],
+  ['/templates', 'Templates'],
+  ['/schedules', 'Schedules'],
+  ['/contacts', 'Lead Lists'],
+  ['/smtp-accounts', 'SMTP'],
+  ['/domains', 'Domains'],
+  ['/suppression', 'Suppression'],
+  ['/verification', 'Verification'],
+  ['/team', 'Team'],
+  ['/developer', 'Webhooks'],
+  ['/toolkit', 'Toolkit'],
+  ['/settings', 'Settings'],
+];
+
+/* `g` then key → destination (Linear-style two-stroke navigation) */
+const GO_MAP: Record<string, string> = {
+  d: '/dashboard',
+  c: '/campaigns',
+  i: '/inbox',
+  a: '/analytics',
+  l: '/contacts',
+  t: '/templates',
+  s: '/settings',
+};
+
+function isTypingTarget(el: EventTarget | null): boolean {
+  const t = el as HTMLElement | null;
+  if (!t) return false;
+  const tag = t.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable;
+}
+
 function AppContent() {
   const { collapsed } = useSidebar();
   const { open, closePalette, togglePalette } = useCommandPalette();
   const unreadCount = useUnreadCount();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const goPending = useRef<number | null>(null);
 
+  // Wayfinding — document title tracks the current page
   useEffect(() => {
-    document.title = unreadCount > 0 ? `SkySend (${unreadCount})` : 'SkySend';
+    const page = PAGE_TITLES.find(([prefix]) => location.pathname.startsWith(prefix))?.[1];
+    const badge = unreadCount > 0 ? ` (${unreadCount})` : '';
+    document.title = `${page ? `${page} · ` : ''}SkySend${badge}`;
     return () => { document.title = 'SkySend'; };
-  }, [unreadCount]);
+  }, [unreadCount, location.pathname]);
 
   // Global ⌘K / Ctrl+K to summon the command palette
   useEffect(() => {
@@ -32,8 +77,37 @@ function AppContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [togglePalette]);
 
+  // Keyboard-first navigation: `g` then a key to jump, `n` to create, `?` for help
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+
+      // Second stroke of a pending `g` sequence
+      if (goPending.current !== null) {
+        window.clearTimeout(goPending.current);
+        goPending.current = null;
+        const to = GO_MAP[e.key.toLowerCase()];
+        if (to) { e.preventDefault(); navigate(to); }
+        return;
+      }
+
+      if (e.key === 'g' || e.key === 'G') {
+        goPending.current = window.setTimeout(() => { goPending.current = null; }, 1400);
+        return;
+      }
+      if (e.key === '?') { e.preventDefault(); setShortcutsOpen((o) => !o); return; }
+      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); navigate('/campaigns/new'); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navigate]);
+
   return (
-    <div className="min-h-screen bg-[var(--bg-app)]" style={{ backgroundImage: 'var(--gradient-page)' }}>
+    <div
+      className="min-h-screen bg-[var(--bg-app)]"
+      style={{ backgroundImage: 'var(--noise), var(--gradient-page)' }}
+    >
       <Sidebar />
       <div className={cn(
         'transition-[padding] duration-200',
@@ -49,6 +123,7 @@ function AppContent() {
         </main>
       </div>
       <CommandPalette open={open} onClose={closePalette} />
+      <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }
