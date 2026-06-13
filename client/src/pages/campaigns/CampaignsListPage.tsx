@@ -11,7 +11,7 @@ import { EmptyState } from '../../components/shared/EmptyState';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { PageTabs } from '../../components/shared/Toolbar';
-import { formatDate, cn } from '../../lib/utils';
+import { formatDate, formatRelativeTime, cn } from '../../lib/utils';
 import {
   Megaphone, Plus, Send, Mail, MousePointerClick, MessageSquare, Copy,
   Folder, FolderPlus, FolderOpen, X, Pencil, Trash2,
@@ -536,7 +536,7 @@ function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, on
             )}
           </div>
           <p className="text-[11px] text-[var(--text-tertiary)] truncate mt-0.5">
-            {campaign.steps_count || 0} steps · {totalContacts.toLocaleString()} contacts · {formatDate(campaign.created_at)}
+            {campaign.steps_count || 0} steps · {totalContacts.toLocaleString()} contacts · <span title={formatDate(campaign.created_at)}>{formatRelativeTime(campaign.created_at)}</span>
           </p>
         </div>
       </div>

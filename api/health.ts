@@ -9,7 +9,7 @@ interface Res extends ServerResponse { status(code: number): Res; json(data: any
  */
 export default async function handler(_req: Req, res: Res) {
   const hasSecret = !!process.env.SMTP_RELAY_SECRET;
-  res.status(200).json({
+  return res.status(200).json({
     relay: 'ok',
     timestamp: new Date().toISOString(),
     secretConfigured: hasSecret,

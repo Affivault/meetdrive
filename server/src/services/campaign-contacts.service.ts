@@ -99,10 +99,15 @@ export const campaignContactsService = {
       .select('*', { count: 'exact', head: true })
       .eq('campaign_id', campaignId);
 
-    await supabaseAdmin
-      .from('campaigns')
-      .update({ total_contacts: count || 0 })
-      .eq('id', campaignId);
+    if (!countError) {
+      const { error: updateErr } = await supabaseAdmin
+        .from('campaigns')
+        .update({ total_contacts: count || 0 })
+        .eq('id', campaignId);
+      if (updateErr) {
+        console.error('[CampaignContacts] Failed to update total_contacts for campaign', campaignId, ':', updateErr.message);
+      }
+    }
 
     return { added: finalIds.length, skipped: contactIds.length - finalIds.length, total: count || 0 };
   },

@@ -175,7 +175,7 @@ export const campaignsController = {
 
       res.json({ success: true, message: `Test email sent to ${to}` });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: err?.message || String(err) });
     }
   },
 
