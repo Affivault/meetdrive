@@ -10,10 +10,13 @@ const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 export function scheduleInboxSync() {
   if (!inboxSyncQueue) {
     console.log('Inbox sync scheduler skipped — no Redis connection');
-    return;
+    return null;
   }
   const queue = inboxSyncQueue;
+  let isRunning = false;
   async function syncAll() {
+    if (isRunning) return; // Skip if a previous enqueue pass is still in flight
+    isRunning = true;
     try {
       // Get all verified, active SMTP accounts
       const { data: accounts } = await supabaseAdmin
@@ -43,10 +46,19 @@ export function scheduleInboxSync() {
       }
     } catch (err) {
       console.error('Inbox sync scheduler error:', err);
+    } finally {
+      isRunning = false;
     }
   }
 
   // Run immediately then on interval
   syncAll();
-  setInterval(syncAll, SYNC_INTERVAL_MS);
+  const intervalId = setInterval(syncAll, SYNC_INTERVAL_MS);
+
+  return {
+    stop: () => {
+      clearInterval(intervalId);
+      console.log('Inbox sync scheduler stopped');
+    },
+  };
 }
