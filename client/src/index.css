@@ -839,6 +839,22 @@
   animation: routeIn 0.34s var(--ease-out) both;
 }
 
+/* ── Cursor spotlight — a soft indigo glow follows the pointer across a
+   card. Pair `.spotlight` with the useSpotlight() mouse handler. */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--indigo-subtle), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
+  z-index: -1;
+}
+.spotlight:hover::before { opacity: 1; }
+
 .page-enter {
   opacity: 0;
   transform: translateY(8px);

@@ -1010,6 +1010,47 @@ export function AnalyticsDashboardPage() {
       {/* ── OVERVIEW MODE ────────────────────────────────────────────────── */}
       {mode === 'overview' && (
         <>
+          {/* Editorial hero — headline-number moment */}
+          {overview && (
+            <section className="panel relative overflow-hidden">
+              <div className="absolute inset-y-0 right-0 w-[62%] opacity-[0.5] pointer-events-none" aria-hidden>
+                {formattedTrend.length > 1 && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={formattedTrend} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="ana-hero" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6366F1" stopOpacity={0.22} />
+                          <stop offset="100%" stopColor="#6366F1" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <Area type="monotone" dataKey="sent" stroke="#6366F1" strokeWidth={2} fill="url(#ana-hero)" dot={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, var(--bg-surface) 30%, transparent 78%)' }} aria-hidden />
+              <div className="relative px-6 py-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="eyebrow">Emails sent</span>
+                  <span className="font-data text-[10px] text-[var(--text-muted)] uppercase tracking-[0.1em]">last {days} days</span>
+                </div>
+                <div className="flex items-end gap-3 flex-wrap">
+                  <span className="text-[clamp(40px,6vw,60px)] font-semibold text-[var(--text-primary)] tabular-nums leading-[0.95] tracking-[-0.04em]">
+                    {fmtNum(overview.total_sent)}
+                  </span>
+                  <div className="mb-2.5"><ChangeChip change={overview.sent_change} /></div>
+                </div>
+                <p className="mt-2.5 text-[13px] text-[var(--text-secondary)]">
+                  <span className="font-semibold text-[var(--text-primary)]">{fmtNum(overview.total_opened)}</span> opens
+                  <span className="mx-2 text-[var(--border-strong)]">·</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{fmtNum(overview.total_clicked)}</span> clicks
+                  <span className="mx-2 text-[var(--border-strong)]">·</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{fmtNum(overview.total_replied)}</span> replies
+                </p>
+              </div>
+            </section>
+          )}
+
           {/* KPI row */}
           {overview && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

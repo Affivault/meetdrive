@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useCountUp } from '../../hooks/useCountUp';
+import { useSpotlight } from '../../hooks/useSpotlight';
 import { analyticsApi, type TrendDataPoint } from '../../api/analytics.api';
 import { inboxApi } from '../../api/inbox.api';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
@@ -144,12 +146,14 @@ function Spark({ data }: { data: number[] }) {
 }
 
 /* ─── KPI tile ──────────────────────────────────────── */
-function Kpi({ label, value, hint, delta, icon: Icon, spark, onClick }: {
-  label: string; value: string; hint?: string; delta?: number | null;
+function Kpi({ label, target, format, hint, delta, icon: Icon, spark, onClick }: {
+  label: string; target: number; format: (n: number) => string; hint?: string; delta?: number | null;
   icon: any; spark: number[]; onClick?: () => void;
 }) {
+  const animated = useCountUp(target);
+  const spotlight = useSpotlight();
   return (
-    <button onClick={onClick} className="group text-left panel panel-hover p-4 pb-3">
+    <button onClick={onClick} {...spotlight} className="group spotlight text-left panel panel-hover p-4 pb-3">
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
           <Icon className="h-3.5 w-3.5" strokeWidth={2} />
@@ -158,7 +162,7 @@ function Kpi({ label, value, hint, delta, icon: Icon, spark, onClick }: {
         <Delta value={delta} />
       </div>
       <div className="mt-3.5 text-[34px] font-semibold text-[var(--text-primary)] tabular leading-none tracking-[-0.035em]">
-        {value}
+        {format(animated)}
       </div>
       <div className="mt-2 text-[12px] text-[var(--text-tertiary)] truncate">{hint}</div>
       <div className="mt-3 -mx-1 opacity-90"><Spark data={spark} /></div>
@@ -178,8 +182,9 @@ function InsightCard({ tone, icon: Icon, label, name, metric, context, onClick }
   name: string; metric: string; context: string; onClick: () => void;
 }) {
   const t = INSIGHT_TONES[tone];
+  const spotlight = useSpotlight();
   return (
-    <button onClick={onClick} className="group text-left panel panel-hover p-4">
+    <button onClick={onClick} {...spotlight} className="group spotlight text-left panel panel-hover p-4">
       <div className="flex items-center gap-1.5 mb-2.5">
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{label}</span>
@@ -554,13 +559,13 @@ export function DashboardPage() {
 
       {/* ── KPI row ── */}
       <div className={cn('grid grid-cols-2 lg:grid-cols-4 gap-3 transition-opacity duration-300', refreshing && 'opacity-60')}>
-        <Kpi label="Emails sent" icon={Send} value={fmtNum(s.total_sent)} hint={`${fmtFull(s.total_sent)} in ${period} days`}
+        <Kpi label="Emails sent" icon={Send} target={s.total_sent} format={fmtNum} hint={`${fmtFull(s.total_sent)} in ${period} days`}
           delta={s.sent_change} spark={spark('sent')} onClick={() => navigate('/analytics')} />
-        <Kpi label="Open rate" icon={MailOpen} value={fmtPct(s.avg_open_rate)} hint={`${fmtFull(s.total_opened)} opens`}
+        <Kpi label="Open rate" icon={MailOpen} target={s.avg_open_rate} format={fmtPct} hint={`${fmtFull(s.total_opened)} opens`}
           delta={s.opened_change} spark={spark('opened')} onClick={() => navigate('/analytics')} />
-        <Kpi label="Click rate" icon={MousePointerClick} value={fmtPct(s.avg_click_rate)} hint={`${fmtFull(s.total_clicked)} clicks`}
+        <Kpi label="Click rate" icon={MousePointerClick} target={s.avg_click_rate} format={fmtPct} hint={`${fmtFull(s.total_clicked)} clicks`}
           delta={s.clicked_change} spark={spark('clicked')} onClick={() => navigate('/analytics')} />
-        <Kpi label="Reply rate" icon={MessageSquare} value={fmtPct(s.avg_reply_rate)} hint={`${fmtFull(s.total_replied)} replies`}
+        <Kpi label="Reply rate" icon={MessageSquare} target={s.avg_reply_rate} format={fmtPct} hint={`${fmtFull(s.total_replied)} replies`}
           delta={s.replied_change} spark={spark('replied')} onClick={() => navigate('/inbox')} />
       </div>
 
