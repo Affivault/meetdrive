@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useCountUp } from '../../hooks/useCountUp';
 import { useSpotlight } from '../../hooks/useSpotlight';
+import { CountUp } from '../../components/ui/CountUp';
 import { analyticsApi, type TrendDataPoint } from '../../api/analytics.api';
 import { inboxApi } from '../../api/inbox.api';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
@@ -543,7 +544,7 @@ export function DashboardPage() {
           </div>
           <div className="flex items-end gap-3 flex-wrap">
             <span className="text-[clamp(40px,6vw,60px)] font-semibold text-[var(--text-primary)] tabular leading-[0.95] tracking-[-0.04em]">
-              {fmtFull(s.total_sent)}
+              <CountUp value={s.total_sent} format={fmtFull} />
             </span>
             <div className="mb-2.5"><Delta value={s.sent_change} /></div>
           </div>
