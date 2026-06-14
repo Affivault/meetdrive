@@ -154,6 +154,10 @@ function AddStepMenu({ onAdd, showAbove }: AddStepMenuProps) {
   );
 }
 
+/** Total delay of a single delay step, expressed in (fractional) days. */
+const stepDelayInDays = (step: FlowStep): number =>
+  (step.delay_days || 0) + (step.delay_hours || 0) / 24 + (step.delay_minutes || 0) / 1440;
+
 const getStepColors = (stepType: string) => {
   switch (stepType) {
     case 'email':
@@ -193,6 +197,7 @@ function FlowNode({
   step,
   index,
   totalSteps,
+  dayOffset,
   isEditing,
   onEdit,
   onRemove,
@@ -203,6 +208,7 @@ function FlowNode({
   step: FlowStep;
   index: number;
   totalSteps: number;
+  dayOffset: number;
   isEditing: boolean;
   onEdit: () => void;
   onRemove: () => void;
@@ -262,6 +268,15 @@ function FlowNode({
         )}>
           <span>Step {index + 1}</span>
           <span className="opacity-70">/ {totalSteps}</span>
+        </div>
+
+        {/* Timeline badge — when this step fires relative to enrollment */}
+        <div
+          className="absolute -top-2.5 right-5 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--bg-elevated)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] shadow-sm"
+          title="When this step fires after a contact is enrolled"
+        >
+          <Clock className="h-2.5 w-2.5" strokeWidth={2.2} />
+          <span>{dayOffset === 0 ? 'Immediately' : `Day ${dayOffset}`}</span>
         </div>
 
         <div className="p-4 pt-5">
@@ -599,14 +614,31 @@ export function FlowBuilder({ steps, onStepsChange, onEditStep, editingStep }: F
     );
   }
 
+  // Cumulative day-offset for each step (sum of delays preceding it), plus
+  // overall sequence stats shown in the summary chip.
+  const dayOffsets: number[] = [];
+  let cumulative = 0;
+  for (const step of steps) {
+    dayOffsets.push(Math.round(cumulative));
+    if (step.step_type === 'delay') cumulative += stepDelayInDays(step);
+  }
+  const emailCount = steps.filter((s) => s.step_type === 'email').length;
+  const totalDays = Math.round(cumulative);
+
   return (
     <div className="relative py-4">
       {/* Start Node */}
-      <div className="flex justify-center mb-1">
+      <div className="flex flex-col items-center gap-1.5 mb-1">
         <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--indigo)] text-white text-[11.5px] font-bold shadow-[0_2px_6px_rgba(91,91,245,0.3)]">
           <Sparkles className="h-3 w-3" />
           Campaign Start
         </div>
+        {emailCount > 0 && (
+          <p className="text-[11px] text-[var(--text-tertiary)]">
+            {emailCount} email{emailCount !== 1 ? 's' : ''}
+            {totalDays > 0 && <> · spans ~{totalDays} day{totalDays !== 1 ? 's' : ''}</>}
+          </p>
+        )}
       </div>
 
       {/* Steps */}
@@ -631,6 +663,7 @@ export function FlowBuilder({ steps, onStepsChange, onEditStep, editingStep }: F
               step={step}
               index={index}
               totalSteps={steps.length}
+              dayOffset={dayOffsets[index]}
               isEditing={editingStep === index}
               onEdit={() => onEditStep(editingStep === index ? -1 : index)}
               onRemove={() => removeStep(index)}
