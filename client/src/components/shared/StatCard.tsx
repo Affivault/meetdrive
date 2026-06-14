@@ -1,6 +1,7 @@
 import { type LucideIcon } from 'lucide-react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useSpotlight } from '../../hooks/useSpotlight';
 
 interface StatCardProps {
   label: string;
@@ -64,12 +65,14 @@ export function StatCard({
   const color = ACCENT_HEX[accent] ?? ACCENT_HEX.indigo;
   const deltaGood = delta != null ? (deltaInverted ? delta < 0 : delta > 0) : null;
   const flat = delta != null && Math.abs(delta) < 0.05;
+  const spotlight = useSpotlight();
 
   return (
     <div
       onClick={onClick}
+      {...spotlight}
       className={cn(
-        'group panel p-4 pb-3',
+        'group spotlight panel p-4 pb-3',
         onClick && 'panel-hover cursor-pointer',
         className
       )}

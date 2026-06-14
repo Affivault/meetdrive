@@ -18,6 +18,7 @@ import { Button } from '../../components/ui/Button';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { StatCard } from '../../components/shared/StatCard';
+import { CountUp } from '../../components/ui/CountUp';
 import { Avatar } from '../../components/shared/Avatar';
 import { useTheme } from '../../context/ThemeContext';
 import { Link } from 'react-router-dom';
@@ -1036,7 +1037,7 @@ export function AnalyticsDashboardPage() {
                 </div>
                 <div className="flex items-end gap-3 flex-wrap">
                   <span className="text-[clamp(40px,6vw,60px)] font-semibold text-[var(--text-primary)] tabular-nums leading-[0.95] tracking-[-0.04em]">
-                    {fmtNum(overview.total_sent)}
+                    <CountUp value={overview.total_sent} format={fmtNum} />
                   </span>
                   <div className="mb-2.5"><ChangeChip change={overview.sent_change} /></div>
                 </div>
