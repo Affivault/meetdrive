@@ -184,6 +184,7 @@ export function CampaignCreatePage() {
 
   const [senderPoolIds, setSenderPoolIds] = useState<string[]>([]);
   const [testEmailTo, setTestEmailTo] = useState('');
+  const [testSmtpId, setTestSmtpId] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
 
   const subjectRef = useRef<HTMLInputElement>(null);
@@ -1288,47 +1289,95 @@ export function CampaignCreatePage() {
                           isTextarea
                         />
 
-                        {/* Send test */}
-                        {campaignForm.smtp_account_id && (
-                          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3">
-                            <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                              <Send className="h-3 w-3" />
-                              Send test email
-                            </p>
-                            <div className="flex gap-2">
-                              <input
-                                type="email"
-                                value={testEmailTo}
-                                onChange={(e) => setTestEmailTo(e.target.value)}
-                                placeholder="your@email.com"
-                                className="flex-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all"
-                              />
-                              <button
-                                type="button"
-                                disabled={sendingTest || !testEmailTo || !steps[editingStep].subject}
-                                onClick={async () => {
-                                  setSendingTest(true);
-                                  try {
-                                    const result = await smtpApi.sendTestEmail(campaignForm.smtp_account_id!, {
-                                      to: testEmailTo,
-                                      subject: steps[editingStep].subject || 'Test',
-                                      body_html: steps[editingStep].body_html || '',
-                                    });
-                                    if (result.success) toast.success(result.message || 'Test sent!');
-                                    else toast.error(result.error || 'Failed');
-                                  } catch (err: any) {
-                                    toast.error(err.response?.data?.error || 'Send failed');
-                                  }
-                                  setSendingTest(false);
-                                }}
-                                className="inline-flex items-center gap-1 px-3 rounded-md bg-[var(--indigo)] text-white text-[11px] font-semibold disabled:opacity-40 hover:bg-[var(--indigo-hover)] transition-colors"
-                              >
+                        {/* Send test — always available so you can preview a step in your inbox */}
+                        {(() => {
+                          const accounts = smtpAccounts || [];
+                          const effectiveSmtp = campaignForm.smtp_account_id || testSmtpId;
+                          const hasBody = !!(steps[editingStep].body_html || '').replace(/<[^>]*>/g, '').trim();
+                          return (
+                            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3">
+                              <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <Send className="h-3 w-3" />
-                                {sendingTest ? '…' : 'Send'}
-                              </button>
+                                Send test email
+                              </p>
+
+                              {accounts.length === 0 ? (
+                                <div className="flex items-start gap-2 text-[11.5px] text-[var(--text-tertiary)] leading-snug">
+                                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-px" />
+                                  <span>
+                                    Connect a sending account in{' '}
+                                    <button
+                                      type="button"
+                                      onClick={() => setWizardStep(0)}
+                                      className="font-semibold text-[var(--indigo)] hover:underline"
+                                    >
+                                      Settings
+                                    </button>{' '}
+                                    to send yourself a test.
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {/* Sender picker — only needed when the campaign sender isn't set yet */}
+                                  {!campaignForm.smtp_account_id && (
+                                    <select
+                                      value={testSmtpId}
+                                      onChange={(e) => setTestSmtpId(e.target.value)}
+                                      className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-primary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all"
+                                    >
+                                      <option value="">Send from…</option>
+                                      {accounts.map((a: SmtpAccount) => (
+                                        <option key={a.id} value={a.id}>{a.label || a.email_address}</option>
+                                      ))}
+                                    </select>
+                                  )}
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="email"
+                                      value={testEmailTo}
+                                      onChange={(e) => setTestEmailTo(e.target.value)}
+                                      placeholder="your@email.com"
+                                      className="flex-1 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:ring-1 focus:ring-[var(--indigo-subtle)] transition-all"
+                                    />
+                                    <button
+                                      type="button"
+                                      disabled={sendingTest || !testEmailTo || !effectiveSmtp || !steps[editingStep].subject || !hasBody}
+                                      title={
+                                        !effectiveSmtp ? 'Choose a sending account'
+                                          : !steps[editingStep].subject ? 'Add a subject line first'
+                                          : !hasBody ? 'Write an email body first'
+                                          : !testEmailTo ? 'Enter a recipient'
+                                          : 'Send a test to your inbox'
+                                      }
+                                      onClick={async () => {
+                                        setSendingTest(true);
+                                        try {
+                                          const result = await smtpApi.sendTestEmail(effectiveSmtp, {
+                                            to: testEmailTo,
+                                            subject: steps[editingStep].subject || 'Test',
+                                            body_html: steps[editingStep].body_html || '',
+                                          });
+                                          if (result.success) toast.success(result.message || 'Test sent!');
+                                          else toast.error(result.error || 'Failed');
+                                        } catch (err: any) {
+                                          toast.error(err.response?.data?.error || 'Send failed');
+                                        }
+                                        setSendingTest(false);
+                                      }}
+                                      className="inline-flex items-center gap-1 px-3 rounded-md bg-[var(--indigo)] text-white text-[11px] font-semibold disabled:opacity-40 hover:bg-[var(--indigo-hover)] transition-colors"
+                                    >
+                                      <Send className="h-3 w-3" />
+                                      {sendingTest ? '…' : 'Send'}
+                                    </button>
+                                  </div>
+                                  <p className="text-[10.5px] text-[var(--text-tertiary)] leading-snug">
+                                    Personalization tags like <span className="font-data">{'{{first_name}}'}</span> are sent as-is in tests.
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     </div>
                   ) : editingStep !== null && steps[editingStep]?.step_type === 'delay' ? (

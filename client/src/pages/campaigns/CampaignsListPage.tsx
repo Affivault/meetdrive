@@ -17,6 +17,7 @@ import {
   Folder, FolderPlus, FolderOpen, X, Pencil, Trash2,
   BarChart3, Layers, Play, Pause, Search, AlertTriangle, MoreVertical,
   ChevronUp, ChevronDown, ChevronsUpDown,
+  Clock, Gauge, Calendar, ArrowUpRight, Ban, Users, CheckCircle2,
 } from 'lucide-react';
 
 /* Shared column template so the header and every row stay perfectly aligned */
@@ -59,6 +60,7 @@ export function CampaignsListPage() {
   const [editingFolder, setEditingFolder] = useState<CampaignFolder | null>(null);
   const [folderAnalyticsId, setFolderAnalyticsId] = useState<string | null>(null);
   const [contextMenuFor, setContextMenuFor] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const { data: campaignsResp, isLoading } = useQuery({
     queryKey: ['campaigns', 'all', statusFilter],
@@ -350,16 +352,22 @@ export function CampaignsListPage() {
                   </div>
                   <div className="divide-y divide-[var(--border-subtle)]">
                     {visibleCampaigns.map((campaign: any) => (
-                      <CampaignRow
-                        key={campaign.id}
-                        campaign={campaign}
-                        onOpen={() => navigate(`/campaigns/${campaign.id}`)}
-                        onLaunch={() => launchMut.mutate(campaign.id)}
-                        onPause={()  => pauseMut.mutate(campaign.id)}
-                        onResume={() => resumeMut.mutate(campaign.id)}
-                        onEdit={()   => navigate(`/campaigns/${campaign.id}/edit`)}
-                        onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setContextMenuFor({ id: campaign.id, x: e.clientX, y: e.clientY }); }}
-                      />
+                      <div key={campaign.id}>
+                        <CampaignRow
+                          campaign={campaign}
+                          expanded={expandedId === campaign.id}
+                          onToggleSnapshot={() => setExpandedId((id) => (id === campaign.id ? null : campaign.id))}
+                          onOpen={() => navigate(`/campaigns/${campaign.id}`)}
+                          onLaunch={() => launchMut.mutate(campaign.id)}
+                          onPause={()  => pauseMut.mutate(campaign.id)}
+                          onResume={() => resumeMut.mutate(campaign.id)}
+                          onEdit={()   => navigate(`/campaigns/${campaign.id}/edit`)}
+                          onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setContextMenuFor({ id: campaign.id, x: e.clientX, y: e.clientY }); }}
+                        />
+                        {expandedId === campaign.id && (
+                          <CampaignSnapshot campaign={campaign} onOpenReport={() => navigate(`/campaigns/${campaign.id}`)} />
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -500,7 +508,7 @@ const STATUS_DOT: Record<string, string> = {
   scheduled: 'bg-blue-500',
 };
 
-function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, onContextMenu }: any) {
+function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, onPause, onResume, onEdit, onContextMenu }: any) {
   const total = campaign.sent_count || 0;
   const openPct  = total ? (campaign.opened_count  / total) * 100 : 0;
   const clickPct = total ? (campaign.clicked_count / total) * 100 : 0;
@@ -559,6 +567,13 @@ function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, on
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-0.5" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onToggleSnapshot}
+          title={expanded ? 'Hide snapshot' : 'Show snapshot'}
+          className={cn('icon-btn transition-transform', expanded ? '!text-[var(--indigo)] !bg-[var(--indigo-subtle)] rotate-180' : '')}
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
         {campaign.status === 'draft' && (
           <button onClick={onLaunch} title="Launch" className="icon-btn !text-[var(--indigo)] hover:!bg-[var(--indigo-subtle)]"><Play className="h-3.5 w-3.5" /></button>
         )}
@@ -570,6 +585,175 @@ function CampaignRow({ campaign, onOpen, onLaunch, onPause, onResume, onEdit, on
         )}
         <button onClick={onEdit} title="Edit" className="icon-btn opacity-0 group-hover:opacity-100 transition-opacity"><Pencil className="h-3.5 w-3.5" /></button>
         <button onClick={(e) => { e.stopPropagation(); onContextMenu(e); }} title="More" className="icon-btn"><MoreVertical className="h-3.5 w-3.5" /></button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Per-campaign snapshot (expandable insights) ───────────────── */
+
+const DAY_SHORT: Record<string, string> = {
+  monday: 'M', tuesday: 'T', wednesday: 'W', thursday: 'T', friday: 'F', saturday: 'S', sunday: 'S',
+};
+const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+function FunnelRow({ icon: Icon, label, value, pct, tone }: {
+  icon: any; label: string; value: number; pct: number; tone: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 w-[88px] flex-shrink-0">
+        <Icon className="h-3.5 w-3.5" strokeWidth={2} style={{ color: tone }} />
+        <span className="text-[11.5px] font-medium text-[var(--text-secondary)]">{label}</span>
+      </div>
+      <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(pct, value > 0 ? 2 : 0)}%`, background: tone }} />
+      </div>
+      <div className="w-[112px] flex-shrink-0 text-right">
+        <span className="text-[12.5px] font-semibold text-[var(--text-primary)] tabular">{value.toLocaleString()}</span>
+        <span className="text-[11px] text-[var(--text-tertiary)] tabular ml-1.5">{pct.toFixed(1)}%</span>
+      </div>
+    </div>
+  );
+}
+
+function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpenReport: () => void }) {
+  const sent = c.sent_count || 0;
+  const pct = (n: number) => (sent ? (n / sent) * 100 : 0);
+  const opened = c.opened_count || 0;
+  const clicked = c.clicked_count || 0;
+  const replied = c.replied_count || 0;
+  const bounced = c.bounced_count || 0;
+  const unsub = c.unsubscribed_contacts || 0;
+
+  const totalContacts = c.contacts_count || c.total_contacts || 0;
+  const active = c.active_contacts || 0;
+  const completed = c.completed_contacts || 0;
+  const remaining = Math.max(totalContacts - active - completed - bounced, 0);
+
+  const bouncePct = sent ? (bounced / sent) * 100 : 0;
+  const window = c.send_window_start && c.send_window_end ? `${c.send_window_start}–${c.send_window_end}` : 'Any time';
+  const activeDays = (c.send_days || []) as string[];
+
+  const seg = (n: number, color: string, title: string) =>
+    totalContacts > 0 && n > 0 ? (
+      <div className="h-full transition-all" style={{ width: `${(n / totalContacts) * 100}%`, background: color }} title={title} />
+    ) : null;
+
+  return (
+    <div className="bg-[var(--bg-muted)]/40 border-t border-[var(--border-subtle)] px-4 py-4 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-x-8 gap-y-5">
+        {/* Conversion funnel */}
+        <div>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Conversion funnel</span>
+            {sent === 0 && <span className="text-[10.5px] text-[var(--text-tertiary)]">No emails sent yet</span>}
+          </div>
+          <div className="space-y-2">
+            <FunnelRow icon={Send}              label="Sent"    value={sent}    pct={sent ? 100 : 0} tone="#6366F1" />
+            <FunnelRow icon={Mail}              label="Opened"  value={opened}  pct={pct(opened)}    tone="#8B5CF6" />
+            <FunnelRow icon={MousePointerClick} label="Clicked" value={clicked} pct={pct(clicked)}   tone="#06B6D4" />
+            <FunnelRow icon={MessageSquare}     label="Replied" value={replied} pct={pct(replied)}   tone="#10B981" />
+          </div>
+
+          {/* Delivery health */}
+          <div className="flex flex-wrap items-center gap-4 mt-4 pt-3 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center gap-1.5" title="Bounce rate">
+              <AlertTriangle className={cn('h-3.5 w-3.5', bouncePct > 3 ? 'text-rose-500' : 'text-[var(--text-tertiary)]')} strokeWidth={2} />
+              <span className="text-[11.5px] text-[var(--text-secondary)]">
+                <span className="font-semibold text-[var(--text-primary)] tabular">{bounced.toLocaleString()}</span> bounced
+                <span className="text-[var(--text-tertiary)] tabular ml-1">({bouncePct.toFixed(1)}%)</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5" title="Unsubscribed">
+              <Ban className="h-3.5 w-3.5 text-[var(--text-tertiary)]" strokeWidth={2} />
+              <span className="text-[11.5px] text-[var(--text-secondary)]">
+                <span className="font-semibold text-[var(--text-primary)] tabular">{unsub.toLocaleString()}</span> unsubscribed
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Audience + schedule */}
+        <div className="space-y-4">
+          {/* Audience progress */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Audience</span>
+              <span className="text-[11px] text-[var(--text-tertiary)] tabular">{totalContacts.toLocaleString()} contacts</span>
+            </div>
+            <div className="flex h-2.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+              {seg(completed, '#6366F1', `${completed} completed`)}
+              {seg(active, '#10B981', `${active} active`)}
+              {seg(bounced, '#F43F5E', `${bounced} bounced`)}
+              {seg(remaining, 'var(--border-strong)', `${remaining} not started`)}
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+              <LegendDot color="#10B981" icon={Users}        label="Active"    value={active} />
+              <LegendDot color="#6366F1" icon={CheckCircle2} label="Completed" value={completed} />
+              {remaining > 0 && <LegendDot color="var(--border-strong)" label="Pending" value={remaining} />}
+            </div>
+          </div>
+
+          {/* Sending config */}
+          <div>
+            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Sending config</span>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
+              <ConfigItem icon={Layers}   label="Steps"       value={`${c.steps_count || 0}`} />
+              <ConfigItem icon={Gauge}    label="Daily limit" value={c.daily_limit ? `${c.daily_limit}/day` : '—'} />
+              <ConfigItem icon={Clock}    label="Window"      value={window} />
+              <ConfigItem icon={Calendar} label="Timezone"    value={c.timezone || 'UTC'} />
+            </div>
+            <div className="flex items-center gap-1 mt-2.5">
+              {DAY_ORDER.map((d) => {
+                const on = activeDays.includes(d);
+                return (
+                  <span
+                    key={d}
+                    title={d.charAt(0).toUpperCase() + d.slice(1)}
+                    className={cn(
+                      'flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold capitalize',
+                      on ? 'bg-[var(--indigo-subtle)] text-[var(--indigo)]' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
+                    )}
+                  >
+                    {DAY_SHORT[d]}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          <button
+            onClick={onOpenReport}
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--indigo)] hover:gap-2 transition-all"
+          >
+            Open full report
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LegendDot({ color, icon: Icon, label, value }: { color: string; icon?: any; label: string; value: number }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+      <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: color }} />
+      {Icon && <Icon className="h-3 w-3 text-[var(--text-tertiary)]" strokeWidth={2} />}
+      {label}
+      <span className="font-semibold text-[var(--text-primary)] tabular">{value.toLocaleString()}</span>
+    </span>
+  );
+}
+
+function ConfigItem({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <Icon className="h-3.5 w-3.5 text-[var(--text-tertiary)] flex-shrink-0" strokeWidth={2} />
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] leading-none">{label}</div>
+        <div className="text-[11.5px] font-medium text-[var(--text-primary)] truncate mt-0.5">{value}</div>
       </div>
     </div>
   );
