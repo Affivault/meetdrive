@@ -5,11 +5,12 @@ import { contactsApi, listsApi } from '../../api/contacts.api';
 import { listFoldersApi, type ListFolder } from '../../api/list-folders.api';
 import { Spinner } from '../../components/ui/Spinner';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { Checkbox } from '../../components/ui/Checkbox';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { StatCard } from '../../components/shared/StatCard';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { Avatar } from '../../components/shared/Avatar';
-import { formatDate, cn } from '../../lib/utils';
+import { formatDate, formatRelativeTime, cn } from '../../lib/utils';
 import {
   Plus,
   Upload,
@@ -34,6 +35,8 @@ import {
   ShieldOff,
   RotateCcw,
   Filter,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 type ContactSortKey = 'first_name' | 'email' | 'company' | 'dcs_score' | 'created_at';
@@ -82,6 +85,58 @@ const emptyContact: CreateContactInput = {
   linkedin_url: '',
   website: '',
 };
+
+/* Deterministic tint for a company monogram so the same company always
+   gets the same colour — adds quiet visual texture to the table. */
+const MONO_TINTS = [
+  'var(--c-indigo)', 'var(--c-violet)', 'var(--c-cyan)', 'var(--c-blue)',
+  'var(--c-emerald)', 'var(--c-amber)', 'var(--c-rose)', 'var(--c-fuchsia)',
+];
+function tintFor(str: string): string {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return MONO_TINTS[h % MONO_TINTS.length];
+}
+
+function CompanyCell({ company }: { company?: string | null }) {
+  if (!company) return <span className="text-[12px] text-[var(--text-muted)]">—</span>;
+  const tint = tintFor(company);
+  const initials = company.trim().slice(0, 2).toUpperCase();
+  return (
+    <span className="inline-flex items-center gap-2 min-w-0">
+      <span
+        className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-[5px] text-[9px] font-bold leading-none"
+        style={{ color: tint, background: `color-mix(in srgb, ${tint} 14%, transparent)` }}
+      >
+        {initials}
+      </span>
+      <span className="text-[12.5px] text-[var(--text-secondary)] truncate">{company}</span>
+    </span>
+  );
+}
+
+function CopyableEmail({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <span className="group/email inline-flex items-center gap-1.5 min-w-0">
+      <span className="text-[12.5px] text-[var(--text-secondary)] truncate font-data">{email}</span>
+      <button
+        type="button"
+        title="Copy email"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigator.clipboard?.writeText(email).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1200);
+          }).catch(() => {});
+        }}
+        className="flex-shrink-0 p-1 rounded-md text-[var(--text-tertiary)] opacity-0 group-hover/email:opacity-100 hover:bg-[var(--bg-active)] hover:text-[var(--text-primary)] transition-all"
+      >
+        {copied ? <Check className="h-3 w-3 text-[var(--success)]" /> : <Copy className="h-3 w-3" />}
+      </button>
+    </span>
+  );
+}
 
 
 export function ContactsListPage() {
@@ -373,9 +428,9 @@ export function ContactsListPage() {
           <button
             onClick={() => setSearchParams({})}
             className={cn(
-              "w-full flex items-center gap-2.5 h-8 px-2.5 rounded-[6px] text-[13px] font-medium transition-all",
+              "w-full flex items-center gap-2.5 h-8 px-2.5 rounded-md text-[13px] font-medium transition-all",
               !activeListId
-                ? "bg-[rgba(99,102,241,0.1)] text-[var(--indigo)]"
+                ? "bg-[var(--indigo-subtle)] text-[var(--indigo)]"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
             )}
           >
@@ -458,9 +513,9 @@ export function ContactsListPage() {
                           onClick={() => setSearchParams({ list: list.id })}
                           onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setListContextMenu({ listId: list.id, x: e.clientX, y: e.clientY }); }}
                           className={cn(
-                            "w-full flex items-center gap-2 h-8 px-2.5 rounded-[6px] text-[12px] font-medium transition-all",
+                            "w-full flex items-center gap-2 h-8 px-2.5 rounded-md text-[12px] font-medium transition-all",
                             activeListId === list.id
-                              ? "bg-[rgba(99,102,241,0.1)] text-[var(--indigo)]"
+                              ? "bg-[var(--indigo-subtle)] text-[var(--indigo)]"
                               : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
                           )}
                         >
@@ -496,7 +551,7 @@ export function ContactsListPage() {
             </div>
             <Link
               to="/suppression"
-              className="w-full flex items-center gap-2 h-8 px-2.5 rounded-[6px] text-[12px] font-medium text-[var(--text-secondary)] hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+              className="w-full flex items-center gap-2 h-8 px-2.5 rounded-md text-[12px] font-medium text-[var(--text-secondary)] hover:text-rose-500 hover:bg-rose-500/10 transition-all"
             >
               <ShieldOff className="h-3 w-3 flex-shrink-0" />
               <span className="flex-1 text-left">Do not email</span>
@@ -610,7 +665,7 @@ export function ContactsListPage() {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search by name, email, or company…"
-              className="w-full h-8 pl-8 pr-4 text-[12px] rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+              className="w-full h-8 pl-8 pr-4 text-[12px] rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--indigo)] focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all"
             />
             {search && (
               <button
@@ -697,13 +752,13 @@ export function ContactsListPage() {
           <div className="panel overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40">
-                  <th className="px-5 py-2.5 w-12">
-                    <input
-                      type="checkbox"
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/50">
+                  <th className="pl-5 pr-2 py-2.5 w-10">
+                    <Checkbox
                       checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
                       onChange={toggleSelectAll}
-                      className="rounded border-[var(--border-default)] cursor-pointer"
+                      aria-label="Select all contacts"
                     />
                   </th>
                   <th className="px-4 py-2.5 text-left">
@@ -727,75 +782,65 @@ export function ContactsListPage() {
               <tbody>
                 {contacts.map((contact: any, index: number) => {
                   const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
+                  const isSelected = selectedContacts.has(contact.id);
                   return (
                     <tr
                       key={contact.id}
+                      onClick={() => navigate(`/contacts/${contact.id}`)}
                       className={cn(
-                        "group transition-colors duration-150",
-                        index < contacts.length - 1 && "border-b border-[var(--border-subtle)]",
-                        selectedContacts.has(contact.id)
-                          ? "bg-[rgba(99,102,241,0.04)]"
-                          : "hover:bg-[var(--bg-hover)]"
+                        'group relative cursor-pointer transition-colors duration-150',
+                        index < contacts.length - 1 && 'border-b border-[var(--border-subtle)]',
+                        isSelected ? 'bg-[var(--indigo-subtle)]' : 'hover:bg-[var(--bg-hover)]'
                       )}
                     >
-                      <td className="px-4 py-2.5">
-                        <input
-                          type="checkbox"
-                          checked={selectedContacts.has(contact.id)}
+                      <td className="pl-5 pr-2 py-3 relative">
+                        {isSelected && (
+                          <span className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-[var(--indigo)]" />
+                        )}
+                        <Checkbox
+                          checked={isSelected}
                           onChange={() => toggleSelectContact(contact.id)}
-                          className="rounded border-[var(--border-default)] cursor-pointer"
+                          aria-label={`Select ${fullName || contact.email}`}
                         />
                       </td>
-                      <td className="px-4 py-2.5">
-                        <button
-                          onClick={() => navigate(`/contacts/${contact.id}`)}
-                          className="flex items-center gap-2.5"
-                        >
-                          <Avatar
-                            name={fullName || contact.email}
-                            email={contact.email}
-                            size="sm"
-                          />
-                          <div className="min-w-0 text-left">
-                            <span className="text-[13px] font-medium text-[var(--text-primary)]">
-                              {fullName || '---'}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Avatar name={fullName || contact.email} email={contact.email} size="sm" />
+                          <div className="min-w-0">
+                            <span className="block text-[13px] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--indigo)] transition-colors">
+                              {fullName || 'Unnamed contact'}
                             </span>
-                            {contact.job_title && (
-                              <p className="text-[11px] text-[var(--text-tertiary)] truncate">
-                                {contact.job_title}
-                              </p>
-                            )}
+                            <p className="text-[11px] text-[var(--text-tertiary)] truncate leading-tight">
+                              {contact.job_title || 'No title'}
+                            </p>
                           </div>
-                        </button>
+                        </div>
                       </td>
-                      <td className="px-4 py-2.5">
-                        <span className="text-[12px] text-[var(--text-secondary)]">{contact.email}</span>
+                      <td className="px-4 py-3 max-w-[260px]">
+                        <CopyableEmail email={contact.email} />
                       </td>
-                      <td className="px-4 py-2.5">
-                        {contact.company
-                          ? <span className="text-[12px] text-[var(--text-secondary)]">{contact.company}</span>
-                          : <span className="text-[12px] text-[var(--text-tertiary)]">—</span>
-                        }
+                      <td className="px-4 py-3 max-w-[200px]">
+                        <CompanyCell company={contact.company} />
                       </td>
-                      <td className="px-4 py-2.5">
-                        <span className="text-[11px] text-[var(--text-tertiary)]">
-                          {formatDate(contact.created_at)}
+                      <td className="px-4 py-3">
+                        <span className="text-[11.5px] text-[var(--text-tertiary)] font-data" title={formatDate(contact.created_at)}>
+                          {formatRelativeTime(contact.created_at)}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-3">
                         {contact.is_bounced ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 h-[18px] rounded-[4px] text-[10.5px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-500/10">
+                          <span className="inline-flex items-center gap-1 px-1.5 h-[20px] rounded-md text-[10.5px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-500/10">
                             <ShieldX className="h-3 w-3" />
                             Bounced
                           </span>
                         ) : contact.is_unsubscribed ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 h-[18px] rounded-[4px] text-[10.5px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10">
+                          <span className="inline-flex items-center gap-1 px-1.5 h-[20px] rounded-md text-[10.5px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10">
                             <ShieldX className="h-3 w-3" />
                             Opted out
                           </span>
                         ) : contact.dcs_score !== null && contact.dcs_score !== undefined ? (
-                          <span title={`DCS: ${contact.dcs_score}/100`} className={cn(
-                            'inline-flex items-center gap-1 px-1.5 h-[18px] rounded-[4px] text-[10.5px] font-semibold',
+                          <span title={`Deliverability confidence: ${contact.dcs_score}/100`} className={cn(
+                            'inline-flex items-center gap-1 px-1.5 h-[20px] rounded-md text-[10.5px] font-semibold tabular',
                             contact.dcs_score >= 80
                               ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
                               : contact.dcs_score >= 50
@@ -811,11 +856,11 @@ export function ContactsListPage() {
                             {contact.dcs_score}
                           </span>
                         ) : (
-                          <span className="text-[11px] text-[var(--text-tertiary)]">—</span>
+                          <span className="text-[11px] text-[var(--text-muted)]">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                           <button onClick={() => openEdit(contact)} className="icon-btn" title="Edit">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
