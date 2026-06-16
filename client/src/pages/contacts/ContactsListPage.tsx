@@ -1159,105 +1159,74 @@ export function ContactsListPage() {
 
       {/* Create List Modal */}
       {showListModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={closeListModal} />
-          <div className="relative bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl w-full max-w-sm shadow-xl animate-slide-up">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                  {editingList ? 'Edit List' : 'Create List'}
-                </h2>
-                <p className="text-[13px] text-[var(--text-tertiary)] mt-0.5">
-                  {editingList ? 'Update list details' : 'Organize contacts into a list'}
-                </p>
-              </div>
-              <button
-                onClick={closeListModal}
-                className="p-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-all duration-200"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <form
-              onSubmit={(e) => { e.preventDefault(); createListMutation.mutate(listForm); }}
-              className="px-6 py-5 space-y-5"
-            >
-              <div>
-                <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-1.5">
-                  List Name <span className="text-[var(--error)]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={listForm.name}
-                  onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
-                  placeholder="e.g. Hot Leads, Enterprise, Q1 Prospects"
-                  required
-                  className="input-field rounded-lg"
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
-                <button type="button" onClick={closeListModal} className="btn-secondary rounded-lg">
-                  Cancel
-                </button>
-                <button type="submit" disabled={createListMutation.isPending} className="btn-primary rounded-lg">
-                  {createListMutation.isPending ? 'Saving...' : editingList ? 'Update List' : 'Create List'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <Modal
+          isOpen={showListModal}
+          onClose={closeListModal}
+          title={editingList ? 'Edit list' : 'Create list'}
+          description={editingList ? 'Update this list’s details.' : 'Organise contacts into a list.'}
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" size="md" onClick={closeListModal}>Cancel</Button>
+              <Button type="submit" form="list-form" size="md" disabled={createListMutation.isPending || !listForm.name.trim()}>
+                {createListMutation.isPending ? 'Saving…' : editingList ? 'Save changes' : 'Create list'}
+              </Button>
+            </>
+          }
+        >
+          <form id="list-form" onSubmit={(e) => { e.preventDefault(); createListMutation.mutate(listForm); }}>
+            <Input
+              label="List name"
+              required
+              autoFocus
+              value={listForm.name}
+              onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
+              placeholder="e.g. Hot Leads, Enterprise, Q1 Prospects"
+            />
+          </form>
+        </Modal>
       )}
 
       {/* Add to List Modal */}
       {showAddToListModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddToListModal(false)} />
-          <div className="relative bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl w-full max-w-sm shadow-xl animate-slide-up">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Add to List</h2>
-                <p className="text-[13px] text-[var(--text-tertiary)] mt-0.5">
-                  Add {selectedContacts.size} contact{selectedContacts.size !== 1 ? 's' : ''} to a list
-                </p>
-              </div>
+        <Modal
+          isOpen={showAddToListModal}
+          onClose={() => setShowAddToListModal(false)}
+          title="Add to list"
+          description={`Add ${selectedContacts.size} contact${selectedContacts.size !== 1 ? 's' : ''} to a list.`}
+          size="sm"
+        >
+          <div className="space-y-1.5 max-h-64 overflow-y-auto -mx-1 px-1">
+            {(lists || []).length === 0 && (
+              <p className="text-[12.5px] text-[var(--text-tertiary)] text-center py-4">No lists yet — create one below.</p>
+            )}
+            {lists?.map((list) => (
               <button
-                onClick={() => setShowAddToListModal(false)}
-                className="p-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-all duration-200"
+                key={list.id}
+                onClick={() => addToListMutation.mutate({ listId: list.id, contactIds: Array.from(selectedContacts) })}
+                disabled={addToListMutation.isPending}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50 group"
               >
-                <X className="h-5 w-5" />
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-elevated)] text-[var(--text-secondary)] group-hover:bg-[var(--indigo-subtle)] group-hover:text-[var(--indigo)] transition-colors">
+                  <FolderOpen className="h-4 w-4" />
+                </div>
+                <span className="flex-1 text-left text-[13px] font-medium text-[var(--text-primary)] truncate">
+                  {list.name}
+                </span>
+                <span className="text-[11.5px] font-semibold tabular text-[var(--text-tertiary)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full">
+                  {list.contact_count}
+                </span>
               </button>
-            </div>
-            <div className="px-6 py-4">
-              <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                {lists?.map((list) => (
-                  <button
-                    key={list.id}
-                    onClick={() => addToListMutation.mutate({ listId: list.id, contactIds: Array.from(selectedContacts) })}
-                    disabled={addToListMutation.isPending}
-                    className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 disabled:opacity-50 group"
-                  >
-                    <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--bg-elevated)] text-[var(--text-primary)] group-hover:bg-[var(--text-primary)] group-hover:text-[var(--bg-surface)] transition-all duration-200">
-                      <FolderOpen className="h-4 w-4" />
-                    </div>
-                    <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">
-                      {list.name}
-                    </span>
-                    <span className="text-[12px] font-medium text-[var(--text-tertiary)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full">
-                      {list.contact_count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => { setShowAddToListModal(false); setShowListModal(true); }}
-                className="w-full flex items-center justify-center gap-2 mt-4 py-2.5 border-2 border-dashed border-[var(--border-default)] rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--bg-elevated)] transition-all duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                Create new list
-              </button>
-            </div>
+            ))}
           </div>
-        </div>
+          <button
+            onClick={() => { setShowAddToListModal(false); setShowListModal(true); }}
+            className="w-full flex items-center justify-center gap-2 mt-3 py-2.5 border border-dashed border-[var(--border-default)] rounded-xl text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--indigo)] hover:border-[var(--indigo)] hover:bg-[var(--indigo-subtle)] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Create new list
+          </button>
+        </Modal>
       )}
     </div>
   );
@@ -1285,43 +1254,48 @@ function ListFolderModal({ initial, onClose }: { initial: ListFolder | null; onC
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">{initial ? 'Edit folder' : 'New folder'}</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-[var(--bg-hover)]"><X className="h-4 w-4 text-[var(--text-tertiary)]" /></button>
-        </div>
-        <div className="p-5 space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Q4 Prospects" className="input-field" autoFocus />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Colour</label>
-            <div className="flex gap-2 flex-wrap">
-              {FOLDER_COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  style={{ background: c }}
-                  className={cn('w-7 h-7 rounded-full transition-all', color === c ? 'ring-2 ring-offset-2 ring-offset-[var(--bg-surface)]' : 'opacity-70 hover:opacity-100')}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="px-5 py-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={initial ? 'Edit folder' : 'New folder'}
+      description={initial ? 'Rename or recolour this folder.' : 'Group related lead lists together.'}
+      size="sm"
+      footer={
+        <div className="flex items-center justify-between w-full">
           {initial ? (
-            <button onClick={() => { if (confirm(`Delete folder "${initial.name}"? Lists inside will not be deleted.`)) deleteMut.mutate(); }} className="text-xs text-red-500 hover:underline">Delete folder</button>
-          ) : <div />}
-          <div className="flex gap-2">
-            <button onClick={onClose} className="btn-secondary">Cancel</button>
-            <button onClick={() => saveMut.mutate()} disabled={!name.trim() || saveMut.isPending} className="btn-primary">
-              {saveMut.isPending ? 'Saving...' : (initial ? 'Save' : 'Create')}
+            <button
+              onClick={() => { if (confirm(`Delete folder "${initial.name}"? Lists inside will not be deleted.`)) deleteMut.mutate(); }}
+              className="text-[12px] font-medium text-[var(--error)] hover:underline"
+            >
+              Delete folder
             </button>
+          ) : <span />}
+          <div className="flex gap-2">
+            <Button variant="secondary" size="md" onClick={onClose}>Cancel</Button>
+            <Button type="submit" form="folder-form" size="md" disabled={!name.trim() || saveMut.isPending}>
+              {saveMut.isPending ? 'Saving…' : (initial ? 'Save changes' : 'Create folder')}
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <form id="folder-form" onSubmit={(e) => { e.preventDefault(); saveMut.mutate(); }} className="space-y-4">
+        <Input label="Name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Q4 Prospects" />
+        <div>
+          <label className="block text-[12px] font-medium text-[var(--text-secondary)] mb-2">Colour</label>
+          <div className="flex gap-2 flex-wrap">
+            {FOLDER_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                style={{ background: c }}
+                className={cn('w-7 h-7 rounded-full transition-all', color === c ? 'ring-2 ring-offset-2 ring-offset-[var(--bg-surface)] ring-[var(--text-primary)]' : 'opacity-70 hover:opacity-100')}
+              />
+            ))}
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 }
