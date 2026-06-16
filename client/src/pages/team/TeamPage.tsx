@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { teamApi } from '../../api/team.api';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { Input } from '../../components/ui/Input';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { Card } from '../../components/shared/Card';
 import { Avatar } from '../../components/shared/Avatar';
@@ -299,52 +301,43 @@ export function TeamPage() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Invite Team Member</h2>
-              <button onClick={() => setShowInviteModal(false)} className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email address</label>
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="colleague@example.com"
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Role</label>
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                >
-                  <option value="member">Member — can view and run campaigns</option>
-                  <option value="admin">Admin — full access except billing</option>
-                </select>
-              </div>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] mt-3">
-              We'll generate an invite link you can share. The invite expires in 7 days.
-            </p>
-            <div className="flex gap-3 mt-5">
-              <Button variant="secondary" className="flex-1" onClick={() => setShowInviteModal(false)}>Cancel</Button>
-              <button
-                disabled={!inviteEmail || inviteMut.isPending}
-                onClick={() => inviteMut.mutate()}
-                className="flex-1 py-2 rounded-xl bg-[var(--indigo)] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
+        <Modal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          title="Invite team member"
+          description="We’ll generate an invite link you can share. It expires in 7 days."
+          size="md"
+          footer={
+            <>
+              <Button variant="secondary" size="md" onClick={() => setShowInviteModal(false)}>Cancel</Button>
+              <Button type="submit" form="invite-form" size="md" disabled={!inviteEmail || inviteMut.isPending}>
+                {inviteMut.isPending ? 'Sending…' : 'Send invite'}
+              </Button>
+            </>
+          }
+        >
+          <form id="invite-form" onSubmit={(e) => { e.preventDefault(); inviteMut.mutate(); }} className="space-y-4">
+            <Input
+              label="Email address"
+              type="email"
+              autoFocus
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="colleague@example.com"
+            />
+            <div className="space-y-1">
+              <label className="block text-[12px] font-medium text-[var(--text-secondary)]">Role</label>
+              <select
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value)}
+                className="w-full h-8 rounded-md border border-[var(--border-default)] bg-[var(--bg-app)] px-2.5 text-[13px] text-[var(--text-primary)] focus:border-[var(--indigo)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-[border-color,box-shadow]"
               >
-                {inviteMut.isPending ? 'Sending...' : 'Send Invite'}
-              </button>
+                <option value="member">Member — can view and run campaigns</option>
+                <option value="admin">Admin — full access except billing</option>
+              </select>
             </div>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

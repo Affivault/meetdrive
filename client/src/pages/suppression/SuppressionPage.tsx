@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { suppressionApi } from '../../api/suppression.api';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { Card } from '../../components/shared/Card';
@@ -10,6 +12,9 @@ import { formatDate, cn } from '../../lib/utils';
 import { ShieldOff, Plus, Trash2, Upload, Search, X, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DEFAULT_PAGE_SIZE } from '../../lib/constants';
+
+/* Shared select styling that matches the Input primitive */
+const SELECT_CLS = 'w-full h-8 rounded-md border border-[var(--border-default)] bg-[var(--bg-app)] px-2.5 text-[13px] text-[var(--text-primary)] focus:border-[var(--indigo)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-[border-color,box-shadow]';
 
 const REASON_LABELS: Record<string, { label: string; color: string; dot: string }> = {
   unsubscribed: { label: 'Unsubscribed', color: 'text-amber-700 dark:text-amber-400 bg-amber-500/10',  dot: 'bg-amber-500'  },
@@ -198,102 +203,77 @@ export function SuppressionPage() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Add to Suppression List</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email address</label>
-                <input
-                  type="email"
-                  value={addEmail}
-                  onChange={(e) => setAddEmail(e.target.value)}
-                  placeholder="user@example.com"
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Reason</label>
-                <select
-                  value={addReason}
-                  onChange={(e) => setAddReason(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                >
-                  <option value="manual">Manual</option>
-                  <option value="unsubscribed">Unsubscribed</option>
-                  <option value="bounced">Bounced</option>
-                  <option value="complained">Complained</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Notes (optional)</label>
-                <input
-                  type="text"
-                  value={addNotes}
-                  onChange={(e) => setAddNotes(e.target.value)}
-                  placeholder="Optional note..."
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                />
-              </div>
+        <Modal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          title="Add to suppression list"
+          description="Suppressed addresses never receive campaign emails."
+          size="md"
+          footer={
+            <>
+              <Button variant="secondary" size="md" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button type="submit" form="suppress-add-form" size="md" disabled={!addEmail || addMut.isPending}>
+                {addMut.isPending ? 'Adding…' : 'Add to list'}
+              </Button>
+            </>
+          }
+        >
+          <form id="suppress-add-form" onSubmit={(e) => { e.preventDefault(); addMut.mutate(); }} className="space-y-4">
+            <Input label="Email address" type="email" autoFocus value={addEmail} onChange={(e) => setAddEmail(e.target.value)} placeholder="user@example.com" />
+            <div className="space-y-1">
+              <label className="block text-[12px] font-medium text-[var(--text-secondary)]">Reason</label>
+              <select value={addReason} onChange={(e) => setAddReason(e.target.value)} className={SELECT_CLS}>
+                <option value="manual">Manual</option>
+                <option value="unsubscribed">Unsubscribed</option>
+                <option value="bounced">Bounced</option>
+                <option value="complained">Complained</option>
+              </select>
             </div>
-            <div className="flex gap-3 mt-6">
-              <Button variant="secondary" className="flex-1" onClick={() => setShowAddModal(false)}>Cancel</Button>
-              <button
-                disabled={!addEmail || addMut.isPending}
-                onClick={() => addMut.mutate()}
-                className="flex-1 py-2 rounded-xl bg-[var(--indigo)] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
-              >
-                {addMut.isPending ? 'Adding...' : 'Add to list'}
-              </button>
-            </div>
-          </div>
-        </div>
+            <Input label="Notes (optional)" value={addNotes} onChange={(e) => setAddNotes(e.target.value)} placeholder="Optional note…" />
+          </form>
+        </Modal>
       )}
 
       {/* Bulk Import Modal */}
       {showBulkModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] shadow-2xl w-full max-w-md p-4">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Bulk Import</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
-                  Email addresses (one per line, or comma-separated)
-                </label>
-                <textarea
-                  value={bulkText}
-                  onChange={(e) => setBulkText(e.target.value)}
-                  rows={8}
-                  placeholder={"user1@example.com\nuser2@example.com\nuser3@example.com"}
-                  className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none resize-none font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Reason</label>
-                <select
-                  value={addReason}
-                  onChange={(e) => setAddReason(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 text-sm focus:border-[var(--indigo)] focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                >
-                  <option value="manual">Manual</option>
-                  <option value="unsubscribed">Unsubscribed</option>
-                  <option value="bounced">Bounced</option>
-                  <option value="complained">Complained</option>
-                </select>
-              </div>
+        <Modal
+          isOpen={showBulkModal}
+          onClose={() => setShowBulkModal(false)}
+          title="Bulk import"
+          description="Paste addresses to suppress — one per line or comma-separated."
+          size="md"
+          footer={
+            <>
+              <Button variant="secondary" size="md" onClick={() => setShowBulkModal(false)}>Cancel</Button>
+              <Button type="submit" form="suppress-bulk-form" size="md" disabled={!bulkText.trim() || bulkMut.isPending}>
+                {bulkMut.isPending ? 'Importing…' : 'Import'}
+              </Button>
+            </>
+          }
+        >
+          <form id="suppress-bulk-form" onSubmit={(e) => { e.preventDefault(); bulkMut.mutate(); }} className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[12px] font-medium text-[var(--text-secondary)]">Email addresses</label>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                rows={8}
+                autoFocus
+                placeholder={"user1@example.com\nuser2@example.com\nuser3@example.com"}
+                className="w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-app)] px-3 py-2 text-[13px] text-[var(--text-primary)] font-data placeholder:text-[var(--text-tertiary)] focus:border-[var(--indigo)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-[border-color,box-shadow] resize-none"
+              />
             </div>
-            <div className="flex gap-3 mt-6">
-              <Button variant="secondary" className="flex-1" onClick={() => setShowBulkModal(false)}>Cancel</Button>
-              <button
-                disabled={!bulkText.trim() || bulkMut.isPending}
-                onClick={() => bulkMut.mutate()}
-                className="flex-1 py-2 rounded-xl bg-[var(--indigo)] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-all"
-              >
-                {bulkMut.isPending ? 'Importing...' : 'Import'}
-              </button>
+            <div className="space-y-1">
+              <label className="block text-[12px] font-medium text-[var(--text-secondary)]">Reason</label>
+              <select value={addReason} onChange={(e) => setAddReason(e.target.value)} className={SELECT_CLS}>
+                <option value="manual">Manual</option>
+                <option value="unsubscribed">Unsubscribed</option>
+                <option value="bounced">Bounced</option>
+                <option value="complained">Complained</option>
+              </select>
             </div>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
     </div>
   );
