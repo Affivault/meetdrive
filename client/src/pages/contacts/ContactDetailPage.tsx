@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contactsApi, listsApi } from '../../api/contacts.api';
 import { analyticsApi } from '../../api/analytics.api';
 import { Spinner } from '../../components/ui/Spinner';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 import { Avatar } from '../../components/shared/Avatar';
 import { formatDate, formatDateTime, cn } from '../../lib/utils';
 import {
@@ -322,72 +324,60 @@ export function ContactDetailPage() {
 
       {/* Move Contact Modal */}
       {showMoveModal && moveFromListId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMoveModal(false)} />
-          <div className="relative bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl w-full max-w-sm shadow-xl">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Move to List</h2>
-                <p className="text-[13px] text-[var(--text-tertiary)] mt-0.5">
-                  Move from "{memberLists.find((l: any) => l.id === moveFromListId)?.name}" to:
-                </p>
-              </div>
-              <button
-                onClick={() => setShowMoveModal(false)}
-                className="p-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-all duration-200"
+        <Modal
+          isOpen={showMoveModal}
+          onClose={() => setShowMoveModal(false)}
+          title="Move to list"
+          description={`Move from "${memberLists.find((l: any) => l.id === moveFromListId)?.name}" to:`}
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" size="md" onClick={() => setShowMoveModal(false)}>Cancel</Button>
+              <Button
+                size="md"
+                disabled={!moveToListId || moveContactMutation.isPending}
+                onClick={() => {
+                  if (moveFromListId && moveToListId) {
+                    moveContactMutation.mutate({ fromListId: moveFromListId, toListId: moveToListId });
+                  }
+                }}
               >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="px-6 py-4">
-              <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                {(contactLists || [])
-                  .filter((l: any) => l.id !== moveFromListId && !l.is_default)
-                  .map((list: any) => (
-                    <button
-                      key={list.id}
-                      onClick={() => setMoveToListId(list.id)}
-                      className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 ${
-                        moveToListId === list.id
-                          ? 'bg-[var(--bg-elevated)] border border-[var(--border-default)]'
-                          : 'hover:bg-[var(--bg-hover)] border border-transparent'
-                      }`}
-                    >
-                      <FolderOpen className="h-4 w-4 text-[var(--text-tertiary)]" />
-                      <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">
-                        {list.name}
-                      </span>
-                      {list.is_member && (
-                        <span className="text-[10px] font-medium text-[var(--text-tertiary)] bg-[var(--bg-elevated)] px-1.5 py-0.5 rounded-full">
-                          Already on
-                        </span>
-                      )}
-                      {moveToListId === list.id && (
-                        <Check className="h-4 w-4 text-[var(--success)]" />
-                      )}
-                    </button>
-                  ))}
-              </div>
-              <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-[var(--border-subtle)]">
-                <button onClick={() => setShowMoveModal(false)} className="btn-secondary rounded-lg">
-                  Cancel
-                </button>
+                <ArrowRightLeft className="h-4 w-4" />
+                {moveContactMutation.isPending ? 'Moving…' : 'Move'}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-1.5 max-h-64 overflow-y-auto -mx-1 px-1">
+            {(contactLists || [])
+              .filter((l: any) => l.id !== moveFromListId && !l.is_default)
+              .map((list: any) => (
                 <button
-                  disabled={!moveToListId || moveContactMutation.isPending}
-                  onClick={() => {
-                    if (moveFromListId && moveToListId) {
-                      moveContactMutation.mutate({ fromListId: moveFromListId, toListId: moveToListId });
-                    }
-                  }}
-                  className="btn-primary rounded-lg disabled:opacity-40"
+                  key={list.id}
+                  onClick={() => setMoveToListId(list.id)}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors border',
+                    moveToListId === list.id
+                      ? 'bg-[var(--indigo-subtle)] border-[var(--indigo)]/30'
+                      : 'hover:bg-[var(--bg-hover)] border-transparent'
+                  )}
                 >
-                  <ArrowRightLeft className="h-4 w-4" />
-                  {moveContactMutation.isPending ? 'Moving...' : 'Move'}
+                  <FolderOpen className={cn('h-4 w-4', moveToListId === list.id ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)]')} />
+                  <span className="flex-1 text-left text-[13px] font-medium text-[var(--text-primary)] truncate">
+                    {list.name}
+                  </span>
+                  {list.is_member && (
+                    <span className="text-[10px] font-medium text-[var(--text-tertiary)] bg-[var(--bg-elevated)] px-1.5 py-0.5 rounded-full">
+                      Already on
+                    </span>
+                  )}
+                  {moveToListId === list.id && (
+                    <Check className="h-4 w-4 text-[var(--indigo)]" />
+                  )}
                 </button>
-              </div>
-            </div>
+              ))}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
