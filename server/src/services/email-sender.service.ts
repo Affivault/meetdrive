@@ -253,7 +253,7 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
   }
 
   // 5. Send via relay (Vercel) or direct SMTP
-  const domain = smtpAccount.email_address?.split('@')[1] || 'skysend.io';
+  const domain = (smtpAccount.email_address || '').split('@')[1] || 'skysend.io';
   const messageId = `<${crypto.randomUUID()}@${domain}>`;
   const emailHeaders: Record<string, string> = {
     'X-SkySend-Campaign': campaignId,

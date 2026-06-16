@@ -196,6 +196,7 @@ async function deliverWebhook(
 
       if (success) break;
     } catch (err: any) {
+      console.error(`[Webhook] Delivery attempt ${attempt} to ${endpoint.url} failed:`, err.message);
       statusCode = 0;
       responseBody = err.message || 'Network error';
       success = false;

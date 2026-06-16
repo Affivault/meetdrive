@@ -139,7 +139,8 @@ export const contactsService = {
 
     if (tag_ids && tag_ids.length > 0) {
       const tagRows = tag_ids.map((tagId: string) => ({ contact_id: data.id, tag_id: tagId }));
-      await supabaseAdmin.from('contact_tags').insert(tagRows);
+      const { error: tagError } = await supabaseAdmin.from('contact_tags').insert(tagRows);
+      if (tagError) throw new AppError(`Contact created but failed to add tags: ${tagError.message}`, 500);
     }
 
     fireEvent(userId, 'contact.created', { contact: data }).catch(() => {});

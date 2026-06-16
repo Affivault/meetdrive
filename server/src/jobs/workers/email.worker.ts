@@ -174,7 +174,7 @@ export function startEmailWorker() {
         }
 
         // Generate a unique Message-ID for reply threading
-        const domain = smtpAccount.email_address?.split('@')[1] || 'skysend.io';
+        const domain = (smtpAccount.email_address || '').split('@')[1] || 'skysend.io';
         const messageId = `<${crypto.randomUUID()}@${domain}>`;
 
         // 6. Send the email

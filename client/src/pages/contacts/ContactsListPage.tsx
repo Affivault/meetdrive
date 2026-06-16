@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 
 type ContactSortKey = 'first_name' | 'email' | 'company' | 'dcs_score' | 'created_at';
+type HealthFilter = 'all' | 'verified' | 'bounced' | 'opted-out';
 
 function SortableHeader({
   label,
@@ -163,6 +164,7 @@ export function ContactsListPage() {
   const [editingList, setEditingList] = useState<ContactList | null>(null);
   const [sortBy, setSortBy] = useState<ContactSortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [healthFilter, setHealthFilter] = useState<HealthFilter>('all');
 
   const handleSort = (key: ContactSortKey) => {
     if (key === sortBy) {
@@ -176,14 +178,22 @@ export function ContactsListPage() {
 
   const activeListId = searchParams.get('list') || null;
 
-  // Reset to page 1 whenever the active list changes so stale page numbers
-  // don't cause empty results on smaller lists.
+  // Reset to page 1 and clear health filter whenever the active list changes
+  // so stale state doesn't cause empty results on smaller lists.
   useEffect(() => {
     setPage(1);
+    setHealthFilter('all');
   }, [activeListId]);
 
+  const healthParams = useMemo(() => {
+    if (healthFilter === 'bounced') return { is_bounced: true };
+    if (healthFilter === 'opted-out') return { is_unsubscribed: true };
+    if (healthFilter === 'verified') return { dcs_min: 80 };
+    return {};
+  }, [healthFilter]);
+
   const { data: contactsData, isLoading } = useQuery({
-    queryKey: ['contacts', page, search, activeListId, sortBy, sortDir],
+    queryKey: ['contacts', page, search, activeListId, sortBy, sortDir, healthFilter],
     queryFn: () => contactsApi.list({
       page,
       limit: DEFAULT_PAGE_SIZE,
@@ -191,6 +201,7 @@ export function ContactsListPage() {
       list_id: activeListId || undefined,
       sort_by: sortBy,
       sort_order: sortDir,
+      ...healthParams,
     }),
   });
 
@@ -656,6 +667,39 @@ export function ContactsListPage() {
             <StatCard label="Total contacts" value={stats.total.toLocaleString()} icon={Users} accent="indigo" />
             <StatCard label="Verified" value={(stats.verified ?? 0).toLocaleString()} icon={ShieldCheck} accent="emerald" hint={stats.total > 0 ? `${Math.round((stats.verified / stats.total) * 100)}% of total` : undefined} />
             <StatCard label="Lists" value={lists?.length ?? 0} icon={FolderOpen} accent="violet" />
+          </div>
+        )}
+
+        {/* Health filter chips */}
+        {stats && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {(
+              [
+                { key: 'all', label: 'All', count: stats.total },
+                { key: 'verified', label: 'Verified', count: stats.verified },
+                { key: 'bounced', label: 'Bounced', count: stats.bounced },
+                { key: 'opted-out', label: 'Opted out', count: stats.unsubscribed },
+              ] as { key: HealthFilter; label: string; count: number }[]
+            ).map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => { setHealthFilter(key); setPage(1); }}
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium border transition-all duration-150',
+                  healthFilter === key
+                    ? 'bg-[var(--indigo)] text-white border-[var(--indigo)] shadow-sm'
+                    : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'
+                )}
+              >
+                {label}
+                <span className={cn(
+                  'text-[10.5px] font-semibold tabular px-1 rounded',
+                  healthFilter === key ? 'text-indigo-200' : 'text-[var(--text-tertiary)]'
+                )}>
+                  {count.toLocaleString()}
+                </span>
+              </button>
+            ))}
           </div>
         )}
 
