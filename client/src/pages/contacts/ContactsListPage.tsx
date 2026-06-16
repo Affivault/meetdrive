@@ -433,6 +433,20 @@ export function ContactsListPage() {
     ? lists.find((l) => l.id === activeListId)?.name || 'List'
     : 'All Contacts';
 
+  // Collapsible folders (persisted) + drag-and-drop of lists into folders
+  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(() => {
+    try { const s = localStorage.getItem('contacts.collapsedFolders'); return new Set(s ? JSON.parse(s) : []); }
+    catch { return new Set(); }
+  });
+  const toggleFolder = (key: string) => setCollapsedFolders((prev) => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    try { localStorage.setItem('contacts.collapsedFolders', JSON.stringify([...next])); } catch { /* ignore */ }
+    return next;
+  });
+  const [draggingListId, setDraggingListId] = useState<string | null>(null);
+  const [dropFolderKey, setDropFolderKey] = useState<string | null>(null);
+
   return (
     <div className="flex gap-5">
       {/* Sidebar */}
@@ -483,70 +497,110 @@ export function ContactsListPage() {
             </div>
 
             <div className="space-y-0.5">
-              {groupedLists.map((group) => (
-                <div key={group.folder?.id || 'uncat'}>
-                  {group.folder ? (
-                    <div className="group flex items-center gap-2 px-2 py-1 text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
-                      <Folder className="h-3 w-3" style={{ color: group.folder.color }} />
-                      <span className="flex-1 truncate" style={{ color: group.folder.color }}>{group.folder.name}</span>
-                      <button
-                        onClick={() => { setEditingFolder(group.folder); setFolderModalOpen(true); }}
-                        className="p-0.5 rounded hover:bg-[var(--bg-hover)] opacity-0 group-hover:opacity-100"
-                        title="Edit folder"
+              {groupedLists.map((group) => {
+                const isFolder = !!group.folder;
+                const folderKey = isFolder ? group.folder!.id : 'uncat';
+                const targetFolderId = isFolder ? group.folder!.id : null;
+                const collapsed = collapsedFolders.has(folderKey);
+                const isDrop = dropFolderKey === folderKey && !!draggingListId;
+                const showHeader = isFolder || (group.lists.length > 0 && groupedLists.length > 1);
+                return (
+                  <div key={folderKey}>
+                    {showHeader && (
+                      <div
+                        onClick={() => toggleFolder(folderKey)}
+                        onDragOver={(e) => { if (draggingListId) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropFolderKey(folderKey); } }}
+                        onDragLeave={() => setDropFolderKey((k) => (k === folderKey ? null : k))}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const id = e.dataTransfer.getData('text/plain') || draggingListId;
+                          if (id) folderMoveMut.mutate({ listId: id, folderId: targetFolderId });
+                          setDropFolderKey(null); setDraggingListId(null);
+                        }}
+                        className={cn(
+                          'group/folder flex items-center gap-1.5 px-1.5 h-7 rounded-md cursor-pointer select-none transition-colors',
+                          isDrop ? 'bg-[var(--indigo-subtle)] ring-1 ring-[var(--indigo)]/40' : 'hover:bg-[var(--bg-hover)]'
+                        )}
                       >
-                        <Pencil className="h-2.5 w-2.5" />
-                      </button>
-                    </div>
-                  ) : group.lists.length > 0 && groupedLists.length > 1 ? (
-                    <div className="px-2 py-1 text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
-                      Uncategorised
-                    </div>
-                  ) : null}
+                        <ChevronRight className={cn('h-3 w-3 flex-shrink-0 text-[var(--text-tertiary)] transition-transform duration-150', !collapsed && 'rotate-90')} />
+                        <Folder className="h-3 w-3 flex-shrink-0" style={isFolder ? { color: group.folder!.color } : { color: 'var(--text-tertiary)' }} />
+                        <span className="flex-1 truncate text-[10.5px] font-semibold uppercase tracking-wider" style={isFolder ? { color: group.folder!.color } : { color: 'var(--text-tertiary)' }}>
+                          {isFolder ? group.folder!.name : 'Uncategorised'}
+                        </span>
+                        {isFolder && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setEditingFolder(group.folder!); setFolderModalOpen(true); }}
+                            className="p-0.5 rounded hover:bg-[var(--bg-active)] opacity-0 group-hover/folder:opacity-100 transition-opacity"
+                            title="Edit folder"
+                          >
+                            <Pencil className="h-2.5 w-2.5 text-[var(--text-tertiary)]" />
+                          </button>
+                        )}
+                        <span className="text-[10px] font-semibold tabular text-[var(--text-tertiary)]">{group.lists.length}</span>
+                      </div>
+                    )}
 
-                  {group.lists.map((list: any) => (
-                    <div key={list.id} className="relative group">
-                      {renamingListId === list.id ? (
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            if (renameValue.trim()) renameListMut.mutate({ id: list.id, name: renameValue.trim() });
-                          }}
-                          className="px-2 py-1"
-                        >
-                          <input
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            onBlur={() => setRenamingListId(null)}
-                            onKeyDown={(e) => { if (e.key === 'Escape') setRenamingListId(null); }}
-                            autoFocus
-                            className="w-full px-2 py-1 text-[12px] rounded border border-[var(--indigo)] bg-[var(--bg-elevated)] outline-none"
-                          />
-                        </form>
-                      ) : (
-                        <button
-                          onClick={() => setSearchParams({ list: list.id })}
-                          onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setListContextMenu({ listId: list.id, x: e.clientX, y: e.clientY }); }}
-                          className={cn(
-                            "w-full flex items-center gap-2 h-8 px-2.5 rounded-md text-[12px] font-medium transition-all",
-                            activeListId === list.id
-                              ? "bg-[var(--indigo-subtle)] text-[var(--indigo)]"
-                              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-                          )}
-                        >
-                          <FolderOpen className="h-3 w-3 flex-shrink-0" />
-                          <span className="flex-1 text-left truncate">{list.name}</span>
-                          <span className={cn(
-                            "text-[10px] font-semibold tabular",
-                            activeListId === list.id ? "text-[var(--indigo)]" : "text-[var(--text-tertiary)]"
-                          )}>
-                            {list.contact_count || 0}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
+                    {!collapsed && (
+                      <div className={cn('space-y-0.5 mt-0.5', showHeader && 'ml-[11px] pl-1.5 border-l border-[var(--border-subtle)]')}>
+                        {group.lists.map((list: any) => (
+                          <div
+                            key={list.id}
+                            className="relative group/list"
+                            draggable={renamingListId !== list.id}
+                            onDragStart={(e) => { e.dataTransfer.setData('text/plain', list.id); e.dataTransfer.effectAllowed = 'move'; setDraggingListId(list.id); }}
+                            onDragEnd={() => { setDraggingListId(null); setDropFolderKey(null); }}
+                          >
+                            {renamingListId === list.id ? (
+                              <form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  if (renameValue.trim()) renameListMut.mutate({ id: list.id, name: renameValue.trim() });
+                                }}
+                                className="px-2 py-1"
+                              >
+                                <input
+                                  value={renameValue}
+                                  onChange={(e) => setRenameValue(e.target.value)}
+                                  onBlur={() => setRenamingListId(null)}
+                                  onKeyDown={(e) => { if (e.key === 'Escape') setRenamingListId(null); }}
+                                  autoFocus
+                                  className="w-full px-2 py-1 text-[12px] rounded border border-[var(--indigo)] bg-[var(--bg-elevated)] outline-none"
+                                />
+                              </form>
+                            ) : (
+                              <button
+                                onClick={() => setSearchParams({ list: list.id })}
+                                onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setListContextMenu({ listId: list.id, x: e.clientX, y: e.clientY }); }}
+                                className={cn(
+                                  'w-full flex items-center gap-2 h-8 px-2.5 rounded-md text-[12px] font-medium transition-all cursor-grab active:cursor-grabbing',
+                                  draggingListId === list.id && 'opacity-50',
+                                  activeListId === list.id
+                                    ? 'bg-[var(--indigo-subtle)] text-[var(--indigo)]'
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
+                                )}
+                              >
+                                <FolderOpen className="h-3 w-3 flex-shrink-0" />
+                                <span className="flex-1 text-left truncate">{list.name}</span>
+                                <span className={cn(
+                                  'text-[10px] font-semibold tabular',
+                                  activeListId === list.id ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)]'
+                                )}>
+                                  {list.contact_count || 0}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        {isFolder && group.lists.length === 0 && (
+                          <p className="px-2 py-1 text-[10.5px] text-[var(--text-muted)] italic">
+                            {isDrop ? 'Drop to add here' : 'Empty folder'}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
 
               {(!lists || lists.length === 0) && (
                 <p className="px-2 py-2 text-[11px] text-[var(--text-tertiary)] italic">
