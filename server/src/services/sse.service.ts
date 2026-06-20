@@ -167,6 +167,22 @@ export async function recordBounce(accountId: string): Promise<void> {
  * Record an open - slightly recover health score.
  */
 export async function recordOpen(accountId: string): Promise<void> {
+  // Atomically increment total_opened (mirrors recordSend's RPC approach to avoid
+  // lost-update races when multiple opens arrive concurrently for the same account).
+  let rpcSucceeded = false;
+  try {
+    await supabaseAdmin.rpc('increment_field', {
+      table_name: 'smtp_accounts',
+      field_name: 'total_opened',
+      row_id: accountId,
+    });
+    rpcSucceeded = true;
+  } catch {
+    // RPC not available — fall back to manual update below
+  }
+
+  // Health score requires a clamped increment (MIN(100, score+1)) which can't
+  // be expressed atomically via the generic RPC, so we do read-modify-write here.
   const { data, error } = await supabaseAdmin
     .from('smtp_accounts')
     .select('health_score, total_opened')
@@ -184,7 +200,8 @@ export async function recordOpen(accountId: string): Promise<void> {
       .from('smtp_accounts')
       .update({
         health_score: newHealth,
-        total_opened: data.total_opened + 1,
+        // Only include total_opened in fallback — RPC already incremented it atomically
+        ...(!rpcSucceeded ? { total_opened: data.total_opened + 1 } : {}),
       })
       .eq('id', accountId);
   }
