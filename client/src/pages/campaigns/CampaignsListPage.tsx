@@ -22,19 +22,20 @@ import {
 } from 'lucide-react';
 
 /* Shared column template so the header and every row stay perfectly aligned */
-const ROW_GRID = 'grid grid-cols-[minmax(220px,1fr)_84px_84px_84px_84px_170px_96px] items-center gap-x-3';
+const ROW_GRID = 'grid grid-cols-[minmax(220px,1fr)_72px_72px_72px_72px_72px_170px_96px] items-center gap-x-3';
 
 /* Sortable columns for the campaigns table */
-type SortKey = 'name' | 'sent' | 'open' | 'click' | 'reply' | 'created';
+type SortKey = 'name' | 'sent' | 'open' | 'click' | 'reply' | 'bounce' | 'created';
 function sortValue(c: any, key: SortKey): number | string {
   const sent = c.sent_count || 0;
   switch (key) {
-    case 'name':  return (c.name || '').toLowerCase();
-    case 'sent':  return sent;
-    case 'open':  return sent ? (c.opened_count || 0) / sent : -1;
-    case 'click': return sent ? (c.clicked_count || 0) / sent : -1;
-    case 'reply': return sent ? (c.replied_count || 0) / sent : -1;
-    default:      return new Date(c.created_at || 0).getTime();
+    case 'name':   return (c.name || '').toLowerCase();
+    case 'sent':   return sent;
+    case 'open':   return sent ? (c.opened_count || 0) / sent : -1;
+    case 'click':  return sent ? (c.clicked_count || 0) / sent : -1;
+    case 'reply':  return sent ? (c.replied_count || 0) / sent : -1;
+    case 'bounce': return sent ? (c.bounced_count || 0) / sent : -1;
+    default:       return new Date(c.created_at || 0).getTime();
   }
 }
 import toast from 'react-hot-toast';
@@ -327,11 +328,12 @@ export function CampaignsListPage() {
                   {/* Column header — click to sort */}
                   <div className={cn(ROW_GRID, 'px-4 h-9 border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40')}>
                     {([
-                      { key: 'name' as SortKey,  label: 'Campaign', right: false },
-                      { key: 'sent' as SortKey,  label: 'Sent',     right: true },
-                      { key: 'open' as SortKey,  label: 'Open',     right: true },
-                      { key: 'click' as SortKey, label: 'Click',    right: true },
-                      { key: 'reply' as SortKey, label: 'Reply',    right: true },
+                      { key: 'name' as SortKey,   label: 'Campaign', right: false },
+                      { key: 'sent' as SortKey,   label: 'Sent',     right: true },
+                      { key: 'open' as SortKey,   label: 'Open',     right: true },
+                      { key: 'click' as SortKey,  label: 'Click',    right: true },
+                      { key: 'reply' as SortKey,  label: 'Reply',    right: true },
+                      { key: 'bounce' as SortKey, label: 'Bounce',   right: true },
                     ]).map((col) => (
                       <button
                         key={col.key}
@@ -511,17 +513,18 @@ const STATUS_DOT: Record<string, string> = {
 
 function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, onPause, onResume, onEdit, onContextMenu }: any) {
   const total = campaign.sent_count || 0;
-  const openPct  = total ? (campaign.opened_count  / total) * 100 : 0;
-  const clickPct = total ? (campaign.clicked_count / total) * 100 : 0;
-  const replyPct = total ? (campaign.replied_count / total) * 100 : 0;
+  const openPct   = total ? (campaign.opened_count  / total) * 100 : 0;
+  const clickPct  = total ? (campaign.clicked_count / total) * 100 : 0;
+  const replyPct  = total ? (campaign.replied_count / total) * 100 : 0;
   const totalContacts = campaign.contacts_count || campaign.total_contacts || 0;
   const pipelinePct = totalContacts ? Math.min((total / totalContacts) * 100, 100) : 0;
-  const bounced = campaign.bounced_count || 0;
+  const bounced   = campaign.bounced_count || 0;
+  const bouncePct = total ? (bounced / total) * 100 : 0;
 
-  const metric = (v: string, strong = false) => (
+  const metric = (v: string, strong = false, warn = false) => (
     <span className={cn(
       'text-[13.5px] tabular text-right',
-      strong ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'
+      warn ? 'font-semibold text-rose-500' : strong ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'
     )}>{v}</span>
   );
 
@@ -555,6 +558,7 @@ function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, o
       {metric(total ? `${openPct.toFixed(1)}%` : '—')}
       {metric(total ? `${clickPct.toFixed(1)}%` : '—')}
       {metric(total ? `${replyPct.toFixed(1)}%` : '—', true)}
+      {metric(total ? `${bouncePct.toFixed(1)}%` : '—', false, bouncePct > 3)}
 
       {/* Pipeline */}
       <div className="min-w-0">
