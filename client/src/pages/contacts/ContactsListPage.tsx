@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 
 type ContactSortKey = 'first_name' | 'email' | 'company' | 'dcs_score' | 'created_at';
-type HealthFilter = 'all' | 'verified' | 'bounced' | 'opted-out';
+type StatusFilter = '' | 'valid' | 'risky' | 'invalid' | 'unverified';
 
 function SortableHeader({
   label,
@@ -251,6 +251,29 @@ function LinkedInGlyph({ url }: { url?: string | null }) {
   return <a href={href} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{inner}</a>;
 }
 
+/* Verification summary pill — count + colour dot, doubles as a filter. */
+function StatusPill({ label, count, dot, active, onClick }: {
+  label: string; count: number; dot: string; active: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center gap-1.5 h-7 pl-2.5 pr-2.5 rounded-full text-[12px] font-medium border transition-colors',
+        active
+          ? 'bg-[var(--indigo-subtle)] border-[var(--indigo)] text-[var(--indigo)]'
+          : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'
+      )}
+    >
+      <span className={cn('h-1.5 w-1.5 rounded-full', dot)} />
+      {label}
+      <span className={cn('text-[10.5px] font-semibold tabular', active ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)]')}>
+        {count.toLocaleString()}
+      </span>
+    </button>
+  );
+}
+
 /* Configurable table columns, mapped to our contact fields (the same set
    surfaced during CSV import). The Contact identity column is always shown;
    these are the optional middle columns the user can toggle + reorder-by-default. */
@@ -299,7 +322,7 @@ export function ContactsListPage() {
   const [editingList, setEditingList] = useState<ContactList | null>(null);
   const [sortBy, setSortBy] = useState<ContactSortKey>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [healthFilter, setHealthFilter] = useState<HealthFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
 
   const handleSort = (key: ContactSortKey) => {
     if (key === sortBy) {
@@ -313,26 +336,29 @@ export function ContactsListPage() {
 
   const activeListId = searchParams.get('list') || null;
 
-  // Reset to page 1 and clear health filter whenever the active list changes
-  // so stale state doesn't cause empty results on smaller lists.
+  // Reset to page 1 and clear the status filter whenever the active list
+  // changes so stale state doesn't cause empty results on smaller lists.
   useEffect(() => {
     setPage(1);
-    setHealthFilter('all');
+    setStatusFilter('');
   }, [activeListId]);
-
-  const healthParams = useMemo(() => {
-    if (healthFilter === 'bounced') return { is_bounced: true };
-    if (healthFilter === 'opted-out') return { is_unsubscribed: true };
-    if (healthFilter === 'verified') return { dcs_min: 80 };
-    return {};
-  }, [healthFilter]);
 
   // Auto-verify preference — drives the live "verifying…" affordance
   const { data: userSettings } = useQuery({ queryKey: ['settings'], queryFn: settingsApi.get });
   const autoVerifyOn = userSettings?.auto_verify_contacts ?? true;
 
+  // Verification-status breakdown for the summary pills (scoped to the list)
+  const { data: breakdown } = useQuery({
+    queryKey: ['verification-breakdown', activeListId],
+    queryFn: () => contactsApi.verificationBreakdown(activeListId || undefined),
+    refetchInterval: (q) => {
+      const d = q.state.data as any;
+      return autoVerifyOn && d && d.unverified > 0 ? 12000 : false;
+    },
+  });
+
   const { data: contactsData, isLoading } = useQuery({
-    queryKey: ['contacts', page, search, activeListId, sortBy, sortDir, healthFilter],
+    queryKey: ['contacts', page, search, activeListId, sortBy, sortDir, statusFilter],
     queryFn: () => contactsApi.list({
       page,
       limit: DEFAULT_PAGE_SIZE,
@@ -340,7 +366,7 @@ export function ContactsListPage() {
       list_id: activeListId || undefined,
       sort_by: sortBy,
       sort_order: sortDir,
-      ...healthParams,
+      verification_status: statusFilter || undefined,
     }),
     // While auto-verify is on and some visible contacts are still pending,
     // poll so their status flips live as the background worker processes them.
@@ -920,36 +946,18 @@ export function ContactsListPage() {
           </div>
         )}
 
-        {/* Health filter chips */}
-        {stats && (
+        {/* Verification summary pills — counts per deliverability state, click to filter */}
+        {breakdown && (
           <div className="flex items-center gap-2 flex-wrap">
-            {(
-              [
-                { key: 'all', label: 'All', count: stats.total },
-                { key: 'verified', label: 'Verified', count: stats.verified },
-                { key: 'bounced', label: 'Bounced', count: stats.bounced },
-                { key: 'opted-out', label: 'Opted out', count: stats.unsubscribed },
-              ] as { key: HealthFilter; label: string; count: number }[]
-            ).map(({ key, label, count }) => (
-              <button
-                key={key}
-                onClick={() => { setHealthFilter(key); setPage(1); }}
-                className={cn(
-                  'inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium border transition-all duration-150',
-                  healthFilter === key
-                    ? 'bg-[var(--indigo)] text-white border-[var(--indigo)] shadow-sm'
-                    : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                {label}
-                <span className={cn(
-                  'text-[10.5px] font-semibold tabular px-1 rounded',
-                  healthFilter === key ? 'text-indigo-200' : 'text-[var(--text-tertiary)]'
-                )}>
-                  {count.toLocaleString()}
-                </span>
-              </button>
-            ))}
+            <StatusPill label="All"        count={breakdown.total}      dot="bg-[var(--text-tertiary)]"            active={statusFilter === ''}           onClick={() => { setStatusFilter(''); setPage(1); }} />
+            <StatusPill label="Valid"      count={breakdown.valid}      dot="bg-emerald-500"                       active={statusFilter === 'valid'}      onClick={() => { setStatusFilter((s) => s === 'valid' ? '' : 'valid'); setPage(1); }} />
+            <StatusPill label="Risky"      count={breakdown.risky}      dot="bg-amber-500"                         active={statusFilter === 'risky'}      onClick={() => { setStatusFilter((s) => s === 'risky' ? '' : 'risky'); setPage(1); }} />
+            <StatusPill label="Invalid"    count={breakdown.invalid}    dot="bg-rose-500"                          active={statusFilter === 'invalid'}    onClick={() => { setStatusFilter((s) => s === 'invalid' ? '' : 'invalid'); setPage(1); }} />
+            <StatusPill label="Unverified" count={breakdown.unverified} dot="bg-slate-300 dark:bg-slate-600"       active={statusFilter === 'unverified'} onClick={() => { setStatusFilter((s) => s === 'unverified' ? '' : 'unverified'); setPage(1); }} />
+            <span className="ml-auto inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]" title="Contacts with a LinkedIn profile on file">
+              <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+              {breakdown.with_linkedin.toLocaleString()} on LinkedIn
+            </span>
           </div>
         )}
 
@@ -1136,116 +1144,119 @@ export function ContactsListPage() {
           </div>
         ) : (
           <div className="panel overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/50">
-                  <th className="pl-5 pr-2 py-2.5 w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleSelectAll}
-                      aria-label="Select all contacts"
-                    />
-                  </th>
-                  <th className="px-4 py-2.5 text-left">
-                    <SortableHeader label="Contact" colKey="first_name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                  </th>
-                  {orderedColumns.map((col) => (
-                    <th key={col.id} className="px-4 py-2.5 text-left">
-                      {col.sortKey
-                        ? <SortableHeader label={col.label} colKey={col.sortKey} sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                        : <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{col.label}</span>}
+            <div className="overflow-x-auto">
+              <table className="w-full border-separate border-spacing-0 text-left">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] w-[44px] pl-4 pr-2 py-2">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleSelectAll}
+                        aria-label="Select all contacts"
+                      />
                     </th>
-                  ))}
-                  {activeCustomKeys.map((key) => (
-                    <th key={`cf:${key}`} className="px-4 py-2.5 text-left">
-                      <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)] truncate">{key}</span>
+                    <th className="sticky left-[44px] z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] min-w-[240px] px-3 py-2 shadow-[inset_-1px_0_0_var(--border-subtle)]">
+                      <SortableHeader label="Contact" colKey="first_name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                     </th>
-                  ))}
-                  <th className="px-4 py-2.5 w-20"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {contacts.map((contact: any, index: number) => {
-                  const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
-                  const isSelected = selectedContacts.has(contact.id);
-                  return (
-                    <tr
-                      key={contact.id}
-                      onClick={() => navigate(`/contacts/${contact.id}`)}
-                      className={cn(
-                        'group relative cursor-pointer transition-colors duration-150',
-                        index < contacts.length - 1 && 'border-b border-[var(--border-subtle)]',
-                        isSelected ? 'bg-[var(--indigo-subtle)]' : 'hover:bg-[var(--bg-hover)]'
-                      )}
-                    >
-                      <td className="pl-5 pr-2 py-3 relative">
-                        {isSelected && (
-                          <span className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-[var(--indigo)]" />
+                    {orderedColumns.map((col) => (
+                      <th key={col.id} className="bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] px-4 py-2 whitespace-nowrap min-w-[150px]">
+                        {col.sortKey
+                          ? <SortableHeader label={col.label} colKey={col.sortKey} sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                          : <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{col.label}</span>}
+                      </th>
+                    ))}
+                    {activeCustomKeys.map((key) => (
+                      <th key={`cf:${key}`} className="bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] px-4 py-2 whitespace-nowrap min-w-[150px]">
+                        <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{key}</span>
+                      </th>
+                    ))}
+                    <th className="sticky right-0 z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] w-[112px] px-2 py-2 shadow-[inset_1px_0_0_var(--border-subtle)]" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {contacts.map((contact: any) => {
+                    const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
+                    const isSelected = selectedContacts.has(contact.id);
+                    // Frozen cells need an opaque bg so scrolled content can't show through.
+                    const frozenBg = isSelected
+                      ? 'bg-[var(--bg-active)]'
+                      : 'bg-[var(--bg-surface)] group-hover:bg-[var(--bg-hover)]';
+                    return (
+                      <tr
+                        key={contact.id}
+                        onClick={() => navigate(`/contacts/${contact.id}`)}
+                        className={cn(
+                          'group cursor-pointer transition-colors duration-150',
+                          isSelected ? 'bg-[var(--indigo-subtle)]' : 'hover:bg-[var(--bg-hover)]'
                         )}
-                        <Checkbox
-                          checked={isSelected}
-                          onChange={() => toggleSelectContact(contact.id)}
-                          aria-label={`Select ${fullName || contact.email}`}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Avatar name={fullName || contact.email} email={contact.email} size="sm" />
-                          <div className="min-w-0">
-                            <span className="flex items-center gap-1.5 min-w-0">
-                              <span className="block text-[13px] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--indigo)] transition-colors">
-                                {fullName || 'Unnamed contact'}
+                      >
+                        <td className={cn('sticky left-0 z-[1] w-[44px] pl-4 pr-2 py-2 relative border-b border-[var(--border-subtle)]', frozenBg)}>
+                          {isSelected && <span className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-[var(--indigo)]" />}
+                          <Checkbox
+                            checked={isSelected}
+                            onChange={() => toggleSelectContact(contact.id)}
+                            aria-label={`Select ${fullName || contact.email}`}
+                          />
+                        </td>
+                        <td className={cn('sticky left-[44px] z-[1] min-w-[240px] px-3 py-2 border-b border-[var(--border-subtle)] shadow-[inset_-1px_0_0_var(--border-subtle)]', frozenBg)}>
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Avatar name={fullName || contact.email} email={contact.email} size="sm" />
+                            <div className="min-w-0">
+                              <span className="flex items-center gap-1.5 min-w-0">
+                                <span className="block text-[12.5px] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--indigo)] transition-colors">
+                                  {fullName || 'Unnamed contact'}
+                                </span>
+                                <LinkedInGlyph url={contact.linkedin_url} />
                               </span>
-                              <LinkedInGlyph url={contact.linkedin_url} />
-                            </span>
-                            <p className="text-[11px] text-[var(--text-tertiary)] truncate leading-tight">
-                              {contact.job_title || 'No title'}
-                            </p>
+                              <p className="text-[11px] text-[var(--text-tertiary)] truncate leading-tight">
+                                {contact.job_title || 'No title'}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      {orderedColumns.map((col) => (
-                        <td key={col.id} className={cn('px-4 py-3', col.tdClass)}>
-                          {col.render(contact)}
                         </td>
-                      ))}
-                      {activeCustomKeys.map((key) => (
-                        <td key={`cf:${key}`} className="px-4 py-3 max-w-[200px]">
-                          {contact.custom_fields?.[key]
-                            ? <span className="text-[12.5px] text-[var(--text-secondary)] truncate">{contact.custom_fields[key]}</span>
-                            : <span className="text-[12px] text-[var(--text-muted)]">—</span>}
+                        {orderedColumns.map((col) => (
+                          <td key={col.id} className={cn('px-4 py-2 whitespace-nowrap border-b border-[var(--border-subtle)] min-w-[150px]', col.tdClass)}>
+                            {col.render(contact)}
+                          </td>
+                        ))}
+                        {activeCustomKeys.map((key) => (
+                          <td key={`cf:${key}`} className="px-4 py-2 whitespace-nowrap border-b border-[var(--border-subtle)] min-w-[150px] max-w-[220px]">
+                            {contact.custom_fields?.[key]
+                              ? <span className="text-[12.5px] text-[var(--text-secondary)] truncate inline-block max-w-full align-bottom">{contact.custom_fields[key]}</span>
+                              : <span className="text-[12px] text-[var(--text-muted)]">—</span>}
+                          </td>
+                        ))}
+                        <td className={cn('sticky right-0 z-[1] w-[112px] px-2 py-2 border-b border-[var(--border-subtle)] shadow-[inset_1px_0_0_var(--border-subtle)]', frozenBg)} onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => verifyMutation.mutate(contact.id)}
+                              disabled={verifyingIds.has(contact.id)}
+                              className="icon-btn hover:text-[var(--indigo)] hover:bg-[var(--indigo-subtle)]"
+                              title="Verify email"
+                            >
+                              {verifyingIds.has(contact.id)
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <ShieldCheck className="h-3.5 w-3.5" />}
+                            </button>
+                            <button onClick={() => openEdit(contact)} className="icon-btn" title="Edit">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => { if (confirm('Delete this contact?')) deleteMutation.mutate(contact.id); }}
+                              className="icon-btn hover:text-rose-500 hover:bg-rose-500/10"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </td>
-                      ))}
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => verifyMutation.mutate(contact.id)}
-                            disabled={verifyingIds.has(contact.id)}
-                            className="icon-btn hover:text-[var(--indigo)] hover:bg-[var(--indigo-subtle)]"
-                            title="Verify email"
-                          >
-                            {verifyingIds.has(contact.id)
-                              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              : <ShieldCheck className="h-3.5 w-3.5" />}
-                          </button>
-                          <button onClick={() => openEdit(contact)} className="icon-btn" title="Edit">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => { if (confirm('Delete this contact?')) deleteMutation.mutate(contact.id); }}
-                            className="icon-btn hover:text-rose-500 hover:bg-rose-500/10"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

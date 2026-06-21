@@ -38,6 +38,13 @@ export const contactsApi = {
     return data;
   },
 
+  verificationBreakdown: async (listId?: string) => {
+    const { data } = await apiClient.get<{
+      total: number; valid: number; risky: number; invalid: number; unverified: number; with_linkedin: number;
+    }>('/contacts/verification-breakdown', { params: listId ? { list_id: listId } : undefined });
+    return data;
+  },
+
   get: async (id: string) => {
     const { data } = await apiClient.get<ContactWithTags>(`/contacts/${id}`);
     return data;

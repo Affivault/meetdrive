@@ -119,4 +119,12 @@ export const contactsController = {
       res.json(stats);
     } catch (err) { next(err); }
   },
+
+  async verificationBreakdown(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const listId = typeof req.query.list_id === 'string' ? req.query.list_id : undefined;
+      const breakdown = await contactsService.verificationBreakdown(req.userId!, listId);
+      res.json(breakdown);
+    } catch (err) { next(err); }
+  },
 };

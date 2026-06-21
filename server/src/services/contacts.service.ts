@@ -15,6 +15,7 @@ interface ListParams {
   is_bounced?: boolean;
   dcs_min?: number;
   dcs_max?: number;
+  verification_status?: string;
   sort_by?: string;
   sort_order?: string;
 }
@@ -86,6 +87,23 @@ export const contactsService = {
 
     if (params.dcs_max !== undefined) {
       query = query.lte('dcs_score', params.dcs_max);
+    }
+
+    // Verification status — mirrors the client's derived states so the summary
+    // pills filter the whole list (not just the current page).
+    switch (params.verification_status) {
+      case 'valid':
+        query = query.not('dcs_verified_at', 'is', null).eq('is_bounced', false).gte('dcs_score', 80);
+        break;
+      case 'risky':
+        query = query.not('dcs_verified_at', 'is', null).eq('is_bounced', false).gte('dcs_score', 50).lt('dcs_score', 80);
+        break;
+      case 'invalid':
+        query = query.or('is_bounced.eq.true,and(dcs_verified_at.not.is.null,dcs_score.lt.50)');
+        break;
+      case 'unverified':
+        query = query.is('dcs_verified_at', null).eq('is_bounced', false);
+        break;
     }
 
     const ALLOWED_SORT = new Set(['email', 'first_name', 'last_name', 'company', 'dcs_score', 'created_at']);
@@ -443,6 +461,44 @@ export const contactsService = {
     });
     const csv = Papa.unparse(flat);
     return { data: csv, format: 'csv' };
+  },
+
+  // Verification-status breakdown for the summary pills. Scoped to a list when
+  // given. Buckets mirror the client's derived states so the counts line up.
+  async verificationBreakdown(userId: string, listId?: string) {
+    const empty = { total: 0, valid: 0, risky: 0, invalid: 0, unverified: 0, with_linkedin: 0 };
+
+    let listContactIds: string[] | null = null;
+    if (listId) {
+      const { data: lc } = await supabaseAdmin
+        .from('list_contacts')
+        .select('contact_id')
+        .eq('list_id', listId);
+      listContactIds = (lc || []).map((x: any) => x.contact_id);
+      if (listContactIds.length === 0) return empty;
+    }
+
+    let q = supabaseAdmin
+      .from('contacts')
+      .select('dcs_verified_at, dcs_score, is_bounced, linkedin_url')
+      .eq('user_id', userId);
+    if (listContactIds) q = q.in('id', listContactIds);
+
+    const { data, error } = await q;
+    if (error) throw new AppError(error.message, 500);
+
+    const rows = data || [];
+    const out = { ...empty, total: rows.length };
+    for (const r of rows as any[]) {
+      if (r.linkedin_url) out.with_linkedin++;
+      if (r.is_bounced) { out.invalid++; continue; }
+      if (r.dcs_verified_at == null) { out.unverified++; continue; }
+      const score = r.dcs_score ?? 0;
+      if (score >= 80) out.valid++;
+      else if (score >= 50) out.risky++;
+      else out.invalid++;
+    }
+    return out;
   },
 
   async getStats(userId: string) {
