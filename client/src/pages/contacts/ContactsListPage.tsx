@@ -1045,7 +1045,10 @@ export function ContactsListPage() {
       {listContextMenu && (
         <div
           className="fixed z-50 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-xl py-1 min-w-[200px] animate-fade-in"
-          style={{ top: listContextMenu.y, left: listContextMenu.x }}
+          style={{
+            top: Math.max(8, Math.min(listContextMenu.y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 220)),
+            left: Math.max(8, Math.min(listContextMenu.x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 224)),
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
