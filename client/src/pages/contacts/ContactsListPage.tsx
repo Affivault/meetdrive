@@ -51,6 +51,8 @@ import {
   GripVertical,
   Eye,
   EyeOff,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 type ContactSortKey = 'first_name' | 'email' | 'company' | 'dcs_score' | 'created_at';
@@ -715,6 +717,16 @@ export function ContactsListPage() {
   const [draggingListId, setDraggingListId] = useState<string | null>(null);
   const [dropFolderKey, setDropFolderKey] = useState<string | null>(null);
 
+  // Collapsible lead-lists rail — lets the prospect table use the full width
+  const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem('contacts.railCollapsed') === '1'; } catch { return false; }
+  });
+  const toggleRail = () => setRailCollapsed((v) => {
+    const n = !v;
+    try { localStorage.setItem('contacts.railCollapsed', n ? '1' : '0'); } catch { /* ignore */ }
+    return n;
+  });
+
   // Configurable table columns (persisted), mapped to our contact fields.
   // Standard column ids come from ALL_COLUMNS; custom fields use a `cf:<key>` id.
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
@@ -805,9 +817,30 @@ export function ContactsListPage() {
 
       {/* Lead-lists rail + contacts table */}
       <div className="flex gap-4 items-start" onClick={() => setListContextMenu(null)}>
-        {/* Lead lists rail */}
+        {/* Lead lists rail — collapsible so the table can use the full width */}
+        {railCollapsed ? (
+          <aside className="flex-shrink-0">
+            <button
+              onClick={toggleRail}
+              title="Show lists"
+              className="sticky top-[60px] flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-tertiary)] hover:text-[var(--indigo)] hover:border-[var(--indigo)] transition-colors"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </button>
+          </aside>
+        ) : (
         <aside className="w-56 flex-shrink-0">
           <div className="sticky top-[60px] panel-inset p-1.5 space-y-0.5">
+            <div className="flex items-center justify-between px-1.5 pb-1.5 mb-0.5 border-b border-[var(--border-subtle)]">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">Lists</span>
+              <button
+                onClick={toggleRail}
+                title="Hide lists"
+                className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <PanelLeftClose className="h-3.5 w-3.5" />
+              </button>
+            </div>
           {/* All Contacts */}
           <button
             onClick={() => setSearchParams({})}
@@ -983,6 +1016,7 @@ export function ContactsListPage() {
           </div>
         </div>
       </aside>
+        )}
 
       {/* List right-click context menu */}
       {listContextMenu && (
