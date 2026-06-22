@@ -63,6 +63,8 @@ export function CampaignsListPage() {
   const [folderAnalyticsId, setFolderAnalyticsId] = useState<string | null>(null);
   const [contextMenuFor, setContextMenuFor] = useState<{ id: string; x: number; y: number } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [draggingCampaignId, setDraggingCampaignId] = useState<string | null>(null);
+  const [dropFolderKey, setDropFolderKey] = useState<string | null>(null);
 
   const { data: campaignsResp, isLoading } = useQuery({
     queryKey: ['campaigns', 'all', statusFilter],
@@ -124,6 +126,19 @@ export function CampaignsListPage() {
   }, [allCampaigns, activeFolderId, searchQuery, sortKey, sortDir]);
 
   const activeFolder = folders.find((f) => f.id === activeFolderId);
+
+  // Drag a campaign onto a folder row to move it (mirrors the Lead Lists DnD)
+  const folderDropProps = (key: string, folderId: string | null) => ({
+    dropActive: dropFolderKey === key && !!draggingCampaignId,
+    onDragOver: (e: React.DragEvent) => { if (draggingCampaignId) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropFolderKey(key); } },
+    onDragLeave: () => setDropFolderKey((k) => (k === key ? null : k)),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain') || draggingCampaignId;
+      if (id) moveMut.mutate({ campaignId: id, folderId });
+      setDropFolderKey(null); setDraggingCampaignId(null);
+    },
+  });
 
   // Aggregate stats for current view
   const aggregateStats = useMemo(() => {
@@ -250,6 +265,7 @@ export function CampaignsListPage() {
             active={activeFolderId === null}
             onClick={() => setActiveFolderId(null)}
             color="#94A3B8"
+            {...folderDropProps('uncat', null)}
           />
           {folders.length > 0 && (
             <div className="my-1 mx-2 h-px bg-[var(--border-subtle)]" />
@@ -265,6 +281,7 @@ export function CampaignsListPage() {
               onEdit={() => { setEditingFolder(f); setFolderModalOpen(true); }}
               onAnalytics={() => setFolderAnalyticsId(f.id)}
               color={f.color}
+              {...folderDropProps(f.id, f.id)}
             />
           ))}
         </aside>
@@ -366,6 +383,9 @@ export function CampaignsListPage() {
                           onResume={() => resumeMut.mutate(campaign.id)}
                           onEdit={()   => navigate(`/campaigns/${campaign.id}/edit`)}
                           onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); setContextMenuFor({ id: campaign.id, x: e.clientX, y: e.clientY }); }}
+                          dragging={draggingCampaignId === campaign.id}
+                          onDragStart={() => setDraggingCampaignId(campaign.id)}
+                          onDragEnd={() => { setDraggingCampaignId(null); setDropFolderKey(null); }}
                         />
                         {expandedId === campaign.id && (
                           <CampaignSnapshot campaign={campaign} onOpenReport={() => navigate(`/campaigns/${campaign.id}`)} />
@@ -439,7 +459,7 @@ export function CampaignsListPage() {
 
 /* ─── Sub-components ───────────────────────────────────────────── */
 
-function FolderRow({ label, icon: Icon, count, active, onClick, onEdit, onAnalytics, color }: {
+function FolderRow({ label, icon: Icon, count, active, onClick, onEdit, onAnalytics, color, dropActive, onDragOver, onDragLeave, onDrop }: {
   label: string;
   icon: any;
   count: number;
@@ -448,9 +468,18 @@ function FolderRow({ label, icon: Icon, count, active, onClick, onEdit, onAnalyt
   onEdit?: () => void;
   onAnalytics?: () => void;
   color: string;
+  dropActive?: boolean;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
 }) {
   return (
-    <div className="group relative">
+    <div
+      className={cn('group relative rounded-[6px] transition-shadow', dropActive && 'ring-1 ring-[var(--indigo)] bg-[var(--indigo-subtle)]')}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <button
         onClick={onClick}
         className={cn(
@@ -511,7 +540,7 @@ const STATUS_DOT: Record<string, string> = {
   scheduled: 'bg-blue-500',
 };
 
-function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, onPause, onResume, onEdit, onContextMenu }: any) {
+function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, onPause, onResume, onEdit, onContextMenu, dragging, onDragStart, onDragEnd }: any) {
   const total = campaign.sent_count || 0;
   const openPct   = total ? (campaign.opened_count  / total) * 100 : 0;
   const clickPct  = total ? (campaign.clicked_count / total) * 100 : 0;
@@ -532,7 +561,11 @@ function CampaignRow({ campaign, expanded, onToggleSnapshot, onOpen, onLaunch, o
     <div
       onClick={onOpen}
       onContextMenu={onContextMenu}
-      className={cn(ROW_GRID, 'group px-4 py-3.5 cursor-pointer hover:bg-[var(--bg-hover)] transition-colors')}
+      draggable
+      onDragStart={(e) => { e.dataTransfer.setData('text/plain', campaign.id); e.dataTransfer.effectAllowed = 'move'; onDragStart?.(); }}
+      onDragEnd={onDragEnd}
+      title="Drag to a folder to move this campaign"
+      className={cn(ROW_GRID, 'group px-4 py-3.5 cursor-pointer hover:bg-[var(--bg-hover)] transition-colors', dragging && 'opacity-50')}
     >
       {/* Identity */}
       <div className="min-w-0 flex items-center gap-2.5">
