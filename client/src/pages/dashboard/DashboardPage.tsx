@@ -179,14 +179,14 @@ const INSIGHT_TONES = {
   neutral: { dot: ACCENT,    text: 'text-[var(--indigo)]' },
 } as const;
 
-function InsightCard({ tone, icon: Icon, label, name, metric, context, onClick }: {
+function InsightCard({ tone, icon: Icon, label, name, metric, context, onClick, cta = 'View campaign' }: {
   tone: keyof typeof INSIGHT_TONES; icon: any; label: string;
-  name: string; metric: string; context: string; onClick: () => void;
+  name: string; metric: string; context: string; onClick: () => void; cta?: string;
 }) {
   const t = INSIGHT_TONES[tone];
   const spotlight = useSpotlight();
   return (
-    <button onClick={onClick} {...spotlight} className="group spotlight text-left panel panel-hover p-4">
+    <button onClick={onClick} {...spotlight} className="group spotlight text-left panel panel-hover p-4 h-full flex flex-col">
       <div className="flex items-center gap-1.5 mb-2.5">
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{label}</span>
@@ -195,10 +195,10 @@ function InsightCard({ tone, icon: Icon, label, name, metric, context, onClick }
       <p className="text-[14px] font-semibold text-[var(--text-primary)] tracking-[-0.01em] truncate">{name}</p>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className={cn('text-[24px] font-semibold tabular leading-none tracking-[-0.03em]', t.text)}>{metric}</span>
-        <span className="text-[11.5px] text-[var(--text-tertiary)]">{context}</span>
+        <span className="text-[11.5px] text-[var(--text-tertiary)] truncate">{context}</span>
       </div>
-      <span className="mt-2.5 inline-flex items-center gap-0.5 text-[11.5px] font-medium text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">
-        View campaign <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+      <span className="mt-auto pt-2.5 inline-flex items-center gap-0.5 text-[11.5px] font-medium text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">
+        {cta} <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
       </span>
     </button>
   );
@@ -509,7 +509,6 @@ export function DashboardPage() {
     [...qualified].filter((c) => c.bounce_rate >= 2).sort((a, b) => b.bounce_rate - a.bounce_rate)[0] ||
     [...qualified].filter((c) => c.open_rate < 10).sort((a, b) => a.open_rate - b.open_rate)[0];
   const mostActive = [...campaigns].filter((c) => c.sent > 0).sort((a, b) => b.sent - a.sent)[0];
-  const hasSignals = Boolean(topPerformer || needsAttention || mostActive);
 
   const recentMessages = Array.isArray(inboxData?.data) ? inboxData.data : [];
   const name = user?.email?.split('@')[0] || 'there';
@@ -525,6 +524,45 @@ export function DashboardPage() {
     { label: 'Bounced', value: bounced, color: 'var(--text-tertiary)' },
     { label: 'Suppressed', value: suppressed, color: 'var(--text-muted)' },
   ].filter((seg) => seg.value > 0);
+
+  // ── Richer signal set — the most decision-driving cards, real data only ──
+  const dcs = Number(s.avg_dcs_score) || 0;
+  const dcsTier = dcs >= 80 ? { label: 'Excellent', tone: 'good' as const }
+    : dcs >= 60 ? { label: 'Healthy', tone: 'good' as const }
+    : dcs >= 40 ? { label: 'Fair', tone: 'neutral' as const }
+    : { label: 'At risk', tone: 'bad' as const };
+
+  type Sig = { tone: 'good' | 'bad' | 'neutral'; icon: any; label: string; name: string; metric: string; context: string; onClick: () => void; cta: string };
+  const signals: Sig[] = ([
+    needsAttention && needsAttention.id !== topPerformer?.id ? {
+      tone: 'bad', icon: AlertTriangle, label: 'Needs attention', name: needsAttention.name,
+      metric: needsAttention.bounce_rate >= 2 ? fmtPct(needsAttention.bounce_rate) : fmtPct(needsAttention.open_rate),
+      context: needsAttention.bounce_rate >= 2 ? 'bounce rate · deliverability' : 'open rate · review subjects',
+      onClick: () => navigate(`/campaigns/${needsAttention.id}`), cta: 'View campaign',
+    } : null,
+    unreadCount > 0 ? {
+      tone: 'good', icon: MessageSquare, label: 'Replies waiting', name: 'Your inbox',
+      metric: fmtNum(unreadCount), context: 'unread · respond now',
+      onClick: () => navigate('/inbox'), cta: 'Open inbox',
+    } : null,
+    topPerformer ? {
+      tone: 'good', icon: Trophy, label: 'Top performer', name: topPerformer.name,
+      metric: fmtPct(topPerformer.reply_rate), context: `reply rate · ${fmtFull(topPerformer.sent)} sent`,
+      onClick: () => navigate(`/campaigns/${topPerformer.id}`), cta: 'View campaign',
+    } : null,
+    totalContacts > 0 ? {
+      tone: dcsTier.tone, icon: ShieldCheck, label: 'Deliverability', name: dcsTier.label,
+      metric: fmtNum(dcs), context: `avg score · ${fmtNum(bounced)} bounced`,
+      onClick: () => navigate('/verification'), cta: 'View report',
+    } : null,
+    mostActive ? {
+      tone: 'neutral', icon: Zap, label: 'Highest volume', name: mostActive.name,
+      metric: fmtNum(mostActive.sent), context: `sent · ${fmtPct(mostActive.open_rate)} opens`,
+      onClick: () => navigate(`/campaigns/${mostActive.id}`), cta: 'View campaign',
+    } : null,
+  ].filter(Boolean) as Sig[]).slice(0, 4);
+
+  const today = trend.length ? trend[trend.length - 1] : null;
 
   return (
     <div className="stagger pb-6 space-y-4">
@@ -567,6 +605,35 @@ export function DashboardPage() {
         />
       )}
 
+      {/* ── Today strip — what's happening right now ── */}
+      {today && (
+        <div className="panel flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
+          <span className="eyebrow !text-[var(--text-tertiary)]">Today</span>
+          {[
+            { icon: Send, value: Number(today.sent || 0), label: 'sent' },
+            { icon: MailOpen, value: Number(today.opened || 0), label: 'opened' },
+            { icon: MessageSquare, value: Number(today.replied || 0), label: 'replied' },
+          ].map(({ icon: Icon, value, label }) => (
+            <span key={label} className="inline-flex items-center gap-2">
+              <Icon className="h-3.5 w-3.5 text-[var(--text-tertiary)]" strokeWidth={2} />
+              <span className="text-[15px] font-semibold tabular text-[var(--text-primary)] leading-none">{fmtFull(value)}</span>
+              <span className="text-[12px] text-[var(--text-tertiary)]">{label}</span>
+            </span>
+          ))}
+          <div className="ml-auto flex items-center gap-x-5 gap-y-1 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--text-tertiary)]">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.active_campaigns > 0 ? '#10B981' : 'var(--text-muted)' }} />
+              {s.active_campaigns} active {s.active_campaigns === 1 ? 'campaign' : 'campaigns'}
+            </span>
+            {unreadCount > 0 && (
+              <button onClick={() => navigate('/inbox')} className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--indigo)] hover:underline">
+                <MessageSquare className="h-3.5 w-3.5" /> {unreadCount} unread {unreadCount === 1 ? 'reply' : 'replies'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── KPI row — the headline metrics (the lead element; no duplicated hero) ── */}
       <div className={cn('grid grid-cols-2 lg:grid-cols-4 gap-3 transition-opacity duration-300', refreshing && 'opacity-60')}>
         <Kpi label="Emails sent" icon={Send} target={s.total_sent} format={fmtNum} hint={`${fmtFull(s.total_sent)} in ${period} days`}
@@ -579,33 +646,17 @@ export function DashboardPage() {
           delta={s.replied_change} spark={spark('replied')} onClick={() => navigate('/inbox')} />
       </div>
 
-      {/* ── Signals — what's working, what's not ── */}
-      {hasSignals && (
+      {/* ── Signals — the most decision-driving cards ── */}
+      {signals.length > 0 && (
         <section>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--text-tertiary)]">Signals</span>
             <div className="flex-1 h-px bg-[var(--border-subtle)]" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {topPerformer && (
-              <InsightCard tone="good" icon={Trophy} label="Top performer"
-                name={topPerformer.name} metric={fmtPct(topPerformer.reply_rate)}
-                context={`reply rate · ${fmtFull(topPerformer.sent)} sent`}
-                onClick={() => navigate(`/campaigns/${topPerformer.id}`)} />
-            )}
-            {needsAttention && needsAttention.id !== topPerformer?.id && (
-              <InsightCard tone="bad" icon={AlertTriangle} label="Needs attention"
-                name={needsAttention.name}
-                metric={needsAttention.bounce_rate >= 2 ? fmtPct(needsAttention.bounce_rate) : fmtPct(needsAttention.open_rate)}
-                context={needsAttention.bounce_rate >= 2 ? `bounce rate · check deliverability` : `open rate · review subject lines`}
-                onClick={() => navigate(`/campaigns/${needsAttention.id}`)} />
-            )}
-            {mostActive && (
-              <InsightCard tone="neutral" icon={Zap} label="Highest volume"
-                name={mostActive.name} metric={fmtNum(mostActive.sent)}
-                context={`sent · ${fmtPct(mostActive.open_rate)} opens`}
-                onClick={() => navigate(`/campaigns/${mostActive.id}`)} />
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
+            {signals.map((sig, i) => (
+              <InsightCard key={i} {...sig} />
+            ))}
           </div>
         </section>
       )}
