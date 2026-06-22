@@ -175,7 +175,7 @@ export interface ContactsListParams {
   is_bounced?: boolean;
   dcs_min?: number;
   dcs_max?: number;
-  verification_status?: 'valid' | 'risky' | 'invalid' | 'unverified';
+  verification_status?: 'valid' | 'risky' | 'invalid' | 'not_found' | 'unverified';
   sort_by?: 'created_at' | 'email' | 'first_name' | 'company' | 'dcs_score';
   sort_order?: 'asc' | 'desc';
 }

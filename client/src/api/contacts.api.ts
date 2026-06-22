@@ -40,7 +40,7 @@ export const contactsApi = {
 
   verificationBreakdown: async (listId?: string) => {
     const { data } = await apiClient.get<{
-      total: number; valid: number; risky: number; invalid: number; unverified: number; with_linkedin: number;
+      total: number; valid: number; risky: number; invalid: number; not_found: number; unverified: number; with_linkedin: number;
     }>('/contacts/verification-breakdown', { params: listId ? { list_id: listId } : undefined });
     return data;
   },

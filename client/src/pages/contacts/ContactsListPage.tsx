@@ -48,10 +48,13 @@ import {
   Loader2,
   Tag as TagIcon,
   ArrowRightLeft,
+  GripVertical,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 type ContactSortKey = 'first_name' | 'email' | 'company' | 'dcs_score' | 'created_at';
-type StatusFilter = '' | 'valid' | 'risky' | 'invalid' | 'unverified';
+type StatusFilter = '' | 'valid' | 'risky' | 'invalid' | 'not_found' | 'unverified';
 
 function SortableHeader({
   label,
@@ -195,13 +198,13 @@ const LinkCell = ({ href, label }: { href?: string | null; label?: string | null
    Derives a snov.io-style 4-state signal from our existing DCS fields
    (syntax / domain / SMTP-mailbox checks + score), so a glance tells you
    whether an address is good, risky, bad, or not yet checked. */
-type EmailState = 'valid' | 'risky' | 'invalid' | 'unverified';
+type EmailState = 'valid' | 'risky' | 'invalid' | 'not_found' | 'unverified';
 function emailStatus(c: any): { state: EmailState; label: string; tip: string } {
   if (c.is_bounced) return { state: 'invalid', label: 'Bounced', tip: 'This address previously bounced' };
   const verified = !!c.dcs_verified_at || c.dcs_score != null;
   if (!verified) return { state: 'unverified', label: 'Unverified', tip: 'Not checked yet — click to verify' };
   if (c.dcs_syntax_ok === false) return { state: 'invalid', label: 'Invalid', tip: 'Malformed email address' };
-  if (c.dcs_domain_ok === false) return { state: 'invalid', label: 'No mail server', tip: c.dcs_fail_reason || 'Domain has no mail server (MX) — email not found' };
+  if (c.dcs_domain_ok === false) return { state: 'not_found', label: 'Not found', tip: c.dcs_fail_reason || 'No mail server (MX) for this domain — mailbox not found' };
   const score = c.dcs_score ?? 0;
   if (c.dcs_smtp_ok === true || score >= 80) return { state: 'valid', label: 'Valid', tip: c.dcs_fail_reason || 'Mailbox exists and accepts mail' };
   if (score >= 50) return { state: 'risky', label: 'Risky', tip: c.dcs_fail_reason || 'Catch-all or unverifiable mailbox — send with caution' };
@@ -211,6 +214,7 @@ const STATE_STYLE: Record<EmailState, { dot: string; badge: string }> = {
   valid:      { dot: 'bg-emerald-500',                 badge: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10' },
   risky:      { dot: 'bg-amber-500',                   badge: 'text-amber-700 dark:text-amber-400 bg-amber-500/10' },
   invalid:    { dot: 'bg-rose-500',                    badge: 'text-rose-700 dark:text-rose-400 bg-rose-500/10' },
+  not_found:  { dot: 'bg-slate-400 dark:bg-slate-500', badge: 'text-slate-600 dark:text-slate-300 bg-slate-500/12' },
   unverified: { dot: 'bg-slate-300 dark:bg-slate-600', badge: 'text-[var(--text-tertiary)] bg-[var(--bg-elevated)]' },
 };
 
@@ -718,12 +722,21 @@ export function ContactsListPage() {
     return DEFAULT_COLUMNS;
   });
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
-  const toggleColumn = (id: string) => setVisibleColumns((prev) => {
-    const next = prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id];
+  const [columnSearch, setColumnSearch] = useState('');
+  const [colDragIndex, setColDragIndex] = useState<number | null>(null);
+  const persistColumns = (next: string[]) => {
+    setVisibleColumns(next);
     try { localStorage.setItem('contacts.columns', JSON.stringify(next)); } catch { /* ignore */ }
-    return next;
-  });
-  const orderedColumns = ALL_COLUMNS.filter((c) => visibleColumns.includes(c.id));
+  };
+  const toggleColumn = (id: string) =>
+    persistColumns(visibleColumns.includes(id) ? visibleColumns.filter((c) => c !== id) : [...visibleColumns, id]);
+  const moveColumn = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= visibleColumns.length) return;
+    const next = [...visibleColumns];
+    const [m] = next.splice(from, 1);
+    next.splice(to, 0, m);
+    persistColumns(next);
+  };
 
   // Discover custom-field keys present on the loaded contacts so they can be
   // surfaced as optional columns (parity with our import field mapping).
@@ -735,7 +748,28 @@ export function ContactsListPage() {
     }
     return [...set].sort();
   }, [contactsData]);
-  const activeCustomKeys = customFieldKeys.filter((k) => visibleColumns.includes(`cf:${k}`));
+
+  // Resolve a column id (standard or `cf:<key>`) to a renderable definition.
+  const resolveColumn = (id: string): { id: string; label: string; sortKey?: ContactSortKey; render: (c: any) => React.ReactNode; tdClass?: string } | null => {
+    if (id.startsWith('cf:')) {
+      const key = id.slice(3);
+      return {
+        id, label: key, tdClass: 'max-w-[220px]',
+        render: (c: any) => c.custom_fields?.[key]
+          ? <span className="text-[12.5px] text-[var(--text-secondary)] truncate inline-block max-w-full align-bottom">{c.custom_fields[key]}</span>
+          : <span className="text-[12px] text-[var(--text-muted)]">—</span>,
+      };
+    }
+    return ALL_COLUMNS.find((c) => c.id === id) || null;
+  };
+  // Columns to render, in the user's saved order (standard + custom unified).
+  const activeColumns = visibleColumns.map(resolveColumn).filter(Boolean) as { id: string; label: string; sortKey?: ContactSortKey; render: (c: any) => React.ReactNode; tdClass?: string }[];
+  // Everything available to add, with a friendly label, minus what's shown.
+  const availableColumns = [
+    ...ALL_COLUMNS.map((c) => ({ id: c.id as string, label: c.label })),
+    ...customFieldKeys.map((k) => ({ id: `cf:${k}`, label: k })),
+  ];
+  const hiddenColumns = availableColumns.filter((c) => !visibleColumns.includes(c.id));
 
   return (
     <div className="flex gap-5">
@@ -1021,6 +1055,7 @@ export function ContactsListPage() {
             <StatusPill label="Valid"      count={breakdown.valid}      dot="bg-emerald-500"                       active={statusFilter === 'valid'}      onClick={() => { setStatusFilter((s) => s === 'valid' ? '' : 'valid'); setPage(1); }} />
             <StatusPill label="Risky"      count={breakdown.risky}      dot="bg-amber-500"                         active={statusFilter === 'risky'}      onClick={() => { setStatusFilter((s) => s === 'risky' ? '' : 'risky'); setPage(1); }} />
             <StatusPill label="Invalid"    count={breakdown.invalid}    dot="bg-rose-500"                          active={statusFilter === 'invalid'}    onClick={() => { setStatusFilter((s) => s === 'invalid' ? '' : 'invalid'); setPage(1); }} />
+            <StatusPill label="Not found"  count={breakdown.not_found}  dot="bg-slate-400 dark:bg-slate-500"       active={statusFilter === 'not_found'}  onClick={() => { setStatusFilter((s) => s === 'not_found' ? '' : 'not_found'); setPage(1); }} />
             <StatusPill label="Unverified" count={breakdown.unverified} dot="bg-slate-300 dark:bg-slate-600"       active={statusFilter === 'unverified'} onClick={() => { setStatusFilter((s) => s === 'unverified' ? '' : 'unverified'); setPage(1); }} />
             <span className="ml-auto inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-medium bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]" title="Contacts with a LinkedIn profile on file">
               <Linkedin className="h-3 w-3 text-[#0A66C2]" />
@@ -1077,63 +1112,89 @@ export function ContactsListPage() {
             >
               <Columns3 className="h-3.5 w-3.5" />
               Columns
-              <span className="text-[10px] tabular text-[var(--text-tertiary)]">{orderedColumns.length}</span>
+              <span className="text-[10px] tabular text-[var(--text-tertiary)]">{activeColumns.length}</span>
             </button>
-            {columnMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setColumnMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1.5 z-50 w-56 rounded-xl glass p-1.5 shadow-[var(--shadow-xl)] animate-slide-in">
-                  <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-                    Visible columns
-                  </p>
-                  {ALL_COLUMNS.map((col) => {
-                    const on = visibleColumns.includes(col.id);
-                    return (
-                      <button
-                        key={col.id}
-                        onClick={() => toggleColumn(col.id)}
-                        className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left hover:bg-[var(--bg-hover)] transition-colors"
-                      >
-                        <Checkbox checked={on} onChange={() => toggleColumn(col.id)} aria-label={col.label} />
-                        <span className="flex-1 text-[12.5px] text-[var(--text-primary)]">{col.label}</span>
-                      </button>
-                    );
-                  })}
+            {columnMenuOpen && (() => {
+              const q = columnSearch.trim().toLowerCase();
+              const shown = visibleColumns
+                .map((id, i) => ({ id, i, label: resolveColumn(id)?.label || id }))
+                .filter((c) => !q || c.label.toLowerCase().includes(q));
+              const hidden = hiddenColumns.filter((c) => !q || c.label.toLowerCase().includes(q));
+              return (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => { setColumnMenuOpen(false); setColumnSearch(''); }} />
+                  <div className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl glass shadow-[var(--shadow-xl)] animate-slide-in overflow-hidden">
+                    <div className="p-2 border-b border-[var(--border-subtle)]">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+                        <input
+                          value={columnSearch}
+                          onChange={(e) => setColumnSearch(e.target.value)}
+                          placeholder="Search columns…"
+                          className="w-full h-8 pl-8 pr-3 text-[12.5px] rounded-md bg-[var(--bg-app)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--indigo)]"
+                        />
+                      </div>
+                    </div>
 
-                  {customFieldKeys.length > 0 && (
-                    <>
-                      <p className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-                        Custom fields
+                    <div className="max-h-[320px] overflow-y-auto p-1.5">
+                      {/* Shown — drag to reorder, eye to hide */}
+                      <p className="flex items-center justify-between px-1.5 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
+                        Shown
+                        {!q && <span className="font-data normal-case tracking-normal text-[var(--text-muted)]">drag to reorder</span>}
                       </p>
-                      {customFieldKeys.map((key) => {
-                        const id = `cf:${key}`;
-                        const on = visibleColumns.includes(id);
-                        return (
-                          <button
-                            key={id}
-                            onClick={() => toggleColumn(id)}
-                            className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left hover:bg-[var(--bg-hover)] transition-colors"
-                          >
-                            <Checkbox checked={on} onChange={() => toggleColumn(id)} aria-label={key} />
-                            <span className="flex-1 text-[12.5px] text-[var(--text-primary)] truncate">{key}</span>
+                      {shown.length === 0 && <p className="px-2 py-1.5 text-[12px] text-[var(--text-tertiary)]">No matching columns.</p>}
+                      {shown.map(({ id, i, label }) => (
+                        <div
+                          key={id}
+                          draggable={!q}
+                          onDragStart={() => setColDragIndex(i)}
+                          onDragOver={(e) => { if (colDragIndex !== null) e.preventDefault(); }}
+                          onDrop={(e) => { e.preventDefault(); if (colDragIndex !== null) moveColumn(colDragIndex, i); setColDragIndex(null); }}
+                          onDragEnd={() => setColDragIndex(null)}
+                          className={cn(
+                            'group/col flex items-center gap-1.5 px-1.5 h-8 rounded-lg transition-colors',
+                            colDragIndex === i ? 'opacity-50' : 'hover:bg-[var(--bg-hover)]'
+                          )}
+                        >
+                          {!q && <GripVertical className="h-3.5 w-3.5 flex-shrink-0 text-[var(--text-muted)] cursor-grab active:cursor-grabbing" />}
+                          <span className="flex-1 text-[12.5px] text-[var(--text-primary)] truncate">{label}</span>
+                          <button onClick={() => toggleColumn(id)} title="Hide column" className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-active)]">
+                            <Eye className="h-3.5 w-3.5" />
                           </button>
-                        );
-                      })}
-                    </>
-                  )}
+                        </div>
+                      ))}
 
-                  <div className="border-t border-[var(--border-subtle)] mt-1 pt-1">
-                    <button
-                      onClick={() => { setVisibleColumns(DEFAULT_COLUMNS); try { localStorage.setItem('contacts.columns', JSON.stringify(DEFAULT_COLUMNS)); } catch { /* ignore */ } }}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      Reset to default
-                    </button>
+                      {hidden.length > 0 && (
+                        <>
+                          <p className="px-1.5 pt-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Add columns</p>
+                          {hidden.map((c) => (
+                            <button
+                              key={c.id}
+                              onClick={() => toggleColumn(c.id)}
+                              className="w-full flex items-center gap-1.5 px-1.5 h-8 rounded-lg text-left hover:bg-[var(--bg-hover)] transition-colors"
+                            >
+                              <EyeOff className="h-3.5 w-3.5 flex-shrink-0 text-[var(--text-muted)]" />
+                              <span className="flex-1 text-[12.5px] text-[var(--text-secondary)] truncate">{c.label}</span>
+                              <Plus className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+                            </button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+
+                    <div className="border-t border-[var(--border-subtle)] p-1.5">
+                      <button
+                        onClick={() => { persistColumns(DEFAULT_COLUMNS); setColumnSearch(''); }}
+                        className="w-full flex items-center gap-2 px-1.5 h-8 rounded-lg text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Reset to default
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              );
+            })()}
           </div>
         </div>
 
@@ -1241,16 +1302,11 @@ export function ContactsListPage() {
                     <th className="sticky left-[44px] z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] min-w-[240px] px-3 py-2 shadow-[inset_-1px_0_0_var(--border-subtle)]">
                       <SortableHeader label="Contact" colKey="first_name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                     </th>
-                    {orderedColumns.map((col) => (
+                    {activeColumns.map((col) => (
                       <th key={col.id} className="bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] px-4 py-2 whitespace-nowrap min-w-[150px]">
                         {col.sortKey
                           ? <SortableHeader label={col.label} colKey={col.sortKey} sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                           : <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{col.label}</span>}
-                      </th>
-                    ))}
-                    {activeCustomKeys.map((key) => (
-                      <th key={`cf:${key}`} className="bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] px-4 py-2 whitespace-nowrap min-w-[150px]">
-                        <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{key}</span>
                       </th>
                     ))}
                     <th className="sticky right-0 z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] w-[112px] px-2 py-2 shadow-[inset_1px_0_0_var(--border-subtle)]" />
@@ -1297,16 +1353,9 @@ export function ContactsListPage() {
                             </div>
                           </div>
                         </td>
-                        {orderedColumns.map((col) => (
+                        {activeColumns.map((col) => (
                           <td key={col.id} className={cn('px-4 py-2 whitespace-nowrap border-b border-[var(--border-subtle)] min-w-[150px]', col.tdClass)}>
                             {col.render(contact)}
-                          </td>
-                        ))}
-                        {activeCustomKeys.map((key) => (
-                          <td key={`cf:${key}`} className="px-4 py-2 whitespace-nowrap border-b border-[var(--border-subtle)] min-w-[150px] max-w-[220px]">
-                            {contact.custom_fields?.[key]
-                              ? <span className="text-[12.5px] text-[var(--text-secondary)] truncate inline-block max-w-full align-bottom">{contact.custom_fields[key]}</span>
-                              : <span className="text-[12px] text-[var(--text-muted)]">—</span>}
                           </td>
                         ))}
                         <td className={cn('sticky right-0 z-[1] w-[112px] px-2 py-2 border-b border-[var(--border-subtle)] shadow-[inset_1px_0_0_var(--border-subtle)]', frozenBg)} onClick={(e) => e.stopPropagation()}>

@@ -98,8 +98,12 @@ export const contactsService = {
       case 'risky':
         query = query.not('dcs_verified_at', 'is', null).eq('is_bounced', false).gte('dcs_score', 50).lt('dcs_score', 80);
         break;
+      case 'not_found':
+        // Verified, but the domain has no mail server (MX) — "email not found"
+        query = query.not('dcs_verified_at', 'is', null).eq('is_bounced', false).eq('dcs_domain_ok', false).not('dcs_syntax_ok', 'is', false);
+        break;
       case 'invalid':
-        query = query.or('is_bounced.eq.true,and(dcs_verified_at.not.is.null,dcs_score.lt.50)');
+        query = query.or('is_bounced.eq.true,and(dcs_verified_at.not.is.null,dcs_syntax_ok.is.false),and(dcs_verified_at.not.is.null,dcs_domain_ok.not.is.false,dcs_score.lt.50)');
         break;
       case 'unverified':
         query = query.is('dcs_verified_at', null).eq('is_bounced', false);
@@ -466,7 +470,7 @@ export const contactsService = {
   // Verification-status breakdown for the summary pills. Scoped to a list when
   // given. Buckets mirror the client's derived states so the counts line up.
   async verificationBreakdown(userId: string, listId?: string) {
-    const empty = { total: 0, valid: 0, risky: 0, invalid: 0, unverified: 0, with_linkedin: 0 };
+    const empty = { total: 0, valid: 0, risky: 0, invalid: 0, not_found: 0, unverified: 0, with_linkedin: 0 };
 
     let listContactIds: string[] | null = null;
     if (listId) {
@@ -480,7 +484,7 @@ export const contactsService = {
 
     let q = supabaseAdmin
       .from('contacts')
-      .select('dcs_verified_at, dcs_score, is_bounced, linkedin_url')
+      .select('dcs_verified_at, dcs_score, dcs_syntax_ok, dcs_domain_ok, is_bounced, linkedin_url')
       .eq('user_id', userId);
     if (listContactIds) q = q.in('id', listContactIds);
 
@@ -491,8 +495,11 @@ export const contactsService = {
     const out = { ...empty, total: rows.length };
     for (const r of rows as any[]) {
       if (r.linkedin_url) out.with_linkedin++;
+      // Same ordered logic as the client's emailStatus()
       if (r.is_bounced) { out.invalid++; continue; }
       if (r.dcs_verified_at == null) { out.unverified++; continue; }
+      if (r.dcs_syntax_ok === false) { out.invalid++; continue; }
+      if (r.dcs_domain_ok === false) { out.not_found++; continue; }
       const score = r.dcs_score ?? 0;
       if (score >= 80) out.valid++;
       else if (score >= 50) out.risky++;
