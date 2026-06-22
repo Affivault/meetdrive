@@ -12,7 +12,6 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { PageHeader } from '../../components/shared/PageHeader';
-import { StatCard } from '../../components/shared/StatCard';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { Avatar } from '../../components/shared/Avatar';
 import { formatDate, formatRelativeTime, cn } from '../../lib/utils';
@@ -831,15 +830,19 @@ export function ContactsListPage() {
         ) : (
         <aside className="w-56 flex-shrink-0">
           <div className="sticky top-[60px] panel-inset p-1.5 space-y-0.5">
-            <div className="flex items-center justify-between px-1.5 pb-1.5 mb-0.5 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between gap-1 px-1.5 pb-1.5 mb-0.5 border-b border-[var(--border-subtle)]">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">Lists</span>
-              <button
-                onClick={toggleRail}
-                title="Hide lists"
-                className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-              >
-                <PanelLeftClose className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <button onClick={() => { setEditingFolder(null); setFolderModalOpen(true); }} className="icon-btn h-6 w-6" title="New folder">
+                  <FolderPlus className="h-3.5 w-3.5" />
+                </button>
+                <button onClick={() => setShowListModal(true)} className="icon-btn h-6 w-6" title="New list">
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+                <button onClick={toggleRail} title="Hide lists" className="icon-btn h-6 w-6">
+                  <PanelLeftClose className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           {/* All Contacts */}
           <button
@@ -862,28 +865,10 @@ export function ContactsListPage() {
           </button>
 
           {/* Lists section */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
-                Lead Lists
-              </span>
-              <div className="flex gap-0.5">
-                <button
-                  onClick={() => { setEditingFolder(null); setFolderModalOpen(true); }}
-                  className="icon-btn h-5 w-5"
-                  title="New folder"
-                >
-                  <FolderPlus className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={() => setShowListModal(true)}
-                  className="icon-btn h-5 w-5"
-                  title="New list"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
+          <div className="pt-1.5">
+            <span className="block px-2 mb-1 text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
+              Lead Lists
+            </span>
 
             <div className="space-y-0.5">
               {groupedLists.map((group) => {
@@ -1075,15 +1060,6 @@ export function ContactsListPage() {
 
       {/* Main content */}
       <div className="flex-1 min-w-0 space-y-4">
-        {/* KPI strip */}
-        {stats && (
-          <div className="grid grid-cols-3 gap-3">
-            <StatCard label="Total contacts" value={stats.total.toLocaleString()} icon={Users} accent="indigo" />
-            <StatCard label="Verified" value={(stats.verified ?? 0).toLocaleString()} icon={ShieldCheck} accent="emerald" hint={stats.total > 0 ? `${Math.round((stats.verified / stats.total) * 100)}% of total` : undefined} />
-            <StatCard label="Lists" value={lists?.length ?? 0} icon={FolderOpen} accent="violet" />
-          </div>
-        )}
-
         {/* Verification summary pills — counts per deliverability state, click to filter */}
         {breakdown && (
           <div className="flex items-center gap-2 flex-wrap">
