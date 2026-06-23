@@ -805,8 +805,11 @@
 /* ── Stagger cascade — children rise in sequence. Pair with `.stagger`
    on a container; respects the global reduced-motion collapse. */
 @keyframes staggerIn {
+  /* `to` omits transform so children settle to transform:none — a lingering
+     transform would make each child a containing block for position:fixed
+     descendants (trapping menus/popovers). */
   from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; }
 }
 .stagger > * {
   animation: staggerIn 0.5s var(--ease-out) both;

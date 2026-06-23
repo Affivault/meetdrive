@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { campaignsApi } from '../../api/campaigns.api';
@@ -433,16 +434,19 @@ export function CampaignsListPage() {
         </main>
       </div>
 
-      {/* Context menu */}
-      {contextMenuFor && (
-        <div
-          className="fixed z-50 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-xl py-1 min-w-[200px] animate-fade-in"
-          style={{
-            top: Math.max(8, Math.min(contextMenuFor.y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 300)),
-            left: Math.max(8, Math.min(contextMenuFor.x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 224)),
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
+      {/* Context menu — portaled to body so it can never be offset by an
+          ancestor transform, and clamped to stay fully on-screen */}
+      {contextMenuFor && createPortal(
+        <>
+          <div className="fixed inset-0 z-[60]" onClick={() => setContextMenuFor(null)} />
+          <div
+            className="fixed z-[61] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-xl py-1 min-w-[200px] max-h-[80vh] overflow-y-auto animate-fade-in"
+            style={{
+              top: Math.max(8, Math.min(contextMenuFor.y, window.innerHeight - 320)),
+              left: Math.max(8, Math.min(contextMenuFor.x, window.innerWidth - 224)),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
             Move to folder
           </div>
@@ -474,7 +478,9 @@ export function CampaignsListPage() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
-        </div>
+          </div>
+        </>,
+        document.body
       )}
 
       {/* Folder modal */}

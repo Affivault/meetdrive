@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { contactsApi, listsApi, tagsApi } from '../../api/contacts.api';
@@ -1041,16 +1042,18 @@ export function ContactsListPage() {
       </aside>
         )}
 
-      {/* List right-click context menu */}
-      {listContextMenu && (
-        <div
-          className="fixed z-50 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-xl py-1 min-w-[200px] animate-fade-in"
-          style={{
-            top: Math.max(8, Math.min(listContextMenu.y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 220)),
-            left: Math.max(8, Math.min(listContextMenu.x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 224)),
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
+      {/* List right-click context menu — portaled + clamped to the viewport */}
+      {listContextMenu && createPortal(
+        <>
+          <div className="fixed inset-0 z-[60]" onClick={() => setListContextMenu(null)} />
+          <div
+            className="fixed z-[61] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-xl py-1 min-w-[200px] max-h-[80vh] overflow-y-auto animate-fade-in"
+            style={{
+              top: Math.max(8, Math.min(listContextMenu.y, window.innerHeight - 240)),
+              left: Math.max(8, Math.min(listContextMenu.x, window.innerWidth - 224)),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
           <button
             onClick={() => {
               const list = (lists || []).find((l: any) => l.id === listContextMenu.listId);
@@ -1088,7 +1091,9 @@ export function ContactsListPage() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Move to trash
           </button>
-        </div>
+          </div>
+        </>,
+        document.body
       )}
 
       {/* Folder modal */}
