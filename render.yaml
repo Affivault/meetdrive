@@ -36,4 +36,7 @@ services:
   - type: redis
     name: sincerely-redis
     plan: free
-    maxmemoryPolicy: allkeys-lru
+    # noeviction is Render's recommended policy for job queues: when memory is
+    # full it rejects new writes (surfacing an error) rather than silently
+    # evicting queued email jobs, which allkeys-lru would do.
+    maxmemoryPolicy: noeviction
