@@ -562,7 +562,9 @@ export function FlowBuilder({ steps, onStepsChange, onEditStep, editingStep }: F
 
   const removeStep = useCallback((index: number) => {
     onStepsChange(steps.filter((_, i) => i !== index));
+    // Keep the editor pointed at the same step after the indices shift down.
     if (editingStep === index) onEditStep(-1);
+    else if (editingStep !== null && editingStep > index) onEditStep(editingStep - 1);
   }, [steps, onStepsChange, editingStep, onEditStep]);
 
   const moveStep = useCallback((from: number, to: number) => {
@@ -571,7 +573,10 @@ export function FlowBuilder({ steps, onStepsChange, onEditStep, editingStep }: F
     const [moved] = newSteps.splice(from, 1);
     newSteps.splice(to, 0, moved);
     onStepsChange(newSteps);
+    // Remap the edited step's index to follow the reorder.
     if (editingStep === from) onEditStep(to);
+    else if (editingStep !== null && editingStep > from && editingStep <= to) onEditStep(editingStep - 1);
+    else if (editingStep !== null && editingStep < from && editingStep >= to) onEditStep(editingStep + 1);
   }, [steps, onStepsChange, editingStep, onEditStep]);
 
   const updateStep = useCallback((index: number, updates: Partial<FlowStep>) => {

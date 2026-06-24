@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
+import { supabaseAdmin } from '../config/supabase.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
   userEmail?: string;
 }
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   // If API key middleware already authenticated, skip JWT validation
   if (req.userId && (req as any).authMethod === 'apikey') {
     next();
@@ -24,37 +25,34 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    let decoded: { sub: string; email: string; exp: number } | null = null;
-
     if (env.SUPABASE_JWT_SECRET) {
-      // Verify signature when the JWT secret is configured
-      decoded = jwt.verify(token, env.SUPABASE_JWT_SECRET) as {
+      // Fast path: verify the signature locally with the configured secret.
+      const decoded = jwt.verify(token, env.SUPABASE_JWT_SECRET) as {
         sub: string;
         email: string;
         exp: number;
       };
-    } else {
-      // Fallback: decode without verification (relies on Supabase token issuance)
-      decoded = jwt.decode(token) as {
-        sub: string;
-        email: string;
-        exp: number;
-      } | null;
-
-      // Manual expiration check when not using jwt.verify()
-      if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
-        res.status(401).json({ error: 'Token expired' });
+      if (!decoded || !decoded.sub) {
+        res.status(401).json({ error: 'Invalid token' });
         return;
       }
-    }
-
-    if (!decoded || !decoded.sub) {
-      res.status(401).json({ error: 'Invalid token' });
+      req.userId = decoded.sub;
+      req.userEmail = decoded.email;
+      next();
       return;
     }
 
-    req.userId = decoded.sub;
-    req.userEmail = decoded.email;
+    // Secure fallback (no local secret configured): validate the token with
+    // Supabase itself. We must NEVER trust an unverified jwt.decode() here — that
+    // would let a forged token impersonate any user. getUser() checks the
+    // signature server-side. Set SUPABASE_JWT_SECRET to use the faster local path.
+    const { data, error } = await supabaseAdmin.auth.getUser(token);
+    if (error || !data?.user) {
+      res.status(401).json({ error: 'Invalid token' });
+      return;
+    }
+    req.userId = data.user.id;
+    req.userEmail = data.user.email ?? '';
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });

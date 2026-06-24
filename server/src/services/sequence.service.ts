@@ -35,7 +35,13 @@ function isWithinSendWindow(campaign: any): boolean {
   const windowStart = campaign.send_window_start || '00:00';
   const windowEnd = campaign.send_window_end || '23:59';
   const currentTime = `${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}`;
-  if (currentTime < windowStart || currentTime > windowEnd) return false;
+  if (windowStart <= windowEnd) {
+    // Normal same-day window (e.g. 09:00–17:00).
+    if (currentTime < windowStart || currentTime > windowEnd) return false;
+  } else {
+    // Overnight window that wraps past midnight (e.g. 22:00–06:00).
+    if (currentTime < windowStart && currentTime > windowEnd) return false;
+  }
 
   return true;
 }

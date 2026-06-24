@@ -17,9 +17,9 @@ export function ToolkitPage() {
     queryFn: analyticsApi.deliverability,
   });
 
-  const highDcs = deliverability?.dcs_distribution.find((d) => d.label.startsWith('High'))?.value ?? 0;
-  const medDcs  = deliverability?.dcs_distribution.find((d) => d.label.startsWith('Medium'))?.value ?? 0;
-  const lowDcs  = deliverability?.dcs_distribution.find((d) => d.label.startsWith('Low'))?.value ?? 0;
+  const highDcs = deliverability?.dcs_distribution?.find((d) => d.label.startsWith('High'))?.value ?? 0;
+  const medDcs  = deliverability?.dcs_distribution?.find((d) => d.label.startsWith('Medium'))?.value ?? 0;
+  const lowDcs  = deliverability?.dcs_distribution?.find((d) => d.label.startsWith('Low'))?.value ?? 0;
   const bouncedContacts = deliverability?.bounced_contacts ?? 0;
   const totalVerified = highDcs + medDcs;
 

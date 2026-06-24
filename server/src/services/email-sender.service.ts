@@ -201,15 +201,18 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
     console.log(`[EmailSender] Using campaign default SMTP: ${smtpAccount?.label || smtpAccount?.id}`);
   }
 
-  // Last resort: any active SMTP account for this user
+  // Last resort: any active AND verified SMTP account for this user. We require
+  // is_verified so we never try to send from an unverified/dead mailbox (which
+  // would just fail every send); SSE selection already enforces the same.
   if (!smtpAccount) {
     const { data: anyAccount } = await supabaseAdmin
       .from('smtp_accounts')
       .select('*')
       .eq('user_id', campaign.user_id)
       .eq('is_active', true)
+      .eq('is_verified', true)
       .limit(1)
-      .single();
+      .maybeSingle();
     if (anyAccount) {
       smtpAccount = anyAccount;
       console.log(`[EmailSender] Last resort SMTP: ${smtpAccount.label || smtpAccount.id}`);
@@ -362,13 +365,16 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
         .from('campaign_contacts')
         .update({ current_step_order: nextStepOrder, next_send_at: nextSendAt.toISOString() })
         .eq('id', campaignContactId);
-      if (advanceError) throw new Error(`Failed to advance campaign contact: ${advanceError.message}`);
+      // The email is already sent — never throw after a successful send, or the
+      // caller marks the contact errored and re-sends this step next run
+      // (duplicate email). Log the advancement failure instead.
+      if (advanceError) console.error(`[EmailSender] Sent OK but failed to advance contact ${campaignContactId}: ${advanceError.message}`);
     } else {
       const { error: completeError } = await supabaseAdmin
         .from('campaign_contacts')
         .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('id', campaignContactId);
-      if (completeError) throw new Error(`Failed to complete campaign contact: ${completeError.message}`);
+      if (completeError) console.error(`[EmailSender] Sent OK but failed to complete contact ${campaignContactId}: ${completeError.message}`);
 
       fireEvent(campaign.user_id, 'campaign.completed', {
         campaign_id: campaignId,
