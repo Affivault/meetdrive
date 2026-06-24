@@ -187,10 +187,12 @@ export const contactsService = {
 
     // Apply tag updates when tag_ids is explicitly provided
     if (Array.isArray(tag_ids)) {
-      await supabaseAdmin.from('contact_tags').delete().eq('contact_id', id);
+      const { error: delErr } = await supabaseAdmin.from('contact_tags').delete().eq('contact_id', id);
+      if (delErr) throw new AppError(`Failed to remove tags: ${delErr.message}`, 500);
       if (tag_ids.length > 0) {
         const tagRows = tag_ids.map((tagId: string) => ({ contact_id: id, tag_id: tagId }));
-        await supabaseAdmin.from('contact_tags').insert(tagRows);
+        const { error: insErr } = await supabaseAdmin.from('contact_tags').insert(tagRows);
+        if (insErr) throw new AppError(`Failed to apply tags: ${insErr.message}`, 500);
       }
     }
 

@@ -13,7 +13,7 @@ export const analyticsController = {
 
   async trend(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 30;
+      const days = req.query.days ? (parseInt(req.query.days as string, 10) || 30) : 30;
       const data = await analyticsService.trend(req.userId!, days);
       res.json(data);
     } catch (err) { next(err); }

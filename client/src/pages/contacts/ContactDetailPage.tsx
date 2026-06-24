@@ -26,6 +26,7 @@ import {
   X,
   ArrowRightLeft,
   Check,
+  Copy,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -191,7 +192,7 @@ export function ContactDetailPage() {
           <div className="card p-4">
             <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Contact Info</h2>
             <div className="space-y-2.5">
-              <InfoRow icon={Mail} label="Email" value={contact.email} />
+              <InfoRow icon={Mail} label="Email" value={contact.email} copyable />
               {contact.company && <InfoRow icon={Building2} label="Company" value={contact.company} />}
               {contact.job_title && <InfoRow icon={Briefcase} label="Job Title" value={contact.job_title} />}
               {contact.phone && <InfoRow icon={Phone} label="Phone" value={contact.phone} />}
@@ -388,29 +389,55 @@ function InfoRow({
   label,
   value,
   isLink,
+  copyable,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   isLink?: boolean;
+  copyable?: boolean;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 group/inforow">
       <Icon className="h-4 w-4 text-[var(--text-secondary)] mt-0.5 shrink-0" />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-xs text-[var(--text-secondary)]">{label}</p>
-        {isLink ? (
-          <a
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-[var(--text-primary)] hover:underline truncate block"
-          >
-            {value}
-          </a>
-        ) : (
-          <p className="text-sm text-[var(--text-primary)]">{value}</p>
-        )}
+        <div className="flex items-center gap-1.5">
+          {isLink ? (
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[var(--text-primary)] hover:underline truncate block"
+            >
+              {value}
+            </a>
+          ) : (
+            <p className="text-sm text-[var(--text-primary)] truncate">{value}</p>
+          )}
+          {copyable && (
+            <button
+              onClick={handleCopy}
+              title="Copy to clipboard"
+              className="shrink-0 opacity-0 group-hover/inforow:opacity-100 transition-opacity p-0.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+            >
+              {copied ? (
+                <Check className="h-3 w-3 text-[var(--success)]" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
