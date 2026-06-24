@@ -266,7 +266,7 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
   };
 
   const fromAddress = smtpAccount.label
-    ? `"${smtpAccount.label.replace(/"/g, "'")}" <${smtpAccount.email_address}>`
+    ? `"${smtpAccount.label.replace(/"/g, '\\"')}" <${smtpAccount.email_address}>`
     : smtpAccount.email_address;
 
   let sendResult;

@@ -74,11 +74,12 @@ export async function updateEndpoint(
 }
 
 export async function deleteEndpoint(userId: string, id: string): Promise<void> {
-  await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from('webhook_endpoints')
     .delete()
     .eq('id', id)
     .eq('user_id', userId);
+  if (error) throw error;
 }
 
 // ============================================

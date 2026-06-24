@@ -238,7 +238,7 @@ export async function verifyContact(contactId: string): Promise<DcsVerificationR
 
   const result = await verifyEmail(contact.email);
 
-  await supabaseAdmin
+  const { error: updateErr } = await supabaseAdmin
     .from('contacts')
     .update({
       dcs_score: result.score,
@@ -249,6 +249,7 @@ export async function verifyContact(contactId: string): Promise<DcsVerificationR
       dcs_fail_reason: result.fail_reason,
     })
     .eq('id', contactId);
+  if (updateErr) throw new Error(`Failed to save verification result: ${updateErr.message}`);
 
   if (contact.user_id) {
     fireEvent(contact.user_id, 'contact.verified', {
@@ -290,7 +291,7 @@ export async function batchVerify(
   for (const contact of contacts) {
     const result = await verifyEmail(contact.email);
 
-    await supabaseAdmin
+    const { error: batchUpdateErr } = await supabaseAdmin
       .from('contacts')
       .update({
         dcs_score: result.score,
@@ -301,6 +302,12 @@ export async function batchVerify(
         dcs_fail_reason: result.fail_reason,
       })
       .eq('id', contact.id);
+
+    if (batchUpdateErr) {
+      console.error(`[Verification] Failed to save result for contact ${contact.id}:`, batchUpdateErr.message);
+      failed++;
+      continue;
+    }
 
     if (result.score >= 60) verified++;
     else failed++;
