@@ -1979,7 +1979,7 @@ export function CampaignCreatePage() {
                   type="text"
                   value={aiProduct}
                   onChange={(e) => setAiProduct(e.target.value)}
-                  placeholder="e.g. MeetDrive email automation"
+                  placeholder="e.g. Sincerely email automation"
                   className={inputCls}
                 />
               </Field>

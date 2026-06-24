@@ -1,5 +1,5 @@
 /* =========================================================
-   MeetDrive — Landing & auth design system
+   Sincerely — Landing & auth design system
    Dark premium · Plus Jakarta Sans + Newsreader
    Scoped under .md-landing to isolate from the app shell.
    ========================================================= */
@@ -1069,7 +1069,7 @@
   .intg__grid { grid-template-columns: 1fr; }
 }
 /* =========================================================
-   MeetDrive — atmosphere & density overrides
+   Sincerely — atmosphere & density overrides
    driven by data-* attributes on the .md-landing wrapper.
    ========================================================= */
 
@@ -1179,7 +1179,7 @@
 .md-landing[data-density="roomy"] .lp-section-head { margin-bottom: 88px; }
 
 /* =========================================================
-   MeetDrive — Auth (login / signup) · shares landing tokens
+   Sincerely — Auth (login / signup) · shares landing tokens
    Scoped under .md-auth.
    ========================================================= */
 .md-auth { --bg: #070A14; --bg-2: #0B0F1C; --surface: rgba(255,255,255,0.035);

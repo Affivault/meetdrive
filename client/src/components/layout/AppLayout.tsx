@@ -61,8 +61,8 @@ function AppContent() {
   useEffect(() => {
     const page = PAGE_TITLES.find(([prefix]) => location.pathname.startsWith(prefix))?.[1];
     const badge = unreadCount > 0 ? ` (${unreadCount})` : '';
-    document.title = `${page ? `${page} · ` : ''}MeetDrive${badge}`;
-    return () => { document.title = 'MeetDrive'; };
+    document.title = `${page ? `${page} · ` : ''}Sincerely${badge}`;
+    return () => { document.title = 'Sincerely'; };
   }, [unreadCount, location.pathname]);
 
   // Global ⌘K / Ctrl+K to summon the command palette

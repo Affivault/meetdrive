@@ -22,7 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useCommandPalette } from '../../context/CommandPaletteContext';
 import { useSidebar } from '../../context/SidebarContext';
-import { MeetDriveLogo } from '../MeetDriveLogo';
+import { SincerelyLogo } from '../SincerelyLogo';
 import { cn } from '../../lib/utils';
 
 export function Header() {
@@ -61,7 +61,7 @@ export function Header() {
     <header className="fixed top-0 inset-x-0 z-50 flex h-[56px] items-center border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/90 backdrop-blur-xl gap-3 pr-6">
       {/* Logo zone — fixed, never collapses */}
       <div className="flex items-center gap-1 h-full pl-4 pr-3 flex-shrink-0">
-        <span className="overflow-hidden"><MeetDriveLogo /></span>
+        <span className="overflow-hidden"><SincerelyLogo /></span>
         <button
           onClick={toggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

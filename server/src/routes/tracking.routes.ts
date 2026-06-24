@@ -284,7 +284,7 @@ router.get('/unsubscribe/:trackingId', async (req: Request, res: Response) => {
 
   return res.send(`<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unsubscribed — MeetDrive</title>
+<title>Unsubscribed — Sincerely</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#f0f0ff 0%,#f9fafb 50%,#fff5f5 100%);color:#111;padding:1rem}
@@ -307,7 +307,7 @@ router.get('/unsubscribe/:trackingId', async (req: Request, res: Response) => {
   <p>You've been successfully removed from this mailing list and won't receive any more emails from this campaign.</p>
   <p style="margin-top:.75rem">If this was a mistake, please reply directly to the sender's email to be re-added.</p>
 </div>
-<div class="footer">Powered by <a href="https://meetdrive.io" target="_blank" rel="noopener">MeetDrive</a></div>
+<div class="footer">Powered by <a href="https://usesincerely.com" target="_blank" rel="noopener">Sincerely</a></div>
 </body></html>`);
 });
 

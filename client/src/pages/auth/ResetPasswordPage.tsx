@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import { ArrowRight, KeyRound, AlertTriangle } from 'lucide-react';
-import { MeetDriveLogo } from '../../components/MeetDriveLogo';
+import { SincerelyLogo } from '../../components/SincerelyLogo';
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export function ResetPasswordPage() {
         {/* Logo */}
         <div className="mb-8 flex justify-center">
           <Link to="/">
-            <span className="text-xl"><MeetDriveLogo /></span>
+            <span className="text-xl"><SincerelyLogo /></span>
           </Link>
         </div>
 

@@ -5,7 +5,7 @@ import { fireEvent } from './webhook.service.js';
 import { suppressionService } from './suppression.service.js';
 
 /**
- * SARA - MeetDrive Autonomous Reply Agent
+ * SARA - Sincerely Autonomous Reply Agent
  * Classifies reply intent and drafts context-aware responses.
  */
 

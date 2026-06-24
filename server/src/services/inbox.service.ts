@@ -523,7 +523,7 @@ export const inboxService = {
     } catch (decryptErr: any) {
       throw new AppError(`Failed to decrypt SMTP credentials for ${smtpAccount.label || smtpAccount.email_address}: ${decryptErr.message}`, 500);
     }
-    const domain = smtpAccount.email_address?.split('@')[1] || 'meetdrive.io';
+    const domain = smtpAccount.email_address?.split('@')[1] || 'usesincerely.com';
     const newMessageId = `<${crypto.randomUUID()}@${domain}>`;
 
     const subject = original.subject?.startsWith('Re:')
@@ -592,7 +592,7 @@ export const inboxService = {
     } catch (decryptErr: any) {
       throw new AppError(`Failed to decrypt SMTP credentials for ${smtpAccount.label || smtpAccount.email_address}: ${decryptErr.message}`, 500);
     }
-    const domain = smtpAccount.email_address?.split('@')[1] || 'meetdrive.io';
+    const domain = smtpAccount.email_address?.split('@')[1] || 'usesincerely.com';
     const newMessageId = `<${crypto.randomUUID()}@${domain}>`;
     const subject = `Fwd: ${(original.subject || '(no subject)').replace(/^Fwd:\s*/i, '')}`;
 
@@ -649,7 +649,7 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
     } catch (decryptErr: any) {
       throw new AppError(`Failed to decrypt SMTP credentials for ${smtpAccount.label || smtpAccount.email_address}: ${decryptErr.message}`, 500);
     }
-    const domain = smtpAccount.email_address?.split('@')[1] || 'meetdrive.io';
+    const domain = smtpAccount.email_address?.split('@')[1] || 'usesincerely.com';
     const messageId = `<${crypto.randomUUID()}@${domain}>`;
     // Use rich HTML from editor if provided, otherwise convert plain text
     const htmlBody = input.body_html || `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6;color:#1a1a1a;">${input.body.replace(/\n/g, '<br/>')}</div>`;
@@ -693,7 +693,7 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
   async scheduleSend(userId: string, input: { to: string; subject: string; body: string; body_html?: string; smtp_account_id?: string; scheduled_at: string }) {
     const smtpAccount = await findSmtpAccount(userId, input.smtp_account_id);
 
-    const domain = smtpAccount.email_address?.split('@')[1] || 'meetdrive.io';
+    const domain = smtpAccount.email_address?.split('@')[1] || 'usesincerely.com';
     const messageId = `<${crypto.randomUUID()}@${domain}>`;
     const htmlBody = input.body_html || `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6;color:#1a1a1a;">${input.body.replace(/\n/g, '<br/>')}</div>`;
 
@@ -731,7 +731,7 @@ ${original.body_html || `<p>${original.body_text || ''}</p>`}`;
     if (!original) throw new AppError('Message not found', 404);
 
     const smtpAccount = await findSmtpAccount(userId, smtpAccountId || original.smtp_account_id);
-    const domain = smtpAccount.email_address?.split('@')[1] || 'meetdrive.io';
+    const domain = smtpAccount.email_address?.split('@')[1] || 'usesincerely.com';
     const newMessageId = `<${crypto.randomUUID()}@${domain}>`;
 
     const subject = original.subject?.startsWith('Re:')

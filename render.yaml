@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: meetdrive-api
+    name: sincerely-api
     runtime: node
     # Render auto-detects Node version from .nvmrc / engines field; pin here too.
     buildCommand: npm install --include=dev && npm run build --workspace=shared && npm run build --workspace=server
@@ -19,7 +19,7 @@ services:
         sync: false
       - key: REDIS_URL
         fromService:
-          name: meetdrive-redis
+          name: sincerely-redis
           type: redis
           property: connectionString
       - key: API_BASE_URL
@@ -34,6 +34,6 @@ services:
         sync: false
 
   - type: redis
-    name: meetdrive-redis
+    name: sincerely-redis
     plan: free
     maxmemoryPolicy: allkeys-lru

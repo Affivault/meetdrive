@@ -1,12 +1,12 @@
 import { useId } from 'react';
 
 /**
- * MeetDrive logo — the brand mark (gradient "lightning M") + the
- * "meetdrive.io" wordmark, matching the marketing landing page. Styles are
+ * Sincerely logo — the brand mark (gradient "lightning M") + the
+ * "usesincerely.com" wordmark, matching the marketing landing page. Styles are
  * inline + em-based so it renders identically in the app shell and on the
  * auth pages, and scales with the surrounding font-size.
  */
-export function MeetDriveLogo({ className = '', inverted = false }: { className?: string; inverted?: boolean }) {
+export function SincerelyLogo({ className = '', inverted = false }: { className?: string; inverted?: boolean }) {
   const gid = useId();
   const base = inverted ? '#fff' : 'var(--text-primary)';
 
@@ -44,9 +44,9 @@ export function MeetDriveLogo({ className = '', inverted = false }: { className?
         </svg>
       </span>
       <span style={{ color: base }}>
-        meet
-        <span style={{ background: 'linear-gradient(120deg,#8A4DFC,#2A71FC)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>drive</span>
-        <span style={{ color: '#4F8BFC', fontWeight: 600 }}>.io</span>
+        use
+        <span style={{ background: 'linear-gradient(120deg,#8A4DFC,#2A71FC)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>sincerely</span>
+        <span style={{ color: '#4F8BFC', fontWeight: 600 }}>.com</span>
       </span>
     </span>
   );
@@ -56,7 +56,7 @@ export function MeetDriveLogo({ className = '', inverted = false }: { className?
  * Compact mark — just the gradient "lightning M", for favicon / collapsed
  * contexts. Sized by `className` (defaults to h-7 w-7).
  */
-export function MeetDriveLogoMark({ className = 'h-7 w-7' }: { className?: string; inverted?: boolean }) {
+export function SincerelyLogoMark({ className = 'h-7 w-7' }: { className?: string; inverted?: boolean }) {
   const gid = useId();
   return (
     <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>

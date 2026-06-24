@@ -23,7 +23,7 @@ import {
 } from 'recharts';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MeetDrive — Dashboard
+   Sincerely — Dashboard
    A calm, monochrome-leaning operating surface. One accent (indigo); colour
    lives only in the data, as a tonal scale. Typography and rhythm carry it.
    ═══════════════════════════════════════════════════════════════════════ */

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import { ArrowRight, ArrowLeft, Mail } from 'lucide-react';
-import { MeetDriveLogo } from '../../components/MeetDriveLogo';
+import { SincerelyLogo } from '../../components/SincerelyLogo';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -33,7 +33,7 @@ export function ForgotPasswordPage() {
         {/* Logo */}
         <div className="mb-8 flex justify-center">
           <Link to="/">
-            <span className="text-xl"><MeetDriveLogo /></span>
+            <span className="text-xl"><SincerelyLogo /></span>
           </Link>
         </div>
 

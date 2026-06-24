@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import './meetdrive-landing.css';
+import './sincerely-landing.css';
 
-/* MeetDrive marketing site — ported from the MeetDrive Landing design.
+/* Sincerely marketing site — ported from the Sincerely Landing design.
    Dark premium aesthetic; everything is scoped under `.md-landing`. The
    design-tool tweak panel is intentionally dropped; the brand mood / flat
    atmosphere / roomy density defaults are baked onto the wrapper. */
@@ -53,7 +53,7 @@ function Header() {
       <div className="lp-header__inner">
         <a className="lp-header__logo" href="#top">
           <span className="lp-header__logo-mark"><Icon.Mark /></span>
-          <span className="lp-header__logo-name">meet<span className="lp-header__logo-grad">drive</span><span className="lp-header__logo-tld">.io</span></span>
+          <span className="lp-header__logo-name">use<span className="lp-header__logo-grad">sincerely</span><span className="lp-header__logo-tld">.com</span></span>
         </a>
         <nav className="lp-header__nav">
           <a className="lp-header__link" href="#how">How it works</a>
@@ -121,7 +121,7 @@ function Hero() {
           books the <span className="lp-hero__em">meeting</span>.
         </h1>
         <p className="lp-hero__sub">
-          MeetDrive ships your outbound at scale &mdash; with deliverability, sequencing,
+          Sincerely ships your outbound at scale &mdash; with deliverability, sequencing,
           and an AI co-pilot that turns every reply into a booked meeting.
         </p>
         <div className="lp-hero__ctas">
@@ -139,7 +139,7 @@ function Hero() {
             <span className="mk__dot" />
             <span className="mk__dot" />
             <span className="mk__dot" />
-            <div className="mk__url"><Icon.Lock /> app.meetdrive.io / campaigns</div>
+            <div className="mk__url"><Icon.Lock /> app.usesincerely.com / campaigns</div>
             <span className="mk__live"><span className="mk__live-dot" />Live</span>
           </div>
           <div className="mk__body">
@@ -254,7 +254,7 @@ function Logos() {
 
 function HowItWorks() {
   const steps = [
-    { n: '01', icon: <Icon.Shield />, title: 'Connect & warm up', body: 'Plug in your sending inboxes. MeetDrive auto-warms your domains across 50+ provider networks so you land in the primary inbox from day one.' },
+    { n: '01', icon: <Icon.Shield />, title: 'Connect & warm up', body: 'Plug in your sending inboxes. Sincerely auto-warms your domains across 50+ provider networks so you land in the primary inbox from day one.' },
     { n: '02', icon: <Icon.GitBranch />, title: 'Build & launch', body: 'Compose branching sequences with CRM-backed personalization, then launch to thousands of leads in under 30 seconds.' },
     { n: '03', icon: <Icon.Sparkles />, title: 'SARA books the meeting', body: 'Every reply is read, classified, and answered in your tone. Hot leads get booked straight onto your calendar — hands free.' },
   ];
@@ -477,7 +477,7 @@ function SARA() {
       role: 'Head of Growth · Stripe',
       campaign: 'Q4 Outbound · Series A founders',
       message: "Hey,\n\nThis is actually pretty timely &mdash; we're evaluating outbound tools this quarter. Could you send some times next week to chat?\n\nMaya",
-      draft: "Hi Maya,\n\nGreat to hear &mdash; happy to walk you through MeetDrive. I have a few slots open next week:\n\n• Tue Apr 14, 10:00 AM PT\n• Wed Apr 15, 2:00 PM PT\n• Thu Apr 16, 9:30 AM PT\n\nIf none of those work, here's my calendar. I'll plan for 30 minutes and tailor the demo to your current outbound stack.\n\nBest,\nAlex",
+      draft: "Hi Maya,\n\nGreat to hear &mdash; happy to walk you through Sincerely. I have a few slots open next week:\n\n• Tue Apr 14, 10:00 AM PT\n• Wed Apr 15, 2:00 PM PT\n• Thu Apr 16, 9:30 AM PT\n\nIf none of those work, here's my calendar. I'll plan for 30 minutes and tailor the demo to your current outbound stack.\n\nBest,\nAlex",
     },
     {
       id: 1, name: 'David Okafor', initials: 'DO', color: 'linear-gradient(135deg,#34d399,#10b981)',
@@ -965,7 +965,7 @@ function Pricing() {
 function Testimonials() {
   const quotes = [
     {
-      body: "We replaced three tools with MeetDrive and our reply rate doubled in the first month. SARA alone saves our team about 12 hours a week.",
+      body: "We replaced three tools with Sincerely and our reply rate doubled in the first month. SARA alone saves our team about 12 hours a week.",
       stat: '2.4×', statLabel: 'reply rate growth in 30 days', name: 'Maya Chen', role: 'Head of Growth, Brightline', initials: 'MC',
     },
     {
@@ -983,7 +983,7 @@ function Testimonials() {
         <div className="lp-section-head">
           <span className="lp-eyebrow">Customers</span>
           <h2 className="lp-h2">Loved by teams that <em>actually</em> send.</h2>
-          <p className="lp-lede">4,200+ outbound teams ship more pipeline with MeetDrive &mdash; here's what a few of them say.</p>
+          <p className="lp-lede">4,200+ outbound teams ship more pipeline with Sincerely &mdash; here's what a few of them say.</p>
         </div>
         <div className="lp-testi__grid">
           {quotes.map((q, i) => (
@@ -1011,8 +1011,8 @@ function Testimonials() {
 
 function FAQ() {
   const qs = [
-    { q: 'How fast can I start sending?', a: 'Most teams launch their first campaign the same afternoon. Connect an inbox, import a list, and MeetDrive handles warmup and throttling automatically in the background.' },
-    { q: 'Do you provide domains and inboxes?', a: 'Yes. Bring your own, or spin up managed sending domains and mailboxes inside MeetDrive — pre-configured with SPF, DKIM, and DMARC and warmed for you.' },
+    { q: 'How fast can I start sending?', a: 'Most teams launch their first campaign the same afternoon. Connect an inbox, import a list, and Sincerely handles warmup and throttling automatically in the background.' },
+    { q: 'Do you provide domains and inboxes?', a: 'Yes. Bring your own, or spin up managed sending domains and mailboxes inside Sincerely — pre-configured with SPF, DKIM, and DMARC and warmed for you.' },
     { q: 'How does warmup actually work?', a: 'New domains ramp to production volume over 14 days across 50+ provider networks, building real engagement signals and sender reputation before you send a single campaign.' },
     { q: 'Will SARA sound like a robot?', a: 'SARA trains on your top-performing replies and drafts in your tone. Every draft is yours to review, edit, or send — you stay in control of every message that goes out.' },
     { q: 'Can I keep my existing CRM?', a: 'Two-way sync with Salesforce, HubSpot, Pipedrive and more keeps leads, activity, and booked meetings flowing in both directions in real time.' },
@@ -1078,7 +1078,7 @@ function Footer() {
           <div className="lp-footer__brand">
             <a className="lp-header__logo" href="#top">
               <span className="lp-header__logo-mark"><Icon.Mark /></span>
-              <span className="lp-header__logo-name">meet<span className="lp-header__logo-grad">drive</span><span className="lp-header__logo-tld">.io</span></span>
+              <span className="lp-header__logo-name">use<span className="lp-header__logo-grad">sincerely</span><span className="lp-header__logo-tld">.com</span></span>
             </a>
             <p className="lp-footer__tagline">Cold email that books meetings. Built for outbound teams that care about both scale and signal.</p>
             <div className="lp-footer__socials">
@@ -1107,7 +1107,7 @@ function Footer() {
           </div>
         </div>
         <div className="lp-footer__bottom">
-          <p className="lp-footer__copy">&copy; 2026 MeetDrive, Inc. &middot; All rights reserved.</p>
+          <p className="lp-footer__copy">&copy; 2026 Sincerely, Inc. &middot; All rights reserved.</p>
           <a className="lp-footer__status" href="#top">
             <span className="lp-footer__status-dot" />
             All systems operational

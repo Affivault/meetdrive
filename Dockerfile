@@ -1,4 +1,4 @@
-# MeetDrive Backend Server
+# Sincerely Backend Server
 # Deploys the Express API + BullMQ workers
 
 FROM node:20-slim

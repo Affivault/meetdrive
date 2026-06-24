@@ -92,7 +92,7 @@ export const smtpController = {
         return res.status(500).json({ error: `Failed to decrypt SMTP password: ${decryptErr.message}` });
       }
 
-      const htmlBody = body_html || '<p>This is a test email from MeetDrive.</p>';
+      const htmlBody = body_html || '<p>This is a test email from Sincerely.</p>';
       await sendViaSmtp({
         smtpHost: account.smtp_host,
         smtpPort: account.smtp_port,

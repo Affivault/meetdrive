@@ -103,7 +103,7 @@ export const smtpService = {
         smtpPass: password,
         from: account.email_address,
         to: account.email_address,
-        subject: '[MeetDrive] SMTP Verification',
+        subject: '[Sincerely] SMTP Verification',
         text: 'Your SMTP account has been verified successfully.',
       });
       await supabaseAdmin

@@ -253,12 +253,12 @@ export async function sendCampaignEmail(params: SendEmailParams): Promise<void> 
   }
 
   // 5. Send via relay (Vercel) or direct SMTP
-  const domain = (smtpAccount.email_address || '').split('@')[1] || 'meetdrive.io';
+  const domain = (smtpAccount.email_address || '').split('@')[1] || 'usesincerely.com';
   const messageId = `<${crypto.randomUUID()}@${domain}>`;
   const emailHeaders: Record<string, string> = {
-    'X-MeetDrive-Campaign': campaignId,
-    'X-MeetDrive-Contact': contactId,
-    'X-MeetDrive-Step': stepId,
+    'X-Sincerely-Campaign': campaignId,
+    'X-Sincerely-Contact': contactId,
+    'X-Sincerely-Step': stepId,
     ...(campaign.include_unsubscribe === true ? {
       'List-Unsubscribe': `<${unsubUrl}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',

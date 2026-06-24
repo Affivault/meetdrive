@@ -194,9 +194,9 @@ app.post('/debug/send-email', async (req, res) => {
         smtpPass: password,
         from: account.email_address,
         to,
-        subject: `[MeetDrive Debug] Test email at ${new Date().toISOString()}`,
-        html: '<h2>MeetDrive Debug Test</h2><p>If you see this email, your SMTP configuration is working correctly.</p>',
-        text: 'MeetDrive Debug Test - If you see this email, your SMTP configuration is working correctly.',
+        subject: `[Sincerely Debug] Test email at ${new Date().toISOString()}`,
+        html: '<h2>Sincerely Debug Test</h2><p>If you see this email, your SMTP configuration is working correctly.</p>',
+        text: 'Sincerely Debug Test - If you see this email, your SMTP configuration is working correctly.',
       });
       steps.push(`5. EMAIL SENT OK — messageId: ${result.messageId}, accepted: ${JSON.stringify(result.accepted)}, rejected: ${JSON.stringify(result.rejected)}`);
     } catch (err: any) {

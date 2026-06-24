@@ -34,7 +34,7 @@ const PROVIDER_DKIM_SELECTORS: Record<string, string[]> = {
 };
 
 function generateVerificationToken(): string {
-  return `meetdrive-verify=${crypto.randomBytes(16).toString('hex')}`;
+  return `sincerely-verify=${crypto.randomBytes(16).toString('hex')}`;
 }
 
 async function performDnsCheck(domain: string, verificationToken: string): Promise<DnsCheckResult> {
@@ -152,7 +152,7 @@ function buildRecordInstructions(domain: string, verificationToken: string, dnsC
     type: 'TXT',
     host: domain,
     value: verificationToken,
-    purpose: 'Domain ownership verification for MeetDrive',
+    purpose: 'Domain ownership verification for Sincerely',
     status: dnsCheck.verification_txt.found ? 'verified' : 'missing',
   });
 

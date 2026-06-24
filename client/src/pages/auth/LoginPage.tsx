@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import '../meetdrive-landing.css';
+import '../sincerely-landing.css';
 
-/* MeetDrive brand mark + wordmark — matches the landing header. */
-function MeetDriveLogo() {
+/* Sincerely brand mark + wordmark — matches the landing header. */
+function SincerelyLogo() {
   return (
     <a className="lp-header__logo" href="/" style={{ textDecoration: 'none' }}>
       <span className="lp-header__logo-mark">
@@ -19,7 +19,7 @@ function MeetDriveLogo() {
           <circle cx="30.6" cy="29.4" r="3.6" fill="#3B7BFC" />
         </svg>
       </span>
-      <span className="lp-header__logo-name">meet<span className="lp-header__logo-grad">drive</span><span className="lp-header__logo-tld">.io</span></span>
+      <span className="lp-header__logo-name">use<span className="lp-header__logo-grad">sincerely</span><span className="lp-header__logo-tld">.com</span></span>
     </a>
   );
 }
@@ -50,7 +50,7 @@ export function LoginPage() {
       <div className="md-auth__brand">
         <div className="md-auth__brand-bg" />
         <div className="md-auth__brand-inner">
-          <MeetDriveLogo />
+          <SincerelyLogo />
           <h1 className="md-auth__headline">
             Cold email that<br />
             books the <em>meeting</em>.
@@ -70,7 +70,7 @@ export function LoginPage() {
         </div>
 
         <div className="md-auth__quote">
-          <p>"We went from 2% to 18% reply rates in two weeks. MeetDrive is the first tool that made our outbound feel effortless."</p>
+          <p>"We went from 2% to 18% reply rates in two weeks. Sincerely is the first tool that made our outbound feel effortless."</p>
           <div className="md-auth__quote-author">
             <div className="md-auth__quote-av">SR</div>
             <div>
@@ -84,7 +84,7 @@ export function LoginPage() {
       {/* Form */}
       <div className="md-auth__form-wrap">
         <div className="md-auth__form">
-          <div className="md-auth__mobile-logo"><MeetDriveLogo /></div>
+          <div className="md-auth__mobile-logo"><SincerelyLogo /></div>
 
           <h1 className="md-auth__form-h1">Welcome back</h1>
           <p className="md-auth__form-sub">Sign in to your workspace to continue</p>

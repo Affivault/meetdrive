@@ -104,7 +104,7 @@ async function checkSmtp(email: string): Promise<{ ok: boolean; reason?: string 
           if (step === 0) {
             // Server greeting
             if (code === 220) {
-              socket.write('EHLO meetdrive.io\r\n');
+              socket.write('EHLO usesincerely.com\r\n');
               step = 1;
             } else {
               clearTimeout(timeout);
@@ -114,7 +114,7 @@ async function checkSmtp(email: string): Promise<{ ok: boolean; reason?: string 
           } else if (step === 1) {
             // EHLO response
             if (code === 250) {
-              socket.write(`MAIL FROM:<verify@meetdrive.io>\r\n`);
+              socket.write(`MAIL FROM:<verify@usesincerely.com>\r\n`);
               step = 2;
             } else {
               clearTimeout(timeout);

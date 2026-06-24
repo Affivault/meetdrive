@@ -1,4 +1,4 @@
--- MeetDrive Core Excellence Migration
+-- Sincerely Core Excellence Migration
 -- Triple-Layer Verification, Webhook Event Bus, API Keys, State-Machine Sequences
 
 -- ============================================

@@ -1,5 +1,5 @@
 -- =============================================
--- MeetDrive: Complete Database Schema (idempotent)
+-- Sincerely: Complete Database Schema (idempotent)
 -- Paste this entire file into Supabase SQL Editor and hit Run.
 -- Safe to run multiple times — won't break anything.
 -- =============================================
