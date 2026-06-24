@@ -4,7 +4,10 @@ services:
     runtime: node
     # Render auto-detects Node version from .nvmrc / engines field; pin here too.
     buildCommand: npm install --include=dev && npm run build --workspace=shared && npm run build --workspace=server
-    startCommand: npm run start --workspace=server
+    # Run node directly (not via `npm run start`) and `exec` so SIGTERM from
+    # Render reaches Node itself — this lets the graceful-shutdown handler drain
+    # workers cleanly on deploy and avoids the noisy "npm error signal SIGTERM".
+    startCommand: cd server && exec node dist/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -36,4 +39,7 @@ services:
   - type: redis
     name: sincerely-redis
     plan: free
-    maxmemoryPolicy: allkeys-lru
+    # noeviction is Render's recommended policy for job queues: when memory is
+    # full it rejects new writes (surfacing an error) rather than silently
+    # evicting queued email jobs, which allkeys-lru would do.
+    maxmemoryPolicy: noeviction

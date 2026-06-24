@@ -241,8 +241,18 @@ export function startInboxWorker() {
     {
       connection: redisConnection,
       concurrency: 3,
+      // Throttle idle polling to conserve the Redis command quota (see
+      // email.worker for rationale). drainDelay is seconds, stalledInterval ms.
+      drainDelay: 60,
+      stalledInterval: 300000,
     }
   );
+
+  // An unhandled 'error' on a Worker (e.g. Redis unreachable or over quota)
+  // would crash the process. Log it and let the worker keep retrying.
+  worker.on('error', (err) => {
+    console.error('[Worker:inbox-sync] error:', err.message);
+  });
 
   worker.on('failed', (job, err) => {
     console.error(`Inbox sync job ${job?.id} failed:`, err.message);

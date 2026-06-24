@@ -24,4 +24,9 @@ if (redisConnection) {
       removeOnFail: 500,
     },
   });
+
+  // A Queue is an EventEmitter — an unhandled 'error' (e.g. Redis unreachable
+  // or over quota) would otherwise crash the process. Log and keep running.
+  emailQueue.on('error', (err) => console.error('[Queue:email-sending] error:', err.message));
+  inboxSyncQueue.on('error', (err) => console.error('[Queue:inbox-sync] error:', err.message));
 }

@@ -357,8 +357,21 @@ export function startEmailWorker() {
         max: 10,
         duration: 1000, // Max 10 emails per second
       },
+      // Idle long-poll every 60s (vs default 5s) and check for stalled jobs
+      // every 5min (vs default 30s). Newly added jobs still wake the worker
+      // instantly; this only throttles idle polling so we don't burn the Redis
+      // command quota when the queue is empty. drainDelay is in seconds,
+      // stalledInterval in milliseconds.
+      drainDelay: 60,
+      stalledInterval: 300000,
     }
   );
+
+  // An unhandled 'error' on a Worker (e.g. Redis unreachable or over quota)
+  // would crash the process. Log it and let the worker keep retrying.
+  worker.on('error', (err) => {
+    console.error('[Worker:email-sending] error:', err.message);
+  });
 
   worker.on('failed', (job, err) => {
     console.error(`Email job ${job?.id} failed:`, err.message);
