@@ -31,6 +31,12 @@ app.use('/api/track', trackingRoutes);
 // Routes (authenticated)
 app.use('/api/v1', routes);
 
+// Friendly root response so hitting the bare API URL returns 200 (a status
+// ping) instead of a 404. The app itself lives on the separate frontend.
+app.get('/', (_req, res) => {
+  res.json({ service: 'sincerely-api', status: 'ok' });
+});
+
 // Health check with diagnostics
 app.get('/health', async (_req, res) => {
   const diagnostics: Record<string, any> = {
