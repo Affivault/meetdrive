@@ -23,6 +23,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^6.9.14",
     "papaparse": "^5.4.1",
+    "stripe": "^22.3.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
