@@ -122,6 +122,7 @@ export const billingService = {
       inboxes,
       inboxLimit: plan.maxInboxes,
       features: plan.features,
+      hasBilling: !!sub?.stripe_customer_id,
     };
   },
 };

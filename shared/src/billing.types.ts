@@ -81,6 +81,8 @@ export interface UsageSummary {
   /** -1 = unlimited */
   inboxLimit: number;
   features: PlanFeatures;
+  /** True once the user has a Stripe customer (can open the billing portal). */
+  hasBilling: boolean;
 }
 
 /** True when a limit value represents "unlimited". */

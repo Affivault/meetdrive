@@ -7,6 +7,7 @@ import { routes } from './routes/index.js';
 import { assetController } from './controllers/asset.controller.js';
 import { webhookInboundRoutes } from './routes/webhook-inbound.routes.js';
 import { trackingRoutes } from './routes/tracking.routes.js';
+import { billingController } from './controllers/billing.controller.js';
 
 const app = express();
 
@@ -16,6 +17,11 @@ app.use(helmet());
 // CORS — reflect any origin (all routes require JWT auth so this is safe)
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan('dev'));
+
+// Stripe webhook — must read the RAW body for signature verification, so it is
+// mounted BEFORE express.json() and outside the authenticated routes.
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), billingController.webhook);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 

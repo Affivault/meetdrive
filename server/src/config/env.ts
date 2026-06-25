@@ -17,6 +17,8 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z.string().length(64),
   SMTP_RELAY_URL: z.string().optional().default(''),
   SMTP_RELAY_SECRET: z.string().optional().default(''),
+  STRIPE_SECRET_KEY: z.string().optional().default(''),
+  STRIPE_WEBHOOK_SECRET: z.string().optional().default(''),
 });
 
 const parsed = envSchema.safeParse(process.env);
