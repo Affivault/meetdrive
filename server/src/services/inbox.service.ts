@@ -1202,11 +1202,16 @@ export async function processScheduledEmails(): Promise<number> {
       console.log(`[ScheduledEmails] Sent scheduled email ${msg.id} to ${msg.to_email}`);
     } catch (err: any) {
       console.error(`[ScheduledEmails] Failed to send message ${msg.id}:`, err.message);
-      // Clear schedule markers to prevent infinite retry loop
-      await supabaseAdmin
-        .from('inbox_messages')
-        .update({ sara_status: null, sara_action: null })
-        .eq('id', msg.id);
+      // Only wipe schedule markers for permanent failures (auth, config, envelope errors).
+      // Transient network errors keep the markers so the next scheduler run retries.
+      const TRANSIENT_CODES = new Set(['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'ESOCKET', 'EAI_AGAIN']);
+      const isTransient = TRANSIENT_CODES.has(err.code) || err.message?.includes('timeout') || err.message?.includes('ENOTFOUND');
+      if (!isTransient) {
+        await supabaseAdmin
+          .from('inbox_messages')
+          .update({ sara_status: null, sara_action: null })
+          .eq('id', msg.id);
+      }
     }
   }
 

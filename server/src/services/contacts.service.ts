@@ -346,6 +346,7 @@ export const contactsService = {
     }
     const parsed = Papa.parse(fileContent, { header: true, skipEmptyLines: true });
 
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let imported = 0;
     let errors = 0;
 
@@ -365,6 +366,12 @@ export const contactsService = {
 
       // Normalize email consistently with bulkCreate to ensure deduplication works
       contact.email = String(contact.email).trim().toLowerCase();
+
+      // Validate format — matches the bulkCreate check so both paths accept the same emails
+      if (!EMAIL_RE.test(contact.email)) {
+        errors++;
+        continue;
+      }
 
       const { error } = await supabaseAdmin.from('contacts').upsert(
         contact,

@@ -152,12 +152,13 @@ export function CampaignsListPage() {
 
   // Aggregate stats for current view
   const aggregateStats = useMemo(() => {
-    const totals = { sent: 0, opened: 0, clicked: 0, replied: 0 };
+    const totals = { sent: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 };
     for (const c of visibleCampaigns as any[]) {
       totals.sent     += c.sent_count    || 0;
       totals.opened   += c.opened_count  || 0;
       totals.clicked  += c.clicked_count || 0;
       totals.replied  += c.replied_count || 0;
+      totals.bounced  += c.bounced_count || 0;
     }
     return totals;
   }, [visibleCampaigns]);
@@ -165,9 +166,10 @@ export function CampaignsListPage() {
   const uncategorisedCount = allCampaigns.filter((c: any) => !c.folder_id).length;
 
   const sentTotal = aggregateStats.sent || 0;
-  const openPctAgg  = sentTotal ? (aggregateStats.opened  / sentTotal) * 100 : 0;
-  const clickPctAgg = sentTotal ? (aggregateStats.clicked / sentTotal) * 100 : 0;
-  const replyPctAgg = sentTotal ? (aggregateStats.replied / sentTotal) * 100 : 0;
+  const openPctAgg   = sentTotal ? (aggregateStats.opened  / sentTotal) * 100 : 0;
+  const clickPctAgg  = sentTotal ? (aggregateStats.clicked / sentTotal) * 100 : 0;
+  const replyPctAgg  = sentTotal ? (aggregateStats.replied / sentTotal) * 100 : 0;
+  const bouncePctAgg = sentTotal ? (aggregateStats.bounced / sentTotal) * 100 : 0;
 
   const statusTabs = STATUS_TABS.map((t) => ({
     value: t.value,
@@ -237,11 +239,12 @@ export function CampaignsListPage() {
 
       {/* ── Aggregate metrics strip ── */}
       {sentTotal > 0 && (
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-5 gap-2 mb-4">
           <MetricChip icon={Send}              label="Sent"    value={aggregateStats.sent}    tone="indigo" />
           <MetricChip icon={Mail}              label="Opens"   value={aggregateStats.opened}  tone="violet"  rate={openPctAgg} />
           <MetricChip icon={MousePointerClick} label="Clicks"  value={aggregateStats.clicked} tone="cyan"    rate={clickPctAgg} />
           <MetricChip icon={MessageSquare}     label="Replies" value={aggregateStats.replied} tone="emerald" rate={replyPctAgg} />
+          <MetricChip icon={Ban}               label="Bounces" value={aggregateStats.bounced} tone="rose"    rate={bouncePctAgg} />
         </div>
       )}
 
