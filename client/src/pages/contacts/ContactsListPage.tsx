@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import Papa from 'papaparse';
+import { useDebounce } from '../../hooks/useDebounce';
 import { contactsApi, listsApi, tagsApi } from '../../api/contacts.api';
 import { listFoldersApi, type ListFolder } from '../../api/list-folders.api';
 import { verificationApi } from '../../api/verification.api';
@@ -353,6 +355,7 @@ export function ContactsListPage() {
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
@@ -388,6 +391,11 @@ export function ContactsListPage() {
     setStatusFilter('');
   }, [activeListId]);
 
+  // Reset to page 1 when the debounced search term settles
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   // Auto-verify preference — drives the live "verifying…" affordance
   const { data: userSettings } = useQuery({ queryKey: ['settings'], queryFn: settingsApi.get });
   const autoVerifyOn = userSettings?.auto_verify_contacts ?? true;
@@ -403,11 +411,11 @@ export function ContactsListPage() {
   });
 
   const { data: contactsData, isLoading } = useQuery({
-    queryKey: ['contacts', page, search, activeListId, sortBy, sortDir, statusFilter],
+    queryKey: ['contacts', page, debouncedSearch, activeListId, sortBy, sortDir, statusFilter],
     queryFn: () => contactsApi.list({
       page,
       limit: DEFAULT_PAGE_SIZE,
-      search: search || undefined,
+      search: debouncedSearch || undefined,
       list_id: activeListId || undefined,
       sort_by: sortBy,
       sort_order: sortDir,
@@ -677,8 +685,9 @@ export function ContactsListPage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      const firstLine = text.split('\n')[0];
-      const headers = firstLine.split(',').map((h) => h.trim().replace(/"/g, ''));
+      // Use PapaParse to correctly handle quoted fields containing commas
+      const result = Papa.parse<string[]>(text, { header: false, preview: 1 });
+      const headers = (result.data[0] || []).map((h: string) => h.trim());
       setCsvHeaders(headers);
       const autoMap: Record<string, string> = {};
       for (const h of headers) {
@@ -1129,13 +1138,13 @@ export function ContactsListPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or company…"
               className="w-full h-8 pl-8 pr-4 text-[12px] rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--indigo)] focus:ring-2 focus:ring-[var(--indigo-subtle)] transition-all"
             />
             {search && (
               <button
-                onClick={() => { setSearch(''); setPage(1); }}
+                onClick={() => setSearch('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 icon-btn h-4 w-4"
               >
                 <X className="h-3 w-3" />

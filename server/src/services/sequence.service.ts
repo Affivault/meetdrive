@@ -123,7 +123,9 @@ async function _processNextStepInner(campaignContactId: string): Promise<void> {
     throw new Error(`Failed to fetch campaign contact: ${ccError.message}`);
   }
 
-  if (!cc || !cc.campaigns || !cc.contacts) return;
+  if (!cc || !cc.campaigns || !cc.contacts) {
+    throw new Error(`Campaign contact ${campaignContactId} has missing campaign or contact relations — skipping to prevent infinite retry`);
+  }
   if (cc.status !== 'active') return;
   if (cc.campaigns.status !== 'running') return;
 
