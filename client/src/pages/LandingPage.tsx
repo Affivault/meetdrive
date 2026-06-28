@@ -10,8 +10,8 @@ import './sincerely-landing.css';
 type IconProps = React.SVGProps<SVGSVGElement>;
 
 const Icon: Record<string, (p: IconProps) => React.ReactElement> = {
-  Logo: (p) => <svg width="16" height="16" viewBox="0 0 40 40" fill="none" {...p}><path d="M7 31 16 9 24 27 33 11" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" /><circle cx="30.6" cy="29.4" r="3.3" fill="currentColor" /></svg>,
-  Mark: (p) => <svg width="28" height="28" viewBox="0 0 40 40" fill="none" {...p}><defs><linearGradient id="md-mark" x1="4" y1="6" x2="36" y2="34" gradientUnits="userSpaceOnUse"><stop stopColor="#8A4DFC" /><stop offset="1" stopColor="#2A71FC" /></linearGradient></defs><path d="M7 31 16 9 24 27 33 11" stroke="url(#md-mark)" strokeWidth="6.4" strokeLinecap="round" strokeLinejoin="round" /><circle cx="30.6" cy="29.4" r="3.6" fill="#3B7BFC" /></svg>,
+  Logo: (p) => <svg width="16" height="16" viewBox="0 0 40 40" fill="none" {...p}><path d="M27 12.5C24.7 9.3 19.6 8.3 15.6 9.6 11 11.1 9.8 15.6 13.2 18.2 15.6 20 20.2 20.4 23.8 21.8 28.8 23.7 29.4 28.4 26 31.2 22.8 33.8 17.4 33.2 13.8 30" stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  Mark: (p) => <svg width="28" height="28" viewBox="0 0 40 40" fill="none" {...p}><defs><linearGradient id="md-mark" x1="8" y1="8" x2="32" y2="33" gradientUnits="userSpaceOnUse"><stop stopColor="#4F86F7" /><stop offset="1" stopColor="#8B5CF6" /></linearGradient></defs><path d="M27 12.5C24.7 9.3 19.6 8.3 15.6 9.6 11 11.1 9.8 15.6 13.2 18.2 15.6 20 20.2 20.4 23.8 21.8 28.8 23.7 29.4 28.4 26 31.2 22.8 33.8 17.4 33.2 13.8 30" stroke="url(#md-mark)" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   Send: (p) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M3 11l18-8-8 18-2-8-8-2z" /></svg>,
   Mail: (p) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 5L2 7" /></svg>,
   Inbox: (p) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.5 5h13l3.5 7v6a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2v-6Z" /></svg>,
@@ -53,7 +53,7 @@ function Header() {
       <div className="lp-header__inner">
         <a className="lp-header__logo" href="#top">
           <span className="lp-header__logo-mark"><Icon.Mark /></span>
-          <span className="lp-header__logo-name">use<span className="lp-header__logo-grad">sincerely</span><span className="lp-header__logo-tld">.com</span></span>
+          <span className="lp-header__logo-name">sincerely</span>
         </a>
         <nav className="lp-header__nav">
           <a className="lp-header__link" href="#how">How it works</a>
@@ -1078,7 +1078,7 @@ function Footer() {
           <div className="lp-footer__brand">
             <a className="lp-header__logo" href="#top">
               <span className="lp-header__logo-mark"><Icon.Mark /></span>
-              <span className="lp-header__logo-name">use<span className="lp-header__logo-grad">sincerely</span><span className="lp-header__logo-tld">.com</span></span>
+              <span className="lp-header__logo-name">sincerely</span>
             </a>
             <p className="lp-footer__tagline">Cold email that books meetings. Built for outbound teams that care about both scale and signal.</p>
             <div className="lp-footer__socials">
