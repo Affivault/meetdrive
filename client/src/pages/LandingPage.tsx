@@ -856,7 +856,7 @@ function Pricing() {
     {
       name: 'Starter',
       pitch: 'For solo founders and small outbound teams getting started.',
-      m: 39, y: 29,
+      m: 39, y: 348,
       cta: 'Start free trial',
       feats: [
         ['Up to 3 sending inboxes', true],
@@ -870,7 +870,7 @@ function Pricing() {
     {
       name: 'Growth',
       pitch: 'Scale outbound across your team with SARA inbox assist.',
-      m: 99, y: 79,
+      m: 59, y: 499,
       featured: true, badge: 'MOST POPULAR',
       cta: 'Start free trial',
       feats: [
@@ -906,11 +906,11 @@ function Pricing() {
         <div className="lp-section-head">
           <span className="lp-eyebrow">Pricing</span>
           <h2 className="lp-h2">Pricing that <em>scales</em> with you.</h2>
-          <p className="lp-lede">Start free with 500 emails. Pay only for active inboxes &mdash; never for seats.</p>
+          <p className="lp-lede">Start with a 10-day free trial. Pay only for active inboxes &mdash; never for seats.</p>
           <div className="lp-pricing__toggle">
             <button className={`lp-pricing__toggle-btn ${!annual ? 'is-active' : ''}`} onClick={() => setAnnual(false)}>Monthly</button>
             <button className={`lp-pricing__toggle-btn ${annual ? 'is-active' : ''}`} onClick={() => setAnnual(true)}>
-              Annual <span className="lp-pricing__save">SAVE 26%</span>
+              Annual <span className="lp-pricing__save">SAVE up to 30%</span>
             </button>
           </div>
         </div>
@@ -930,7 +930,7 @@ function Pricing() {
                     <>
                       <span className="lp-tier__price-curr">$</span>
                       <span className="lp-tier__price-num">{price}</span>
-                      <span className="lp-tier__price-per">/ mo</span>
+                      <span className="lp-tier__price-per">/ {annual ? 'yr' : 'mo'}</span>
                     </>
                   ) : (
                     <span className="lp-tier__price-num" style={{ fontSize: 36 }}>{price}</span>
@@ -938,7 +938,7 @@ function Pricing() {
                 </div>
                 <p className="lp-tier__price-note">
                   {isNum
-                    ? (annual ? `Billed annually as $${(price as number) * 12} · 14-day free trial` : '14-day free trial · cancel anytime')
+                    ? (annual ? 'Billed once annually · 10-day free trial' : '10-day free trial · cancel anytime')
                     : 'Volume pricing · annual contract'}
                 </p>
 

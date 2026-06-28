@@ -197,7 +197,7 @@ export function BillingPage() {
                   ) : (
                     <>
                       <span className="text-[22px] font-bold text-[var(--text-primary)]">${price}</span>
-                      <span className="text-[12px] text-[var(--text-tertiary)]">/mo</span>
+                      <span className="text-[12px] text-[var(--text-tertiary)]">/{interval === 'annual' ? 'yr' : 'mo'}</span>
                     </>
                   )}
                 </div>

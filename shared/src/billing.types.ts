@@ -23,7 +23,7 @@ export interface PlanInfo extends PlanLimits {
   name: string;
   /** USD/month on the monthly plan; null = sales-led (contact us). */
   priceMonthly: number | null;
-  /** USD/month equivalent on the annual plan; null = sales-led. */
+  /** Total USD/year on the annual plan; null = sales-led. */
   priceAnnual: number | null;
 }
 
@@ -34,12 +34,12 @@ export const PLANS: Record<PlanId, PlanInfo> = {
     features: { sara: true, abTesting: true },
   },
   starter: {
-    id: 'starter', name: 'Starter', priceMonthly: 39, priceAnnual: 29,
+    id: 'starter', name: 'Starter', priceMonthly: 39, priceAnnual: 348,
     maxInboxes: 3, emailsPerMonth: 1500,
     features: { sara: false, abTesting: false },
   },
   growth: {
-    id: 'growth', name: 'Growth', priceMonthly: 99, priceAnnual: 79,
+    id: 'growth', name: 'Growth', priceMonthly: 59, priceAnnual: 499,
     maxInboxes: 25, emailsPerMonth: 15000,
     features: { sara: true, abTesting: true },
   },
