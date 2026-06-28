@@ -589,7 +589,7 @@ function applyOperator(actual: any, operator: string, expected: string): boolean
  * Process a webhook_wait step - pause contact until webhook or timeout.
  */
 async function processWebhookWaitStep(cc: any, step: any): Promise<void> {
-  const timeoutHours = step.webhook_timeout_hours || 72;
+  const timeoutHours = step.webhook_timeout_hours ?? 72;
   const waitUntil = new Date(Date.now() + timeoutHours * 3600000);
 
   try {

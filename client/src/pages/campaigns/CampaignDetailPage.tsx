@@ -485,6 +485,7 @@ function ContactProgressCard({ campaign }: { campaign: any }) {
     { label: 'Bounced', count: campaign.bounced_contacts || 0, color: 'bg-red-500' },
     { label: 'Unsubscribed', count: campaign.unsubscribed_contacts || 0, color: 'bg-amber-500' },
     { label: 'Suppressed', count: campaign.suppressed_contacts || 0, color: 'bg-purple-500' },
+    { label: 'Error', count: campaign.error_contacts || 0, color: 'bg-rose-700' },
   ];
 
   const accounted = segments.reduce((s, seg) => s + seg.count, 0);

@@ -92,6 +92,7 @@ router.get('/open/:trackingId', async (req: Request, res: Response) => {
           contact_id: cc.contact_id,
           step_id: stepId,
           activity_type: 'opened',
+          occurred_at: new Date().toISOString(),
           metadata: {
             ip: req.ip,
             user_agent: req.headers['user-agent'],
@@ -193,6 +194,7 @@ router.get('/click/:trackingId', async (req: Request, res: Response) => {
             contact_id: cc.contact_id,
             step_id: stepId,
             activity_type: 'clicked',
+            occurred_at: new Date().toISOString(),
             metadata: {
               url: originalUrl,
               ip: req.ip,
@@ -257,6 +259,7 @@ router.get('/unsubscribe/:trackingId', async (req: Request, res: Response) => {
           contact_id: cc.contact_id,
           step_id: stepId,
           activity_type: 'unsubscribed',
+          occurred_at: new Date().toISOString(),
           metadata: { method: 'link_click' },
         });
 

@@ -91,11 +91,20 @@ export async function selectBestSender(
  */
 export async function recordSend(accountId: string): Promise<void> {
   try {
-    await supabaseAdmin.rpc('increment_field', {
-      table_name: 'smtp_accounts',
-      field_name: 'sends_today',
-      row_id: accountId,
-    });
+    // Increment both counters atomically via RPC. Two calls are needed because the
+    // generic increment_field RPC only handles one field at a time.
+    await Promise.all([
+      supabaseAdmin.rpc('increment_field', {
+        table_name: 'smtp_accounts',
+        field_name: 'sends_today',
+        row_id: accountId,
+      }),
+      supabaseAdmin.rpc('increment_field', {
+        table_name: 'smtp_accounts',
+        field_name: 'total_sent',
+        row_id: accountId,
+      }),
+    ]);
   } catch {
     // Fallback: direct update if RPC doesn't exist
     try {
