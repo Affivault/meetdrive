@@ -33,9 +33,21 @@ async function getOrCreateCustomer(userId: string, email: string | undefined): P
     metadata: { user_id: userId },
   });
 
-  await supabaseAdmin
-    .from('subscriptions')
-    .upsert({ user_id: userId, stripe_customer_id: customer.id }, { onConflict: 'user_id' });
+  // Persist the customer id. A brand-new placeholder row MUST start on Free —
+  // never the feature-rich internal "trial" plan the table default used to
+  // grant (an abandoned checkout would otherwise hand out full features free,
+  // forever). If a row already exists, touch only the customer id so we never
+  // clobber a live plan/status a webhook may have written.
+  if (sub) {
+    await supabaseAdmin
+      .from('subscriptions')
+      .update({ stripe_customer_id: customer.id })
+      .eq('user_id', userId);
+  } else {
+    await supabaseAdmin
+      .from('subscriptions')
+      .insert({ user_id: userId, stripe_customer_id: customer.id, plan: 'free', status: 'free' });
+  }
 
   return customer.id;
 }

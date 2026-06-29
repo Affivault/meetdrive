@@ -128,8 +128,8 @@ function Hero() {
           <a className="lp-btn lp-btn--ghost" href="#how"><Icon.Play /> Watch 90s demo</a>
         </div>
         <p className="lp-hero__trust">
-          <span><Icon.Check /> No card required</span>
-          <span><Icon.Check /> 500 emails free</span>
+          <span><Icon.Check /> No card to start</span>
+          <span><Icon.Check /> 100 emails free monthly</span>
           <span><Icon.Check /> Cancel anytime</span>
         </p>
 
@@ -1066,13 +1066,13 @@ function CTA() {
               <em>booked meetings</em>.
             </h2>
             <p className="lp-cta__sub">
-              Free for 14 days. No credit card. Bring your own domain or use one of ours &mdash; we'll have you sending by lunch.
+              Start free &mdash; no credit card. Paid plans come with a 10-day trial. Bring your own domain or use one of ours &mdash; we'll have you sending by lunch.
             </p>
             <div className="lp-cta__ctas">
               <Link className="lp-btn lp-btn--hero" to="/signup">Start sending free <Icon.ArrowRight className="lp-btn__arrow" /></Link>
               <a className="lp-btn lp-btn--ghost" href="#top"><Icon.Calendar /> Book a demo</a>
             </div>
-            <p className="lp-cta__trust">No credit card required &middot; 500 emails free &middot; Cancel anytime</p>
+            <p className="lp-cta__trust">No card to start &middot; 100 emails free monthly &middot; Cancel anytime</p>
           </div>
         </div>
       </div>
