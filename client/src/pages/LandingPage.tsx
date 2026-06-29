@@ -51,9 +51,8 @@ function Header() {
   return (
     <header className={`lp-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="lp-header__inner">
-        <a className="lp-header__logo" href="#top">
-          <span className="lp-header__logo-mark"><Icon.Mark /></span>
-          <span className="lp-header__logo-name">sincerely</span>
+        <a className="lp-header__logo" href="#top" aria-label="Sincerely">
+          <img src="/logo-dark.svg" alt="Sincerely" className="lp-header__logo-img" />
         </a>
         <nav className="lp-header__nav">
           <a className="lp-header__link" href="#how">How it works</a>
@@ -1076,9 +1075,8 @@ function Footer() {
       <div className="lp-wrap">
         <div className="lp-footer__inner">
           <div className="lp-footer__brand">
-            <a className="lp-header__logo" href="#top">
-              <span className="lp-header__logo-mark"><Icon.Mark /></span>
-              <span className="lp-header__logo-name">sincerely</span>
+            <a className="lp-header__logo" href="#top" aria-label="Sincerely">
+              <img src="/logo-dark.svg" alt="Sincerely" className="lp-header__logo-img" />
             </a>
             <p className="lp-footer__tagline">Cold email that books meetings. Built for outbound teams that care about both scale and signal.</p>
             <div className="lp-footer__socials">
