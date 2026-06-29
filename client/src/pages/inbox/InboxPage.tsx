@@ -1470,7 +1470,7 @@ export function InboxPage() {
     setReplyMode(null);
     setReplySenderId(msg.smtp_account_id || smtpAccounts[0]?.id || '');
     // Mark the whole thread as read (not just this message)
-    inboxApi.markThreadRead(msg.id).then(() => invalidate()).catch(() => {});
+    inboxApi.markThreadRead(msg.id).then(() => invalidate()).catch((err: unknown) => console.error('[Inbox] markThreadRead failed:', err));
   }, [smtpAccounts, invalidate]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
@@ -1595,6 +1595,24 @@ export function InboxPage() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [conversations, selectedId, showCompose, replyMode]);
+
+  // r → reply, e → archive/unarchive current message (Gmail-style shortcuts)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!currentMsg || showCompose || replyMode) return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement).isContentEditable) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'r') {
+        setReplyMode('reply');
+        setReplySenderId(currentMsg.smtp_account_id || smtpAccounts[0]?.id || '');
+      } else if (e.key === 'e') {
+        handleArchiveToggle(currentMsg);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [currentMsg, showCompose, replyMode, smtpAccounts, handleArchiveToggle]);
 
   // Quick filter presets: combine hard intents into actionable buckets
   const QUICK_FILTERS: { id: string; label: string; match?: string[] }[] = [

@@ -179,7 +179,7 @@ export function startEmailWorker() {
 
         // 6. Send the email
         const fromAddress = smtpAccount.label
-          ? `"${smtpAccount.label.replace(/"/g, "'")}" <${smtpAccount.email_address}>`
+          ? `"${smtpAccount.label.replace(/"/g, '\\"')}" <${smtpAccount.email_address}>`
           : smtpAccount.email_address;
         const mailOptions = {
           from: fromAddress,
@@ -297,8 +297,11 @@ export function startEmailWorker() {
       } catch (err: any) {
         console.error(`Email job ${job.id} send error:`, err.message);
 
-        // Check for bounce-type errors
-        const isBounce = Number(err.responseCode) >= 500 || err.code === 'EENVELOPE';
+        // Check for bounce-type errors (Number(undefined) = NaN which fails >= 500, so guard with isNaN)
+        const _responseCode = Number(err.responseCode);
+        const isBounce = (!isNaN(_responseCode) && _responseCode >= 500)
+          || String(err.responseCode || '').startsWith('5')
+          || err.code === 'EENVELOPE';
 
         // Record appropriate activity
         await supabaseAdmin

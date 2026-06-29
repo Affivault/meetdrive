@@ -43,7 +43,8 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     return res.status(500).json({ error: 'SMTP_RELAY_SECRET not configured on Vercel' });
   }
 
-  const authHeader = req.headers.authorization as string | undefined;
+  const rawAuth = req.headers.authorization;
+  const authHeader = Array.isArray(rawAuth) ? rawAuth[0] : rawAuth;
   if (!authHeader || authHeader !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'Unauthorized - check SMTP_RELAY_SECRET matches' });
   }

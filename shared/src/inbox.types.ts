@@ -1,3 +1,5 @@
+import { SaraIntent, SaraAction, SaraStatus } from './enums.js';
+
 export interface InboxMessage {
   id: string;
   user_id: string;
@@ -14,11 +16,11 @@ export interface InboxMessage {
   message_id: string | null;
   is_read: boolean;
   // SARA fields
-  sara_intent: string | null;
+  sara_intent: SaraIntent | null;
   sara_confidence: number | null;
   sara_draft_reply: string | null;
-  sara_action: string | null;
-  sara_status: string;
+  sara_action: SaraAction | null;
+  sara_status: SaraStatus;
   sara_reviewed_at: string | null;
   sara_reviewed_by: string | null;
   received_at: string;
