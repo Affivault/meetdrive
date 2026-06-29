@@ -40,7 +40,7 @@ const Icon: Record<string, (p: IconProps) => React.ReactElement> = {
   Trend: (p) => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>,
 };
 
-function Header({ light, onToggle }: { light: boolean; onToggle: () => void }) {
+function Header() {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -63,11 +63,6 @@ function Header({ light, onToggle }: { light: boolean; onToggle: () => void }) {
           <a className="lp-header__link" href="#faq">FAQ</a>
         </nav>
         <div className="lp-header__actions">
-          <button type="button" className="lp-header__theme" onClick={onToggle} aria-label="Toggle light or dark theme" title="Toggle theme">
-            {light
-              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
-              : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>}
-          </button>
           <Link className="lp-header__login" to="/login">Log in</Link>
           <Link className="lp-btn lp-btn--primary" to="/signup">Start free <Icon.ArrowRight className="lp-btn__arrow" /></Link>
         </div>
@@ -1130,14 +1125,6 @@ function Footer() {
 
 export function LandingPage() {
   const ref = useRef<HTMLDivElement>(null);
-  const [light, setLight] = useState(() => {
-    try { return localStorage.getItem('sincerely-landing-theme') === 'light'; } catch { return false; }
-  });
-  const toggleTheme = () => setLight((v) => {
-    const nv = !v;
-    try { localStorage.setItem('sincerely-landing-theme', nv ? 'light' : 'dark'); } catch { /* ignore */ }
-    return nv;
-  });
 
   // Scroll-reveal — mirror the design's IntersectionObserver, scoped to this page.
   useEffect(() => {
@@ -1155,16 +1142,16 @@ export function LandingPage() {
     return () => obs.disconnect();
   }, []);
 
-  // Match the page background to the landing theme while the site is mounted.
+  // Keep the page background dark while the marketing site is mounted.
   useEffect(() => {
     const prev = document.body.style.background;
-    document.body.style.background = light ? '#FFFFFF' : '#070A14';
+    document.body.style.background = '#070A14';
     return () => { document.body.style.background = prev; };
-  }, [light]);
+  }, []);
 
   return (
-    <div className={`md-landing ${light ? 'is-light' : ''}`} data-atmosphere="flat" data-density="roomy" ref={ref}>
-      <Header light={light} onToggle={toggleTheme} />
+    <div className="md-landing" data-atmosphere="flat" data-density="roomy" ref={ref}>
+      <Header />
       <div className="lp-stage">
         <Hero />
         <Logos />

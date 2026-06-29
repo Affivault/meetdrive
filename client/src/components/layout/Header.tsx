@@ -18,18 +18,27 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useCommandPalette } from '../../context/CommandPaletteContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { SincerelyLogo } from '../SincerelyLogo';
+import { billingApi } from '../../api/billing.api';
+import { isUnlimited } from '@lemlist/shared';
 import { cn } from '../../lib/utils';
+
+function daysUntil(iso: string | null): number | null {
+  if (!iso) return null;
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
+}
 
 export function Header() {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { openPalette } = useCommandPalette();
   const { collapsed, toggle } = useSidebar();
+  const { data: usage } = useQuery({ queryKey: ['billing', 'usage'], queryFn: billingApi.usage, staleTime: 60_000 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const navigate = useNavigate();
@@ -173,6 +182,41 @@ export function Header() {
                     {user?.email}
                   </p>
                 </div>
+
+                {/* Plan & usage */}
+                {usage && (
+                  <div className="px-2.5 py-2 mb-0.5 border-b border-[var(--border-subtle)] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[var(--text-tertiary)]">Plan</span>
+                      <span className="text-[11.5px] font-semibold text-[var(--text-primary)]">{usage.planName}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[var(--text-tertiary)]">Emails this month</span>
+                      <span className="text-[11.5px] text-[var(--text-secondary)] tabular-nums">
+                        {usage.emailsSent.toLocaleString()} / {isUnlimited(usage.emailsLimit) ? '∞' : usage.emailsLimit.toLocaleString()}
+                      </span>
+                    </div>
+                    {usage.status === 'trialing' && usage.trialEndsAt ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--text-tertiary)]">Trial ends</span>
+                        <span className="text-[11.5px] text-[var(--text-secondary)]">in {daysUntil(usage.trialEndsAt)}d</span>
+                      </div>
+                    ) : usage.currentPeriodEnd ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--text-tertiary)]">Next payment</span>
+                        <span className="text-[11.5px] text-[var(--text-secondary)]">in {daysUntil(usage.currentPeriodEnd)}d</span>
+                      </div>
+                    ) : usage.plan === 'free' ? (
+                      <button
+                        onClick={() => { setMenuOpen(false); navigate('/billing'); }}
+                        className="w-full mt-0.5 h-7 rounded-md text-[11.5px] font-semibold text-white"
+                        style={{ background: 'linear-gradient(100deg,#4F86F7,#8B5CF6)' }}
+                      >
+                        Upgrade plan
+                      </button>
+                    ) : null}
+                  </div>
+                )}
 
                 <button
                   onClick={() => { setMenuOpen(false); navigate('/settings'); }}

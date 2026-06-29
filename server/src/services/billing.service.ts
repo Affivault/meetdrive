@@ -118,6 +118,7 @@ export const billingService = {
       status: (sub?.status as SubscriptionStatus) || 'free',
       trialEndsAt: sub?.trial_ends_at ?? null,
       periodStart: currentPeriodStart(),
+      currentPeriodEnd: sub?.current_period_end ?? null,
       emailsSent,
       emailsLimit: plan.emailsPerMonth,
       inboxes,

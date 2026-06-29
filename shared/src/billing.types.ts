@@ -80,6 +80,8 @@ export interface UsageSummary {
   trialEndsAt: string | null;
   /** ISO date (YYYY-MM-DD) of the start of the current usage period. */
   periodStart: string;
+  /** ISO datetime the paid period renews (next payment); null if not subscribed. */
+  currentPeriodEnd: string | null;
   emailsSent: number;
   /** -1 = unlimited */
   emailsLimit: number;
