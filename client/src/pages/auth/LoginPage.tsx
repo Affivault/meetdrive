@@ -4,21 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import '../sincerely-landing.css';
 
-/* Sincerely brand mark + wordmark — matches the landing header. */
+/* Sincerely wordmark — the md-auth shell is a fixed dark design, so always white. */
 function SincerelyLogo() {
   return (
-    <a className="lp-header__logo" href="/" style={{ textDecoration: 'none' }}>
-      <span className="lp-header__logo-mark">
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="md-auth-mark" x1="8" y1="8" x2="32" y2="33" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#4F86F7" /><stop offset="1" stopColor="#8B5CF6" />
-            </linearGradient>
-          </defs>
-          <path d="M27 12.5C24.7 9.3 19.6 8.3 15.6 9.6 11 11.1 9.8 15.6 13.2 18.2 15.6 20 20.2 20.4 23.8 21.8 28.8 23.7 29.4 28.4 26 31.2 22.8 33.8 17.4 33.2 13.8 30" stroke="url(#md-auth-mark)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-      <span className="lp-header__logo-name">sincerely</span>
+    <a className="lp-header__logo" href="/" style={{ textDecoration: 'none' }} aria-label="Sincerely">
+      <img src="/logo-dark.svg" alt="Sincerely" style={{ height: 28, width: 'auto', display: 'block' }} draggable={false} />
     </a>
   );
 }

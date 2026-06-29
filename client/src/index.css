@@ -961,3 +961,9 @@
   pointer-events: none;
   height: 0;
 }
+
+/* Sincerely logo — theme-aware lockup swap (light ink on light, white on dark) */
+.sx-logo--light { display: block; }
+.sx-logo--dark { display: none; }
+.dark .sx-logo--light { display: none; }
+.dark .sx-logo--dark { display: block; }

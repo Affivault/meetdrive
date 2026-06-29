@@ -21,7 +21,7 @@ export function useUnreadCount() {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Sincerely Inbox', {
           body: `You have ${diff} new message${diff !== 1 ? 's' : ''}`,
-          icon: '/favicon.svg',
+          icon: '/favicon.png',
         });
       }
     }

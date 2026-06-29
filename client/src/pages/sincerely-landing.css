@@ -209,6 +209,7 @@
   filter: drop-shadow(0 3px 10px rgba(108,92,250,0.35));
 }
 .lp-header__logo-mark svg { color: #fff; }
+.lp-header__logo-img { height: 30px; width: auto; display: block; filter: drop-shadow(0 3px 10px rgba(108,92,250,0.35)); }
 .lp-header__logo-name { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.03em; }
 .lp-header__logo-grad {
   background: linear-gradient(120deg, #8A4DFC, #2A71FC);
