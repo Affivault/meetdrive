@@ -10,8 +10,9 @@ import type { ReactNode } from 'react';
  * pinned to its bottom (e.g. a testimonial). `children` is the form column.
  */
 
-/* The md-auth shell is a fixed dark design → always the white wordmark. */
-function BrandLogo() {
+/* Split design: white wordmark on the dark brand panel, dark wordmark on the
+   light form column (mobile). */
+function BrandLogo({ light = false }: { light?: boolean }) {
   return (
     <a
       className="md-auth__logo"
@@ -20,9 +21,9 @@ function BrandLogo() {
       style={{ textDecoration: 'none', display: 'inline-flex' }}
     >
       <img
-        src="/logo-dark.svg"
+        src={light ? '/logo.svg' : '/logo-dark.svg'}
         alt="Sincerely"
-        style={{ height: 36, width: 'auto', display: 'block' }}
+        style={{ height: 32, width: 'auto', display: 'block' }}
         draggable={false}
       />
     </a>
@@ -52,7 +53,7 @@ export function AuthShell({
       <main className="md-auth__form-wrap">
         <div className="md-auth__form">
           <div className="md-auth__mobile-logo">
-            <BrandLogo />
+            <BrandLogo light />
           </div>
           {children}
         </div>
