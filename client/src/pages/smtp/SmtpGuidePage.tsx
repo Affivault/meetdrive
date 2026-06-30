@@ -370,7 +370,7 @@ export function SmtpGuidePage() {
             {checkDomainMutation.data && <DnsCheckResult result={checkDomainMutation.data} />}
 
             <div className="rounded-lg bg-elevated p-4 border border-subtle">
-              <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-2">Why DNS records matter</h4>
+              <h4 className="text-xs font-medium text-secondary mb-2">Why DNS records matter</h4>
               <div className="space-y-2 text-sm text-secondary">
                 <p><strong className="text-primary">SPF</strong> — Tells receiving servers which mail servers can send email for your domain. Without it, emails may land in spam.</p>
                 <p><strong className="text-primary">DKIM</strong> — Adds a digital signature proving emails haven't been tampered with. Set up through your email provider.</p>
@@ -392,7 +392,7 @@ export function SmtpGuidePage() {
 
       {/* Provider Selection */}
       <div>
-        <h2 className="text-sm font-medium text-secondary uppercase tracking-wide mb-3">Choose Your Provider</h2>
+        <h2 className="text-sm font-medium text-secondary mb-3">Choose Your Provider</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {providers.map((provider) => (
             <button
@@ -428,7 +428,7 @@ export function SmtpGuidePage() {
           <div className="p-5 space-y-4">
             {/* Connection Details */}
             <div>
-              <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-3">Connection Details</h4>
+              <h4 className="text-xs font-medium text-secondary mb-3">Connection Details</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-md bg-elevated p-3 border border-subtle">
                   <p className="text-xs text-tertiary mb-1">SMTP Host</p>
@@ -463,7 +463,7 @@ export function SmtpGuidePage() {
 
             {/* SMTP Setup Steps */}
             <div>
-              <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-3">SMTP Setup Steps</h4>
+              <h4 className="text-xs font-medium text-secondary mb-3">SMTP Setup Steps</h4>
               <div className="space-y-2">
                 {selectedProvider.steps.map((step, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 rounded-md bg-elevated border border-subtle">
@@ -479,7 +479,7 @@ export function SmtpGuidePage() {
             {/* DNS Setup */}
             {selectedProvider.dns_steps && (
               <div>
-                <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-3">
+                <h4 className="text-xs font-medium text-secondary mb-3">
                   <span className="inline-flex items-center gap-1.5">
                     <Shield className="h-3.5 w-3.5" />
                     Domain DNS Setup
@@ -501,7 +501,7 @@ export function SmtpGuidePage() {
             {/* Links */}
             {selectedProvider.links && selectedProvider.links.length > 0 && (
               <div>
-                <h4 className="text-xs font-medium text-secondary uppercase tracking-wide mb-3">Useful Links</h4>
+                <h4 className="text-xs font-medium text-secondary mb-3">Useful Links</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedProvider.links.map((link, i) => (
                     <a

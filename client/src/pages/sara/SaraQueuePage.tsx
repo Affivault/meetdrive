@@ -208,7 +208,7 @@ export function SaraQueuePage() {
       {/* Intent Distribution */}
       {stats?.top_intents && stats.top_intents.length > 0 && (
         <div className="card p-4">
-          <h3 className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Intent Distribution</h3>
+          <h3 className="text-[11px] font-bold text-[var(--text-tertiary)] mb-3">Intent Distribution</h3>
           <div className="flex gap-1.5 flex-wrap">
             {stats.top_intents.map((item: any) => {
               const config = INTENT_CONFIG[item.intent] || INTENT_CONFIG.other;
@@ -295,7 +295,7 @@ export function SaraQueuePage() {
         <div className="grid grid-cols-[340px,1fr] gap-3 h-[calc(100vh-340px)] min-h-[480px]">
           {/* ── LEFT PANE: message list ───────────────────────────── */}
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden flex flex-col">
-            <div className="px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)] flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+            <div className="px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)] flex items-center justify-between text-[11px] font-semibold text-[var(--text-tertiary)]">
               <span>{messages.length} {STATUS_TABS.find(t => t.value === statusFilter)?.label.toLowerCase()}</span>
               <span className="flex items-center gap-1 text-[10px] normal-case font-medium tracking-normal">
                 <Kbd>J</Kbd><Kbd>K</Kbd> navigate
@@ -423,7 +423,7 @@ export function SaraQueuePage() {
                     <div className="px-5 py-4 space-y-4">
                       {/* Original message */}
                       <div>
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text-tertiary)] mb-2">
+                        <h4 className="text-[10px] font-bold text-[var(--text-tertiary)] mb-2">
                           Reply received
                         </h4>
                         <div className="text-[13px] text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
@@ -439,7 +439,7 @@ export function SaraQueuePage() {
                               <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--indigo)]">
                                 <Bot className="h-3 w-3 text-white" />
                               </span>
-                              <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--indigo)]">
+                              <h4 className="text-[11px] font-bold text-[var(--indigo)]">
                                 SARA's draft reply
                               </h4>
                             </div>

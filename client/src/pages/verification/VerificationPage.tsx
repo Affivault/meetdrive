@@ -39,7 +39,7 @@ function StageCell({ icon: Icon, label, state }: { icon: any; label: string; sta
       </span>
       <span
         className={cn(
-          'text-[11px] font-medium uppercase tracking-wider',
+          'text-[11px] font-medium',
           state === 'idle' && 'text-[var(--text-tertiary)]',
           state === 'pending' && 'text-[var(--indigo)]',
           state === 'pass' && 'text-emerald-600 dark:text-emerald-400',
@@ -89,7 +89,7 @@ function HealthGauge({ score, size = 160 }: { score: number; size?: number }) {
         <div className="text-[34px] font-semibold tabular tracking-[-0.03em] text-[var(--text-primary)] leading-none">
           {score}
         </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)] mt-1">
+        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] mt-1">
           Avg DCS
         </div>
       </div>
@@ -139,7 +139,7 @@ export function VerificationPage() {
         <div className="relative p-5">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-3.5 w-3.5 text-[var(--indigo)]" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">
+            <span className="text-[10.5px] font-semibold text-[var(--text-tertiary)]">
               Live deliverability pipeline
             </span>
           </div>

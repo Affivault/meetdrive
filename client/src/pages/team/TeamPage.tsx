@@ -168,7 +168,7 @@ export function TeamPage() {
       <Card padding="md" className="mb-3">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-[10.5px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.08em] mb-1">Organisation</p>
+            <p className="text-[10.5px] font-semibold text-[var(--text-tertiary)] mb-1">Organisation</p>
             {editingOrgName ? (
               <div className="flex items-center gap-2">
                 <input

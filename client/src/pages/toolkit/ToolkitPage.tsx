@@ -184,7 +184,7 @@ function HealthCard({ icon: Icon, label, value, color, desc, negative }: {
         <span className="flex h-6 w-6 items-center justify-center rounded-[6px]" style={{ background: `${color}18` }}>
           <Icon className="h-3.5 w-3.5" style={{ color }} />
         </span>
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--text-tertiary)]">{label}</span>
+        <span className="text-[10.5px] font-semibold text-[var(--text-tertiary)]">{label}</span>
       </div>
       <div className="text-[22px] font-bold tabular-nums tracking-[-0.02em]" style={{ color: negative && value > 0 ? color : value === 0 ? '#10B981' : color }}>
         {value.toLocaleString()}

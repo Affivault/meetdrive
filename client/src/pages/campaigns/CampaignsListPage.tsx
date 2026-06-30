@@ -253,7 +253,7 @@ export function CampaignsListPage() {
         {/* Folder rail */}
         <aside className="panel-inset p-1.5 self-start sticky top-[56px] max-h-[calc(100vh-72px)] overflow-y-auto">
           <div className="px-2 pt-1 pb-1.5 flex items-center justify-between">
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Folders</span>
+            <span className="text-[10.5px] font-semibold text-[var(--text-tertiary)]">Folders</span>
             <button
               onClick={() => { setEditingFolder(null); setNewFolderParent(null); setFolderModalOpen(true); }}
               title="New folder"
@@ -393,7 +393,7 @@ export function CampaignsListPage() {
                         key={col.key}
                         onClick={() => toggleSort(col.key)}
                         className={cn(
-                          'group/sort inline-flex items-center gap-1 font-data text-[10px] font-medium uppercase tracking-[0.07em] transition-colors select-none',
+                          'group/sort inline-flex items-center gap-1 font-data text-[10px] font-medium transition-colors select-none',
                           col.right && 'justify-end',
                           sortKey === col.key ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                         )}
@@ -404,7 +404,7 @@ export function CampaignsListPage() {
                           : <ChevronsUpDown className="h-3 w-3 opacity-0 group-hover/sort:opacity-60 transition-opacity" />}
                       </button>
                     ))}
-                    <span className="font-data text-[10px] font-medium uppercase tracking-[0.07em] text-[var(--text-tertiary)]">Pipeline</span>
+                    <span className="font-data text-[10px] font-medium text-[var(--text-tertiary)]">Pipeline</span>
                     <span />
                   </div>
                   <div className="divide-y divide-[var(--border-subtle)]">
@@ -450,7 +450,7 @@ export function CampaignsListPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-          <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
+          <div className="px-3 py-1.5 text-[10px] text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
             Move to folder
           </div>
           <button
@@ -585,7 +585,7 @@ function MetricChip({ icon: Icon, label, value, rate }: {
     <div className="panel panel-hover px-3.5 py-3">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="h-3.5 w-3.5 text-[var(--text-tertiary)]" strokeWidth={2} />
-        <span className="text-[10.5px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)] flex-1">{label}</span>
+        <span className="text-[10.5px] font-medium text-[var(--text-tertiary)] flex-1">{label}</span>
         {rate !== undefined && (
           <span className="text-[10.5px] tabular text-[var(--text-tertiary)] font-medium">{rate.toFixed(1)}%</span>
         )}
@@ -759,7 +759,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
         {/* Conversion funnel */}
         <div>
           <div className="flex items-center justify-between mb-2.5">
-            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Conversion funnel</span>
+            <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Conversion funnel</span>
             {sent === 0 && <span className="text-[10.5px] text-[var(--text-tertiary)]">No emails sent yet</span>}
           </div>
           <div className="space-y-2">
@@ -792,7 +792,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
           {/* Audience progress */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Audience</span>
+              <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Audience</span>
               <span className="text-[11px] text-[var(--text-tertiary)] tabular">{totalContacts.toLocaleString()} contacts</span>
             </div>
             <div className="flex h-2.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
@@ -810,7 +810,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
 
           {/* Sending config */}
           <div>
-            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Sending config</span>
+            <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Sending config</span>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
               <ConfigItem icon={Layers}   label="Steps"       value={`${c.steps_count || 0}`} />
               <ConfigItem icon={Gauge}    label="Daily limit" value={c.daily_limit ? `${c.daily_limit}/day` : '—'} />
@@ -865,7 +865,7 @@ function ConfigItem({ icon: Icon, label, value }: { icon: any; label: string; va
     <div className="flex items-center gap-2 min-w-0">
       <Icon className="h-3.5 w-3.5 text-[var(--text-tertiary)] flex-shrink-0" strokeWidth={2} />
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] leading-none">{label}</div>
+        <div className="text-[10px] text-[var(--text-tertiary)] leading-none">{label}</div>
         <div className="text-[11.5px] font-medium text-[var(--text-primary)] truncate mt-0.5">{value}</div>
       </div>
     </div>
@@ -972,9 +972,9 @@ function FolderAnalyticsModal({ folderId, onClose }: { folderId: string; onClose
             <MetricChip icon={MessageSquare}     label="Replied" value={data.totals.replied} tone="emerald" rate={data.totals.sent ? (data.totals.replied/data.totals.sent*100) : 0} />
           </div>
 
-          <div className="font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">By campaign</div>
+          <div className="font-data text-[10px] text-[var(--text-tertiary)] mb-2">By campaign</div>
           <table className="w-full text-sm">
-            <thead className="font-data text-[10px] uppercase tracking-[0.07em] text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
+            <thead className="font-data text-[10px] text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
               <tr>
                 <th className="text-left py-2 font-medium">Campaign</th>
                 <th className="text-right py-2 font-medium">Sent</th>

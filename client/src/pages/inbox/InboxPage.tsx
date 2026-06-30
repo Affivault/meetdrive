@@ -533,7 +533,7 @@ function CustomCalendar({ selected, onSelect }: { selected: Date | null; onSelec
       {/* Day headers */}
       <div className="grid grid-cols-7 mb-1">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-          <div key={d} className="text-center text-[10px] font-semibold text-[var(--text-muted)] uppercase py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] font-semibold text-[var(--text-muted)] py-1">{d}</div>
         ))}
       </div>
 
@@ -619,7 +619,7 @@ function CustomTimePicker({ value, onChange }: { value: { hour: number; minute: 
 
       {/* Hour grid */}
       <div className="mb-2">
-        <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Hour</span>
+        <span className="text-[10px] font-semibold text-[var(--text-muted)] mb-1.5 block">Hour</span>
         <div className="grid grid-cols-6 gap-1">
           {hours12.map(h => (
             <button
@@ -639,7 +639,7 @@ function CustomTimePicker({ value, onChange }: { value: { hour: number; minute: 
 
       {/* Minute grid */}
       <div>
-        <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Minute</span>
+        <span className="text-[10px] font-semibold text-[var(--text-muted)] mb-1.5 block">Minute</span>
         <div className="grid grid-cols-4 gap-1">
           {minutes.map(m => (
             <button
@@ -1658,7 +1658,7 @@ export function InboxPage() {
                 )}
                 <FIcon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.7} />
                 <span className={cn(
-                  'text-[9px] font-semibold uppercase tracking-wider leading-none',
+                  'text-[9px] font-semibold leading-none',
                   active ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)]'
                 )}>
                   {f.label.slice(0, 5)}
@@ -1716,7 +1716,7 @@ export function InboxPage() {
           {/* Quick filter chips + folder label */}
           <div className="px-3 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text-tertiary)] flex items-center gap-1.5">
+              <span className="text-[10px] font-bold text-[var(--text-tertiary)] flex items-center gap-1.5">
                 {(() => {
                   const F = foldersList.find(f => f.id === folder);
                   const FI = F?.icon || Inbox;
@@ -2023,7 +2023,7 @@ export function InboxPage() {
                       {replyMode === 'forward' && (
                         <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40">
                           <div className="px-4 py-2.5">
-                            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Forwarded message</p>
+                            <p className="text-[10px] font-semibold text-[var(--text-muted)] mb-1.5">Forwarded message</p>
                             <div className="text-[11px] text-[var(--text-tertiary)] space-y-0.5">
                               <p><span className="font-medium text-[var(--text-secondary)]">From:</span> {currentMsg.from_email}</p>
                               <p><span className="font-medium text-[var(--text-secondary)]">Date:</span> {formatFullDate(currentMsg.received_at)}</p>

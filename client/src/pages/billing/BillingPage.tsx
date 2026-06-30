@@ -27,7 +27,7 @@ function UsageMeter({ icon: Icon, label, used, limit }: {
         <span className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[var(--indigo-subtle)]">
           <Icon className="h-3.5 w-3.5 text-[var(--indigo)]" />
         </span>
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--text-tertiary)]">{label}</span>
+        <span className="text-[10.5px] font-semibold text-[var(--text-tertiary)]">{label}</span>
       </div>
       <div className="flex items-baseline gap-1.5">
         <span className="text-[22px] font-bold tabular-nums tracking-[-0.02em] text-[var(--text-primary)]">{used.toLocaleString()}</span>

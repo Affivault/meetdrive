@@ -86,7 +86,7 @@ function CopyableRecord({ record }: { record: DnsRecordInstruction }) {
 
       {/* Host */}
       <div className="space-y-1">
-        <label className="text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Host / Name</label>
+        <label className="text-[11px] font-medium text-[var(--text-tertiary)]">Host / Name</label>
         <div className="flex items-center gap-2">
           <code className="flex-1 text-xs font-mono text-[var(--text-primary)] bg-[var(--bg-elevated)] px-3 py-2 rounded border border-[var(--border-subtle)] break-all">
             {record.host}
@@ -103,7 +103,7 @@ function CopyableRecord({ record }: { record: DnsRecordInstruction }) {
 
       {/* Value */}
       <div className="space-y-1">
-        <label className="text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Value / Content</label>
+        <label className="text-[11px] font-medium text-[var(--text-tertiary)]">Value / Content</label>
         <div className="flex items-center gap-2">
           <code className="flex-1 text-xs font-mono text-[var(--text-primary)] bg-[var(--bg-elevated)] px-3 py-2 rounded border border-[var(--border-subtle)] break-all">
             {record.value}

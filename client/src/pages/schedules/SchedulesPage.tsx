@@ -139,15 +139,15 @@ function ScheduleCard({ schedule, onEdit, onDelete, onMakeDefault }: {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <div className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold mb-1">Time window</div>
+              <div className="text-[10.5px] text-[var(--text-tertiary)] font-semibold mb-1">Time window</div>
               <div className="text-[13px] font-semibold text-[var(--text-primary)] tabular">{schedule.send_window_start} – {schedule.send_window_end}</div>
             </div>
             <div>
-              <div className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold mb-1">Timezone</div>
+              <div className="text-[10.5px] text-[var(--text-tertiary)] font-semibold mb-1">Timezone</div>
               <div className="text-[13px] font-medium text-[var(--text-primary)] truncate">{schedule.timezone}</div>
             </div>
             <div>
-              <div className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold mb-1">Days</div>
+              <div className="text-[10.5px] text-[var(--text-tertiary)] font-semibold mb-1">Days</div>
               <div className="flex gap-0.5">
                 {DAYS.map((d) => (
                   <span key={d.key} className={cn(

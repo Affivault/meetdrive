@@ -428,7 +428,7 @@ export function BulkImportPage() {
 
           {/* Requirements box */}
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-tertiary)] mb-2.5">
+            <p className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2.5">
               Tips for a smooth import
             </p>
             <ul className="space-y-1.5 text-[12.5px] text-[var(--text-secondary)]">
@@ -645,7 +645,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Imported</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Imported</span>
               </div>
               <p className="text-[22px] font-semibold tabular text-emerald-600 dark:text-emerald-400 tracking-[-0.02em] leading-none">
                 {progress.imported.toLocaleString()}
@@ -654,7 +654,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Loader2 className="h-3.5 w-3.5 text-[var(--indigo)] animate-spin" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Processing</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Processing</span>
               </div>
               <p className="text-[22px] font-semibold tabular text-[var(--indigo)] tracking-[-0.02em] leading-none">
                 {progress.processed.toLocaleString()}
@@ -663,7 +663,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <XCircle className="h-3.5 w-3.5 text-rose-500" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Skipped</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Skipped</span>
               </div>
               <p className="text-[22px] font-semibold tabular text-rose-600 dark:text-rose-400 tracking-[-0.02em] leading-none">
                 {progress.errors.toLocaleString()}
@@ -674,7 +674,7 @@ export function BulkImportPage() {
           {/* Recent issues live preview */}
           {progress.errorDetails.length > 0 && (
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3 mb-5">
-              <p className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] mb-2 flex items-center gap-1">
+              <p className="text-[10.5px] font-bold text-[var(--text-tertiary)] mb-2 flex items-center gap-1">
                 <AlertTriangle className="h-3 w-3 text-amber-500" />
                 Recent issues
               </p>
@@ -757,7 +757,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Imported</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Imported</span>
               </div>
               <p className="text-[26px] font-semibold tabular text-emerald-600 dark:text-emerald-400 tracking-[-0.02em] leading-none">
                 {completedResult.imported.toLocaleString()}
@@ -766,7 +766,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <XCircle className="h-3.5 w-3.5 text-rose-500" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Skipped</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Skipped</span>
               </div>
               <p className="text-[26px] font-semibold tabular text-rose-600 dark:text-rose-400 tracking-[-0.02em] leading-none">
                 {completedResult.errors.toLocaleString()}
@@ -775,7 +775,7 @@ export function BulkImportPage() {
             <div className="rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <Users className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Total rows</span>
+                <span className="text-[10.5px] font-bold text-[var(--text-tertiary)]">Total rows</span>
               </div>
               <p className="text-[26px] font-semibold tabular text-[var(--text-primary)] tracking-[-0.02em] leading-none">
                 {completedResult.total.toLocaleString()}

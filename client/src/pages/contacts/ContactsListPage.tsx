@@ -79,7 +79,7 @@ function SortableHeader({
       onClick={() => onSort(colKey)}
       className={`flex items-center gap-1 group/sort transition-colors ${active ? 'text-[var(--indigo)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
     >
-      <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em]">{label}</span>
+      <span className="font-data text-[10px] font-medium">{label}</span>
       {active
         ? (sortDir === 'asc'
             ? <ChevronUp className="h-3 w-3 flex-shrink-0" />
@@ -879,7 +879,7 @@ export function ContactsListPage() {
         <aside className="w-56 flex-shrink-0">
           <div className="sticky top-[60px] panel-inset p-1.5 space-y-0.5">
             <div className="flex items-center justify-between gap-1 px-1.5 pb-1.5 mb-0.5 border-b border-[var(--border-subtle)]">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">Lists</span>
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)]">Lists</span>
               <div className="flex items-center gap-0.5">
                 <button onClick={() => { setEditingFolder(null); setFolderModalOpen(true); }} className="icon-btn h-6 w-6" title="New folder">
                   <FolderPlus className="h-3.5 w-3.5" />
@@ -914,7 +914,7 @@ export function ContactsListPage() {
 
           {/* Lists section */}
           <div className="pt-1.5">
-            <span className="block px-2 mb-1 text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
+            <span className="block px-2 mb-1 text-[10px] font-semibold text-[var(--text-tertiary)]">
               Lead Lists
             </span>
 
@@ -946,7 +946,7 @@ export function ContactsListPage() {
                       >
                         <ChevronRight className={cn('h-3 w-3 flex-shrink-0 text-[var(--text-tertiary)] transition-transform duration-150', !collapsed && 'rotate-90')} />
                         <Folder className="h-3 w-3 flex-shrink-0" style={isFolder ? { color: group.folder!.color } : { color: 'var(--text-tertiary)' }} />
-                        <span className="flex-1 truncate text-[10.5px] font-semibold uppercase tracking-wider" style={isFolder ? { color: group.folder!.color } : { color: 'var(--text-tertiary)' }}>
+                        <span className="flex-1 truncate text-[10.5px] font-semibold" style={isFolder ? { color: group.folder!.color } : { color: 'var(--text-tertiary)' }}>
                           {isFolder ? group.folder!.name : 'Uncategorised'}
                         </span>
                         {isFolder && (
@@ -1035,7 +1035,7 @@ export function ContactsListPage() {
           {/* Other section */}
           <div className="pt-2">
             <div className="px-2 mb-1">
-              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)]">
                 Other
               </span>
             </div>
@@ -1074,7 +1074,7 @@ export function ContactsListPage() {
           </button>
 
           <div className="border-t border-[var(--border-subtle)] my-1" />
-          <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Move to folder</div>
+          <div className="px-3 py-1.5 text-[10px] text-[var(--text-tertiary)]">Move to folder</div>
           <button
             onClick={() => folderMoveMut.mutate({ listId: listContextMenu.listId, folderId: null })}
             className="w-full text-left px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2"
@@ -1205,7 +1205,7 @@ export function ContactsListPage() {
 
                     <div className="max-h-[320px] overflow-y-auto p-1.5">
                       {/* Shown — drag to reorder, eye to hide */}
-                      <p className="flex items-center justify-between px-1.5 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
+                      <p className="flex items-center justify-between px-1.5 pt-1 pb-1.5 text-[10px] font-semibold text-[var(--text-tertiary)]">
                         Shown
                         {!q && <span className="font-data normal-case tracking-normal text-[var(--text-muted)]">drag to reorder</span>}
                       </p>
@@ -1233,7 +1233,7 @@ export function ContactsListPage() {
 
                       {hidden.length > 0 && (
                         <>
-                          <p className="px-1.5 pt-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">Add columns</p>
+                          <p className="px-1.5 pt-2.5 pb-1.5 text-[10px] font-semibold text-[var(--text-tertiary)]">Add columns</p>
                           {hidden.map((c) => (
                             <button
                               key={c.id}
@@ -1373,7 +1373,7 @@ export function ContactsListPage() {
                       <th key={col.id} className="bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] px-4 py-2 whitespace-nowrap min-w-[150px]">
                         {col.sortKey
                           ? <SortableHeader label={col.label} colKey={col.sortKey} sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
-                          : <span className="font-data text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{col.label}</span>}
+                          : <span className="font-data text-[10px] font-medium text-[var(--text-tertiary)]">{col.label}</span>}
                       </th>
                     ))}
                     <th className="sticky right-0 z-[3] bg-[var(--bg-muted)] border-b border-[var(--border-subtle)] w-[112px] px-2 py-2 shadow-[inset_1px_0_0_var(--border-subtle)]" />
@@ -1673,7 +1673,7 @@ export function ContactsListPage() {
               {/* Column mapping */}
               {csvHeaders.length > 0 && (
                 <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
-                  <p className="text-[12px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                  <p className="text-[12px] font-semibold text-[var(--text-tertiary)] mb-1">
                     Column Mapping
                   </p>
                   {csvHeaders.map((header) => (

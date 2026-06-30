@@ -166,7 +166,7 @@ const CATEGORY_COLORS: Record<TemplateCategory, string> = {
 function CategoryBadge({ category }: { category: TemplateCategory }) {
   const label = TEMPLATE_CATEGORIES.find(c => c.value === category)?.label || category;
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase tracking-wider ${CATEGORY_COLORS[category]}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full ${CATEGORY_COLORS[category]}`}>
       {label}
     </span>
   );
@@ -448,7 +448,7 @@ function EmailEditorModal({
         {showPreview && (
           <div className="w-[380px] shrink-0 sticky top-0 self-start space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Live Preview</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Live Preview</span>
               <button onClick={() => setShowPreview(false)} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)]">
                 <X className="h-3 w-3" />
               </button>
@@ -531,7 +531,7 @@ function SequenceEditorModal({
           </div>
 
           <div className="space-y-1.5 pt-2">
-            <span className="text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Steps</span>
+            <span className="text-[11px] font-medium text-[var(--text-tertiary)]">Steps</span>
             {steps.map((step, idx) => (
               <div key={idx}>
                 {idx > 0 && (
@@ -634,7 +634,7 @@ function SequenceEditorModal({
 
             {/* Inline preview */}
             <div className="space-y-1">
-              <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Preview</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Preview</span>
               <EmailPreview subject={current.subject || 'Subject'} bodyHtml={current.body_html || '<p>...</p>'} compact />
             </div>
           </div>
@@ -744,7 +744,7 @@ function PreviewModal({
           {/* Preview */}
           <div className="flex-1">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
                 Email {activeStep + 1} of {steps.length}
               </span>
               <div className="flex gap-1">

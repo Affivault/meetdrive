@@ -190,7 +190,7 @@ export function ContactDetailPage() {
         {/* Contact Info */}
         <div className="space-y-3">
           <div className="card p-4">
-            <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Contact Info</h2>
+            <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] mb-3">Contact Info</h2>
             <div className="space-y-2.5">
               <InfoRow icon={Mail} label="Email" value={contact.email} copyable />
               {contact.company && <InfoRow icon={Building2} label="Company" value={contact.company} />}
@@ -209,7 +209,7 @@ export function ContactDetailPage() {
           {/* Lists Section */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Lists</h2>
+              <h2 className="text-[11px] font-bold text-[var(--text-tertiary)]">Lists</h2>
               <div className="relative">
                 <button
                   onClick={() => setShowAddToListDropdown(!showAddToListDropdown)}
@@ -286,7 +286,7 @@ export function ContactDetailPage() {
 
         {/* Activity Timeline */}
         <div className="lg:col-span-2 card p-4">
-          <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Activity Timeline</h2>
+          <h2 className="text-[11px] font-bold text-[var(--text-tertiary)] mb-3">Activity Timeline</h2>
           {!timeline || timeline.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bg-elevated)] mb-2">

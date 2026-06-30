@@ -140,7 +140,7 @@ function SectionCard({
 function Field({ label, hint, children }: { label: React.ReactNode; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-[0.06em] mb-1.5">
+      <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1.5">
         {label}
       </label>
       {children}
@@ -718,7 +718,7 @@ export function CampaignCreatePage() {
                 'h-3.5 w-3.5',
                 totalIssues === 0 ? 'text-emerald-500' : 'text-amber-500'
               )} />
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+              <p className="text-[10.5px] font-bold text-[var(--text-secondary)]">
                 Pre-flight
               </p>
               {totalIssues > 0 && (
@@ -751,7 +751,7 @@ export function CampaignCreatePage() {
           {/* Live stats */}
           {(selectedContactIds.length > 0 || steps.length > 0) && (
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 mb-3">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
+              <p className="text-[10.5px] font-bold text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
                 <Zap className="h-3 w-3 text-[var(--indigo)]" />
                 Quick stats
               </p>
@@ -901,7 +901,7 @@ export function CampaignCreatePage() {
                   <div className="space-y-4">
                     {savedSchedules.length > 0 && (
                       <div className="rounded-lg border border-[var(--indigo-subtle)] bg-[var(--indigo-subtle)] p-2.5">
-                        <label className="block text-[10.5px] font-bold uppercase tracking-wider text-[var(--indigo)] mb-1.5">
+                        <label className="block text-[10.5px] font-bold text-[var(--indigo)] mb-1.5">
                           Quick apply saved schedule
                         </label>
                         <select
@@ -1297,7 +1297,7 @@ export function CampaignCreatePage() {
                           const hasBody = !!(steps[editingStep].body_html || '').replace(/<[^>]*>/g, '').trim();
                           return (
                             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3">
-                              <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                              <p className="text-[11px] font-semibold text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
                                 <Send className="h-3 w-3" />
                                 Send test email
                               </p>
@@ -1403,7 +1403,7 @@ export function CampaignCreatePage() {
                             { label: 'Min', key: 'delay_minutes', max: 59 },
                           ].map(({ label, key, max }) => (
                             <div key={key}>
-                              <label className="block text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] mb-1.5 text-center">
+                              <label className="block text-[10.5px] font-bold text-[var(--text-tertiary)] mb-1.5 text-center">
                                 {label}
                               </label>
                               <input
@@ -1488,19 +1488,19 @@ export function CampaignCreatePage() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3">
-                        <p className="text-[10.5px] uppercase tracking-wider text-[var(--text-tertiary)] font-bold">Recipients</p>
+                        <p className="text-[10.5px] text-[var(--text-tertiary)] font-bold">Recipients</p>
                         <p className="text-[20px] font-bold text-[var(--text-primary)] tabular leading-tight mt-0.5">
                           {selectedContactIds.length.toLocaleString()}
                         </p>
                       </div>
                       <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-3">
-                        <p className="text-[10.5px] uppercase tracking-wider text-[var(--text-tertiary)] font-bold">Email steps</p>
+                        <p className="text-[10.5px] text-[var(--text-tertiary)] font-bold">Email steps</p>
                         <p className="text-[20px] font-bold text-[var(--text-primary)] tabular leading-tight mt-0.5">
                           {emailSteps.length}
                         </p>
                       </div>
                       <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--indigo-subtle)] p-3">
-                        <p className="text-[10.5px] uppercase tracking-wider text-[var(--indigo)] font-bold">Total sends</p>
+                        <p className="text-[10.5px] text-[var(--indigo)] font-bold">Total sends</p>
                         <p className="text-[20px] font-bold text-[var(--indigo)] tabular leading-tight mt-0.5">
                           {(emailSteps.length * selectedContactIds.length).toLocaleString()}
                         </p>
@@ -1511,7 +1511,7 @@ export function CampaignCreatePage() {
                     {(selectedContactsPreview || []).length > 0 && (
                       <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-3">
                         <div className="flex items-center justify-between mb-2.5">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                          <p className="text-[11px] font-bold text-[var(--text-secondary)]">
                             Preview ({Math.min(8, selectedContactIds.length)} of {selectedContactIds.length.toLocaleString()})
                           </p>
                           <Button variant="secondary" size="sm" onClick={() => setShowContactModal(true)}>
@@ -1737,7 +1737,7 @@ export function CampaignCreatePage() {
                       senderPoolIds.length > 0 ? { label: 'Sender rotation', value: `${senderPoolIds.length} accounts` } : null,
                     ].filter(Boolean).map(({ label, value }: any) => (
                       <div key={label}>
-                        <dt className="text-[10.5px] uppercase tracking-wider text-[var(--text-tertiary)] font-bold mb-0.5">{label}</dt>
+                        <dt className="text-[10.5px] text-[var(--text-tertiary)] font-bold mb-0.5">{label}</dt>
                         <dd className="font-medium text-[var(--text-primary)]">{value}</dd>
                       </div>
                     ))}
@@ -2121,7 +2121,7 @@ function ABSection({
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] p-3.5">
       <div className="flex items-center justify-between mb-2.5">
-        <p className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+        <p className="text-[11px] font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
           <Brain className="h-3 w-3 text-violet-600 dark:text-violet-400" />
           {title}
         </p>
@@ -2137,7 +2137,7 @@ function ABSection({
       </div>
       <div className="space-y-2">
         <div>
-          <label className="block text-[10.5px] font-medium text-[var(--text-tertiary)] mb-1 uppercase tracking-wider">
+          <label className="block text-[10.5px] font-medium text-[var(--text-tertiary)] mb-1">
             {variantALabel}
           </label>
           <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2.5 py-2 text-[11.5px] text-[var(--text-secondary)] line-clamp-2">
@@ -2145,7 +2145,7 @@ function ABSection({
           </div>
         </div>
         <div>
-          <label className="block text-[10.5px] font-medium text-[var(--text-tertiary)] mb-1 uppercase tracking-wider">
+          <label className="block text-[10.5px] font-medium text-[var(--text-tertiary)] mb-1">
             Variant B
           </label>
           {isTextarea ? (
@@ -2278,7 +2278,7 @@ function RecipientPreview({ subject, bodyHtml, fromName, fromEmail }: {
     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)]">
         <Eye className="h-3 w-3 text-[var(--indigo)]" />
-        <span className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Inbox preview</span>
+        <span className="text-[10.5px] font-bold text-[var(--text-secondary)]">Inbox preview</span>
         <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">sample data</span>
       </div>
 

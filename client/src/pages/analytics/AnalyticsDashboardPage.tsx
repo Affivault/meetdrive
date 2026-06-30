@@ -346,13 +346,13 @@ function CampaignLeaderboard({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--border-subtle)]">
-            <th className="text-left py-2.5 px-4 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">
+            <th className="text-left py-2.5 px-4 font-data text-[10px] text-[var(--text-tertiary)] font-medium">
               Campaign
             </th>
             {cols.map((c) => (
               <th
                 key={c.key}
-                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => toggleSort(c.key)}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -361,7 +361,7 @@ function CampaignLeaderboard({
                 </span>
               </th>
             ))}
-            <th className="text-left py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium w-32">
+            <th className="text-left py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium w-32">
               Volume
             </th>
             <th className="w-10" />
@@ -641,10 +641,10 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-[var(--bg-elevated)] border-b border-[var(--border-subtle)]">
-              <th className="text-left py-2.5 px-4 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Contact</th>
-              <th className="text-left py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Status</th>
+              <th className="text-left py-2.5 px-4 font-data text-[10px] text-[var(--text-tertiary)] font-medium">Contact</th>
+              <th className="text-left py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium">Status</th>
               <th
-                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('score'); setSortDir(sortKey === 'score' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -652,7 +652,7 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('sent'); setSortDir(sortKey === 'sent' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -660,7 +660,7 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('opened'); setSortDir(sortKey === 'opened' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
@@ -668,15 +668,15 @@ function ContactsTab({ contacts }: { contacts: CampaignContact[] }) {
                 </span>
               </th>
               <th
-                className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
+                className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium cursor-pointer hover:text-[var(--text-primary)] select-none"
                 onClick={() => { setSortKey('clicked'); setSortDir(sortKey === 'clicked' && sortDir === 'desc' ? 'asc' : 'desc'); }}
               >
                 <span className="inline-flex items-center gap-1 justify-end">
                   Clicks <SortIcon col="clicked" sortKey={sortKey} sortDir={sortDir} />
                 </span>
               </th>
-              <th className="text-center py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">Reply</th>
-              <th className="text-right py-2.5 px-3 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium">DCS</th>
+              <th className="text-center py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium">Reply</th>
+              <th className="text-right py-2.5 px-3 font-data text-[10px] text-[var(--text-tertiary)] font-medium">DCS</th>
             </tr>
           </thead>
           <tbody>
@@ -1033,7 +1033,7 @@ export function AnalyticsDashboardPage() {
               <div className="relative px-6 py-6">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="eyebrow">Emails sent</span>
-                  <span className="font-data text-[10px] text-[var(--text-muted)] uppercase tracking-[0.1em]">last {days} days</span>
+                  <span className="font-data text-[10px] text-[var(--text-muted)]">last {days} days</span>
                 </div>
                 <div className="flex items-end gap-3 flex-wrap">
                   <span className="text-[clamp(40px,6vw,60px)] font-semibold text-[var(--text-primary)] tabular-nums leading-[0.95] tracking-[-0.04em]">
@@ -1379,7 +1379,7 @@ export function AnalyticsDashboardPage() {
                             <tr className="border-b border-[var(--border-subtle)]">
                               {['Step', 'Subject', 'Delay', 'Sent', 'Opened', 'Open %', 'Clicked', 'Click %', 'Replied', 'Reply %', 'Bounced'].map((h) => (
                                 <th key={h} className={cn(
-                                  'py-2 font-data text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-medium',
+                                  'py-2 font-data text-[10px] text-[var(--text-tertiary)] font-medium',
                                   h === 'Subject' ? 'text-left px-3' : 'text-right px-2'
                                 )}>{h}</th>
                               ))}
