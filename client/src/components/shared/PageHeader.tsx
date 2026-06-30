@@ -31,7 +31,6 @@ export function PageHeader({
   breadcrumbs,
   actions,
   leading,
-  decorate = false,
   tabs,
   meta,
   className,
@@ -43,13 +42,8 @@ export function PageHeader({
         className
       )}
     >
-      {/* Subtle ambient wash for hero headers — kept very faint */}
-      {decorate && (
-        <div
-          className="absolute -top-28 right-0 h-56 w-96 rounded-full blur-3xl opacity-50 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.10), transparent 70%)' }}
-        />
-      )}
+      {/* `decorate` retained for API compatibility; the glow wash was removed to
+          keep headers calm and consistent across the app. */}
 
       <div className="relative px-6 pt-5 pb-4">
         {/* Breadcrumbs */}
