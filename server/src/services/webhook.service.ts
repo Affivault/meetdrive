@@ -23,7 +23,10 @@ export async function listEndpoints(userId: string): Promise<WebhookEndpoint[]> 
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
-  return data || [];
+  // Never ship the signing secret in a list response — it's only shown once,
+  // right after creation or a deliberate regenerate, via their dedicated
+  // endpoints. Listing endpoints should not leak it on every page load.
+  return (data || []).map(({ secret, ...rest }: WebhookEndpoint) => ({ ...rest, secret: null }));
 }
 
 export async function getEndpoint(userId: string, id: string): Promise<WebhookEndpoint | null> {
@@ -61,9 +64,35 @@ export async function updateEndpoint(
   id: string,
   input: UpdateWebhookEndpointInput
 ): Promise<WebhookEndpoint> {
+  // Never let an update clear the signing secret — a falsy/empty value here
+  // (e.g. an empty-string PATCH) would silently downgrade the endpoint to
+  // sending unsigned deliveries with no warning to the receiver.
+  const { secret, ...rest } = input as UpdateWebhookEndpointInput & { secret?: string };
+  const update: UpdateWebhookEndpointInput & { secret?: string } = { ...rest };
+  if (secret) update.secret = secret;
+
   const { data, error } = await supabaseAdmin
     .from('webhook_endpoints')
-    .update(input)
+    .update(update)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Rotate an endpoint's signing secret and return the new value once so the
+ * caller can copy it into their receiver's verification config. Never
+ * retrievable again after this — same reveal-once pattern as API keys.
+ */
+export async function regenerateSecret(userId: string, id: string): Promise<WebhookEndpoint> {
+  const newSecret = crypto.randomBytes(32).toString('hex');
+  const { data, error } = await supabaseAdmin
+    .from('webhook_endpoints')
+    .update({ secret: newSecret })
     .eq('id', id)
     .eq('user_id', userId)
     .select()

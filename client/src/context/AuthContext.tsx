@@ -26,7 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-    }).catch(() => {
+    }).catch((err) => {
+      console.error('Failed to load session:', err);
       setLoading(false);
     });
 
@@ -81,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Sign out request failed (clearing local session anyway):', err);
     } finally {
       setUser(null);
       setSession(null);

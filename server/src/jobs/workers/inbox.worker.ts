@@ -187,11 +187,20 @@ export function startInboxWorker() {
             inboxRow.contact_id = matchedActivity.contact_id;
           }
 
-          const { data: saved } = await supabaseAdmin
+          const { data: saved, error: saveErr } = await supabaseAdmin
             .from('inbox_messages')
             .insert(inboxRow)
             .select('id')
             .single();
+
+          if (saveErr || !saved) {
+            // Don't record a "replied" activity or run SARA against a message
+            // that was never actually persisted — the reply would otherwise
+            // silently disappear (stops the sequence but never shows up in
+            // the inbox or gets classified).
+            console.error(`[Inbox] Failed to save inbound message from ${fromEmail}:`, saveErr?.message);
+            continue;
+          }
 
           // 7. If matched, record reply activity and run SARA
           if (matchedActivity) {

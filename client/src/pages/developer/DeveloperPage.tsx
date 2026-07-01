@@ -18,6 +18,7 @@ import {
   Clock,
   Zap,
   X,
+  RefreshCw,
 } from 'lucide-react';
 import { cn, formatDateTime } from '../../lib/utils';
 import { PageHeader } from '../../components/shared/PageHeader';
@@ -43,6 +44,7 @@ export function DeveloperPage() {
   const [webhookLabel, setWebhookLabel] = useState('');
   const [webhookEvents, setWebhookEvents] = useState<WebhookEventType[]>([]);
   const [showDeliveries, setShowDeliveries] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState<{ label: string; secret: string } | null>(null);
 
   const [showCreateKey, setShowCreateKey] = useState(false);
   const [keyName, setKeyName] = useState('');
@@ -69,15 +71,26 @@ export function DeveloperPage() {
 
   const createEndpointMutation = useMutation({
     mutationFn: () => webhookApi.createEndpoint({ url: webhookUrl, label: webhookLabel || undefined, events: webhookEvents }),
-    onSuccess: () => {
+    onSuccess: (endpoint) => {
       queryClient.invalidateQueries({ queryKey: ['webhook-endpoints'] });
       toast.success('Webhook created');
       setShowCreateWebhook(false);
       setWebhookUrl('');
       setWebhookLabel('');
       setWebhookEvents([]);
+      if (endpoint.secret) setRevealedSecret({ label: endpoint.label, secret: endpoint.secret });
     },
     onError: () => toast.error('Failed to create webhook'),
+  });
+
+  const regenerateSecretMutation = useMutation({
+    mutationFn: webhookApi.regenerateSecret,
+    onSuccess: (endpoint) => {
+      queryClient.invalidateQueries({ queryKey: ['webhook-endpoints'] });
+      if (endpoint.secret) setRevealedSecret({ label: endpoint.label, secret: endpoint.secret });
+      toast.success('Secret regenerated');
+    },
+    onError: () => toast.error('Failed to regenerate secret'),
   });
 
   const deleteEndpointMutation = useMutation({
@@ -184,6 +197,31 @@ export function DeveloperPage() {
             </button>
           </div>
 
+          {revealedSecret && (
+            <div className="rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)] p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--text-primary)]">Signing secret for "{revealedSecret.label}"</h3>
+                <button onClick={() => setRevealedSecret(null)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X className="h-4 w-4" /></button>
+              </div>
+              <p className="text-xs text-[var(--text-tertiary)]">
+                Copy this now — it won't be shown again. Use it to verify the <code>X-Sincerely-Signature</code> header on incoming deliveries.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded bg-[var(--bg-surface)] px-3 py-2 text-sm font-mono text-[var(--text-primary)] break-all">{revealedSecret.secret}</code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(revealedSecret.secret)
+                      .then(() => toast.success('Copied!'))
+                      .catch(() => toast.error('Failed to copy to clipboard'));
+                  }}
+                  className="p-2 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] shrink-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {showCreateWebhook && (
             <div className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -261,6 +299,17 @@ export function DeveloperPage() {
                     <button onClick={() => testEndpointMutation.mutate(ep.id)} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-medium bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                       <Zap className="h-3 w-3" /> Test
                     </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Regenerate the signing secret for "${ep.label}"? Any receiver still checking the old signature will start failing verification until updated.`)) {
+                          regenerateSecretMutation.mutate(ep.id);
+                        }
+                      }}
+                      disabled={regenerateSecretMutation.isPending}
+                      className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-medium bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Secret
+                    </button>
                     <button onClick={() => setShowDeliveries(showDeliveries === ep.id ? null : ep.id)} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-medium bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                       <Clock className="h-3 w-3" /> Logs
                     </button>
@@ -317,7 +366,11 @@ export function DeveloperPage() {
                   {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
                 <button
-                  onClick={() => { navigator.clipboard.writeText(newRawKey); toast.success('Copied!'); }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(newRawKey)
+                      .then(() => toast.success('Copied!'))
+                      .catch(() => toast.error('Failed to copy to clipboard'));
+                  }}
                   className="p-2 rounded bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   <Copy className="h-4 w-4" />

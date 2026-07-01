@@ -4,6 +4,7 @@ import type { SaraClassificationResult, SaraQueueStats } from '@lemlist/shared';
 import { fireEvent } from './webhook.service.js';
 import { suppressionService } from './suppression.service.js';
 import { billingService } from './billing.service.js';
+import { AppError } from '../middleware/error.middleware.js';
 
 /**
  * SARA - Sincerely Autonomous Reply Agent
@@ -216,8 +217,13 @@ export function classifyReply(
 
 /**
  * Process a new reply through SARA classification pipeline.
+ *
+ * `requestingUserId` is passed only when called from an authenticated HTTP
+ * request (the sara.controller `classify` route) to verify the caller owns
+ * this message. Internal callers (inbox worker, right after inserting their
+ * own message) omit it since the message is already known to be theirs.
  */
-export async function processReply(messageId: string): Promise<SaraClassificationResult> {
+export async function processReply(messageId: string, requestingUserId?: string): Promise<SaraClassificationResult> {
   // Fetch the message with context
   const { data: message, error: msgError } = await supabaseAdmin
     .from('inbox_messages')
@@ -227,6 +233,9 @@ export async function processReply(messageId: string): Promise<SaraClassificatio
 
   if (msgError) throw new Error(`Failed to fetch message: ${msgError.message}`);
   if (!message) throw new Error('Message not found');
+  if (requestingUserId && message.user_id !== requestingUserId) {
+    throw new AppError('Message not found', 404);
+  }
 
   // SARA is a paid feature — skip classification/auto-actions when not included.
   if (message.user_id && !(await billingService.hasFeature(message.user_id, 'sara'))) {
@@ -342,10 +351,15 @@ export async function approveReply(
     update.sara_draft_reply = editedReply;
   }
 
-  await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('inbox_messages')
     .update(update)
-    .eq('id', messageId);
+    .eq('id', messageId)
+    .eq('user_id', userId)
+    .select('id')
+    .maybeSingle();
+  if (error) throw new AppError(error.message, 500);
+  if (!data) throw new AppError('Message not found', 404);
 
   fireEvent(userId, 'sara.reply_approved', { message_id: messageId, edited: !!editedReply }).catch(() => {});
 }
@@ -354,14 +368,19 @@ export async function approveReply(
  * Dismiss a SARA suggestion.
  */
 export async function dismissReply(messageId: string, userId: string): Promise<void> {
-  await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('inbox_messages')
     .update({
       sara_status: SaraStatus.Dismissed,
       sara_reviewed_at: new Date().toISOString(),
       sara_reviewed_by: userId,
     })
-    .eq('id', messageId);
+    .eq('id', messageId)
+    .eq('user_id', userId)
+    .select('id')
+    .maybeSingle();
+  if (error) throw new AppError(error.message, 500);
+  if (!data) throw new AppError('Message not found', 404);
 }
 
 /**

@@ -102,7 +102,7 @@ export function VerificationPage() {
   const [lastResult, setLastResult] = useState<DcsVerificationResult | null>(null);
   const [history, setHistory] = useState<DcsVerificationResult[]>([]);
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['verification-stats'],
     queryFn: verificationApi.getStats,
   });
@@ -295,6 +295,10 @@ export function VerificationPage() {
               </>
             )}
           </div>
+        </div>
+      ) : statsError ? (
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 text-center text-[13px] text-[var(--text-tertiary)]">
+          Couldn't load verification stats. Try refreshing the page.
         </div>
       ) : null}
 

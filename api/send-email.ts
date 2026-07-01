@@ -1,4 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import { timingSafeEqual } from 'crypto';
+import nodemailer from 'nodemailer';
 
 // Vercel serverless functions receive extended req/res objects
 interface VercelReq extends IncomingMessage {
@@ -45,7 +47,16 @@ export default async function handler(req: VercelReq, res: VercelRes) {
 
   const rawAuth = req.headers.authorization;
   const authHeader = Array.isArray(rawAuth) ? rawAuth[0] : rawAuth;
-  if (!authHeader || authHeader !== `Bearer ${secret}`) {
+  const expected = `Bearer ${secret}`;
+  // Constant-time comparison — this is a public, unauthenticated-by-default
+  // endpoint that relays arbitrary SMTP credentials, so a naive `!==` string
+  // compare would let an attacker brute-force SMTP_RELAY_SECRET one byte at
+  // a time via response-timing differences.
+  const authBuf = Buffer.from(authHeader || '');
+  const expectedBuf = Buffer.from(expected);
+  const authorized =
+    authBuf.length === expectedBuf.length && timingSafeEqual(authBuf, expectedBuf);
+  if (!authorized) {
     return res.status(401).json({ error: 'Unauthorized - check SMTP_RELAY_SECRET matches' });
   }
 
@@ -80,13 +91,15 @@ export default async function handler(req: VercelReq, res: VercelRes) {
     });
   }
 
-  try {
-    // Dynamic import to avoid bundling issues
-    const nodemailer = require('nodemailer');
+  const port = Number(smtp_port);
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+    return res.status(400).json({ error: 'smtp_port must be a valid port number' });
+  }
 
+  try {
     const transporter = nodemailer.createTransport({
       host: smtp_host,
-      port: Number(smtp_port),
+      port,
       secure: smtp_secure ?? false,
       auth: { user: smtp_user, pass: smtp_pass },
       connectionTimeout: 15000,

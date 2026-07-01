@@ -49,9 +49,13 @@ function CopyableRecord({ record }: { record: DnsRecordInstruction }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const statusColor =

@@ -5,7 +5,7 @@ import * as verificationService from '../services/verification.service.js';
 export const verificationController = {
   async verifyContact(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const result = await verificationService.verifyContact(req.params.contactId);
+      const result = await verificationService.verifyContact(req.params.contactId, req.userId!);
       res.json(result);
     } catch (err) { next(err); }
   },
@@ -41,7 +41,7 @@ export const verificationController = {
     try {
       const { campaignId } = req.params;
       const threshold = parseInt(req.query.threshold as string, 10) || 0;
-      const contacts = await verificationService.getSuppressedContacts(campaignId, threshold);
+      const contacts = await verificationService.getSuppressedContacts(campaignId, threshold, req.userId!);
       res.json(contacts);
     } catch (err) { next(err); }
   },

@@ -107,11 +107,12 @@ export const billingService = {
       p_count: 1,
     });
     if (!error) return data === true;
-    // Fallback if migration 020 isn't applied yet: non-atomic check + increment.
-    console.error(`[Billing] reserve_email_quota RPC failed, falling back: ${error.message}`);
-    const ok = await this.hasEmailQuota(userId);
-    if (ok) await this.incrementEmailUsage(userId);
-    return ok;
+    // The atomic RPC is required to enforce the cap without a race. If it's
+    // missing (e.g. migration 020 not applied), fail closed rather than
+    // falling back to a non-atomic check+increment that concurrent sends
+    // could race past the plan's email cap.
+    console.error(`[Billing] reserve_email_quota RPC unavailable, denying send: ${error.message}`);
+    return false;
   },
 
   async incrementEmailUsage(userId: string, count = 1): Promise<void> {

@@ -12,6 +12,23 @@ interface ListParams {
 }
 
 export const campaignsService = {
+  /**
+   * Verify the campaign belongs to this user before delegating to a sub-resource
+   * service (steps/contacts/sender pool) that only filters by campaign_id.
+   * Without this, any authenticated user could read/mutate another tenant's
+   * campaign data by guessing/enumerating a campaign UUID.
+   */
+  async assertOwnership(userId: string, campaignId: string): Promise<void> {
+    const { data, error } = await supabaseAdmin
+      .from('campaigns')
+      .select('id')
+      .eq('id', campaignId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw new AppError(error.message, 500);
+    if (!data) throw new AppError('Campaign not found', 404);
+  },
+
   async list(userId: string, params: ListParams) {
     const { page, limit, from, to } = getPagination(params);
 

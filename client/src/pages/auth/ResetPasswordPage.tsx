@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
@@ -13,6 +13,11 @@ export function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const [invalid, setInvalid] = useState(false);
+  const redirectTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => clearTimeout(redirectTimer.current);
+  }, []);
 
   useEffect(() => {
     // Supabase puts the recovery token in the URL hash; onAuthStateChange
@@ -58,7 +63,7 @@ export function ResetPasswordPage() {
     } else {
       toast.success('Password updated — signing you in.');
       // Short delay so toast is visible, then redirect
-      setTimeout(() => navigate('/dashboard'), 1200);
+      redirectTimer.current = setTimeout(() => navigate('/dashboard'), 1200);
     }
   };
 

@@ -18,6 +18,6 @@ sseRoutes.post('/accounts/:accountId/send', sseController.recordSend);
 sseRoutes.post('/accounts/:accountId/bounce', sseController.recordBounce);
 sseRoutes.post('/accounts/:accountId/open', sseController.recordOpen);
 
-// Maintenance (for cron jobs or manual triggers)
-sseRoutes.post('/maintenance/reset-daily', sseController.resetDailyCounts);
-sseRoutes.post('/maintenance/recalculate-bounces', sseController.recalculateBounceRates);
+// Note: daily reset / bounce-rate recalculation operate across every tenant's
+// smtp_accounts and are intentionally NOT exposed as authenticated-user HTTP
+// routes — see jobs/schedulers/sse-maintenance.scheduler.ts.

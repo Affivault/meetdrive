@@ -92,6 +92,7 @@ export const campaignsController = {
   // Steps
   async getSteps(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       const steps = await campaignStepsService.list(req.params.id);
       res.json(steps);
     } catch (err) { next(err); }
@@ -99,6 +100,7 @@ export const campaignsController = {
 
   async addStep(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       const step = await campaignStepsService.add(req.params.id, req.body);
       res.status(201).json(step);
     } catch (err) { next(err); }
@@ -106,6 +108,7 @@ export const campaignsController = {
 
   async updateStep(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       const step = await campaignStepsService.update(req.params.id, req.params.stepId, req.body);
       res.json(step);
     } catch (err) { next(err); }
@@ -113,6 +116,7 @@ export const campaignsController = {
 
   async deleteStep(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       await campaignStepsService.delete(req.params.id, req.params.stepId);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -120,6 +124,7 @@ export const campaignsController = {
 
   async reorderSteps(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       await campaignStepsService.reorder(req.params.id, req.body.step_ids);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -128,6 +133,7 @@ export const campaignsController = {
   // Campaign contacts
   async getContacts(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       const result = await campaignContactsService.list(req.params.id, req.query as any);
       res.json(result);
     } catch (err) { next(err); }
@@ -135,6 +141,7 @@ export const campaignsController = {
 
   async addContacts(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       await campaignContactsService.add(req.params.id, req.body.contact_ids);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -142,6 +149,7 @@ export const campaignsController = {
 
   async removeContacts(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       await campaignContactsService.remove(req.params.id, req.body.contact_ids);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -181,14 +189,13 @@ export const campaignsController = {
       });
 
       res.json({ success: true, message: `Test email sent to ${to}` });
-    } catch (err: any) {
-      res.status(500).json({ success: false, error: err?.message || String(err) });
-    }
+    } catch (err) { next(err); }
   },
 
   // Sender pool (rotation)
   async getSenderPool(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       const pool = await sse.getCampaignPool(req.params.id);
       res.json(pool);
     } catch (err) { next(err); }
@@ -196,6 +203,7 @@ export const campaignsController = {
 
   async setSenderPool(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.id);
       await sse.setCampaignPool(req.params.id, req.body.smtp_account_ids || []);
       res.status(204).send();
     } catch (err) { next(err); }

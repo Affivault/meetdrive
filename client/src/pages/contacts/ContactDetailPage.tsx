@@ -403,6 +403,8 @@ function InfoRow({
     navigator.clipboard.writeText(value).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard');
     });
   }
 

@@ -125,6 +125,8 @@ export const teamService = {
 
   async invite(userId: string, email: string, role: TeamRole = 'member') {
     const org = await this.getOrCreateOrg(userId);
+    if (org.owner_id !== userId) throw new AppError('Only the owner can invite members', 403);
+    if (role === 'owner') throw new AppError('Cannot invite someone as owner', 400);
 
     // Check if already a member
     const { data: existing } = await supabaseAdmin
@@ -153,6 +155,7 @@ export const teamService = {
   async revokeInvite(userId: string, inviteId: string) {
     const org = await this.getOrg(userId);
     if (!org) throw new AppError('No organisation found', 404);
+    if (org.owner_id !== userId) throw new AppError('Only the owner can revoke invites', 403);
     await supabaseAdmin.from('team_invites').delete().eq('id', inviteId).eq('org_id', org.id);
   },
 

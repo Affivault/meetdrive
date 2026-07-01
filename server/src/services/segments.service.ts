@@ -2,6 +2,23 @@ import { supabaseAdmin } from '../config/supabase.js';
 import { AppError } from '../middleware/error.middleware.js';
 import type { CreateSegmentInput, UpdateSegmentInput, FilterConfig, SegmentCondition } from '@lemlist/shared';
 
+// Column names a segment condition may filter on. `field`/`operator` arrive
+// as untyped JSON from the request body (SegmentField is a compile-time-only
+// type), and `buildConditionString` interpolates `field` directly into a raw
+// PostgREST filter string — without this allow-list an attacker could inject
+// arbitrary filter syntax (e.g. extra operators, references to columns
+// outside the intended set) via the `field` value.
+const ALLOWED_SEGMENT_FIELDS = new Set([
+  'email', 'first_name', 'last_name', 'company', 'job_title', 'phone',
+  'source', 'is_unsubscribed', 'is_bounced', 'dcs_score', 'created_at', 'tag',
+]);
+
+function assertValidField(field: string): void {
+  if (!ALLOWED_SEGMENT_FIELDS.has(field)) {
+    throw new AppError(`Invalid segment field: ${field}`, 400);
+  }
+}
+
 export const segmentsService = {
   async list(userId: string) {
     const { data, error } = await supabaseAdmin
@@ -171,6 +188,7 @@ export const segmentsService = {
 
   buildConditionString(condition: SegmentCondition): string | null {
     const { field, operator, value } = condition;
+    assertValidField(field);
 
     // Handle tag field separately (requires join)
     if (field === 'tag') return null;
@@ -213,6 +231,7 @@ export const segmentsService = {
 
   applyCondition(query: any, condition: SegmentCondition): any {
     const { field, operator, value } = condition;
+    assertValidField(field);
 
     // Skip tag field for now (would need separate handling)
     if (field === 'tag') return query;

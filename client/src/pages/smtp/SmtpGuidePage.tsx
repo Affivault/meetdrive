@@ -239,8 +239,9 @@ const providers: Provider[] = [
 
 function CopyButton({ text }: { text: string }) {
   const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied!');
+    navigator.clipboard.writeText(text)
+      .then(() => toast.success('Copied!'))
+      .catch(() => toast.error('Failed to copy to clipboard'));
   };
   return (
     <button onClick={handleCopy} className="p-1 rounded hover:bg-hover text-tertiary hover:text-secondary transition-colors">

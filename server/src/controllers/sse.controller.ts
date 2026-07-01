@@ -1,6 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware.js';
 import * as sseService from '../services/sse.service.js';
+import { campaignsService } from '../services/campaigns.service.js';
+import { smtpService } from '../services/smtp.service.js';
 
 export const sseController = {
   async dashboard(req: AuthRequest, res: Response, next: NextFunction) {
@@ -13,6 +15,7 @@ export const sseController = {
   async selectSender(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { campaignId } = req.params;
+      await campaignsService.assertOwnership(req.userId!, campaignId);
       const result = await sseService.selectBestSender(req.userId!, campaignId);
       res.json(result);
     } catch (err) { next(err); }
@@ -20,6 +23,7 @@ export const sseController = {
 
   async getCampaignPool(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await campaignsService.assertOwnership(req.userId!, req.params.campaignId);
       const pool = await sseService.getCampaignPool(req.params.campaignId);
       res.json({ account_ids: pool });
     } catch (err) { next(err); }
@@ -32,6 +36,7 @@ export const sseController = {
         res.status(400).json({ error: 'account_ids must be an array' });
         return;
       }
+      await campaignsService.assertOwnership(req.userId!, req.params.campaignId);
       await sseService.setCampaignPool(req.params.campaignId, account_ids);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -39,6 +44,7 @@ export const sseController = {
 
   async recordSend(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await smtpService.assertOwnership(req.userId!, req.params.accountId);
       await sseService.recordSend(req.params.accountId);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -46,6 +52,7 @@ export const sseController = {
 
   async recordBounce(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await smtpService.assertOwnership(req.userId!, req.params.accountId);
       await sseService.recordBounce(req.params.accountId);
       res.status(204).send();
     } catch (err) { next(err); }
@@ -53,21 +60,8 @@ export const sseController = {
 
   async recordOpen(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      await smtpService.assertOwnership(req.userId!, req.params.accountId);
       await sseService.recordOpen(req.params.accountId);
-      res.status(204).send();
-    } catch (err) { next(err); }
-  },
-
-  async resetDailyCounts(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const count = await sseService.resetDailySendCounts();
-      res.json({ reset_count: count });
-    } catch (err) { next(err); }
-  },
-
-  async recalculateBounceRates(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      await sseService.recalculateBounceRates();
       res.status(204).send();
     } catch (err) { next(err); }
   },

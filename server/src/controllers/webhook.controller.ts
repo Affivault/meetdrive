@@ -42,6 +42,13 @@ export const webhookController = {
     } catch (err) { next(err); }
   },
 
+  async regenerateSecret(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const endpoint = await webhookService.regenerateSecret(req.userId!, req.params.id);
+      res.json(endpoint);
+    } catch (err) { next(err); }
+  },
+
   async test(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const result = await webhookService.testEndpoint(req.userId!, req.params.id);

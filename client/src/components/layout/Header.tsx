@@ -226,19 +226,19 @@ export function Header() {
                 )}
 
                 <button
-                  onClick={() => { setMenuOpen(false); navigate('/settings'); }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-                >
-                  <Settings className="h-3.5 w-3.5" />
-                  Settings
-                </button>
-
-                <button
-                  onClick={() => { setMenuOpen(false); navigate('/settings'); }}
+                  onClick={() => { setMenuOpen(false); navigate('/settings?tab=profile'); }}
                   className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
                 >
                   <User className="h-3.5 w-3.5" />
                   Profile
+                </button>
+
+                <button
+                  onClick={() => { setMenuOpen(false); navigate('/settings?tab=account'); }}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+                >
+                  <Settings className="h-3.5 w-3.5" />
+                  Settings
                 </button>
 
                 <div className="border-t border-[var(--border-subtle)] mt-0.5 pt-0.5">

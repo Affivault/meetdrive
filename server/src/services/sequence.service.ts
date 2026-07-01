@@ -341,13 +341,28 @@ async function processEmailStep(cc: any, step: any): Promise<void> {
   const bodyHtml = interpolateMergeTags(rawBodyHtml, cc.contacts);
   const bodyText = htmlToText(bodyHtml);
 
-  // Nullify next_send_at BEFORE sending to prevent re-processing
-  const { error: nullifyErr } = await supabaseAdmin
+  // Atomically claim this contact BEFORE sending to prevent re-processing.
+  // Conditioning the UPDATE on the still-pending state (status active, next_send_at
+  // still set) makes this a compare-and-swap: if `launch()` and the periodic
+  // sequence worker both race to process the same due contact, only the first
+  // UPDATE to commit will match these conditions — the second affects 0 rows
+  // and backs off instead of sending a duplicate email.
+  const { data: claimed, error: nullifyErr } = await supabaseAdmin
     .from('campaign_contacts')
     .update({ current_step_order: step.step_order, next_send_at: null })
-    .eq('id', cc.id);
+    .eq('id', cc.id)
+    .eq('status', 'active')
+    .not('next_send_at', 'is', null)
+    .select('id')
+    .maybeSingle();
   if (nullifyErr) {
     throw new Error(`Failed to lock contact ${cc.id} for processing: ${nullifyErr.message}`);
+  }
+  if (!claimed) {
+    // Lost the race to a concurrent processDueSteps() run — the other caller
+    // already claimed this contact for this step. Don't send a duplicate.
+    console.log(`[Sequence] Contact ${cc.id} already claimed by a concurrent run — skipping`);
+    return;
   }
 
   // Send email DIRECTLY (no BullMQ queue — eliminates Redis dependency)

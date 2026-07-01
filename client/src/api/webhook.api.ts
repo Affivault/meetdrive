@@ -31,6 +31,11 @@ export const webhookApi = {
     return data;
   },
 
+  regenerateSecret: async (id: string) => {
+    const { data } = await apiClient.post<WebhookEndpoint>(`/webhooks/endpoints/${id}/regenerate-secret`);
+    return data;
+  },
+
   getDeliveries: async (endpointId?: string, limit?: number) => {
     const params: Record<string, string> = {};
     if (endpointId) params.endpoint_id = endpointId;

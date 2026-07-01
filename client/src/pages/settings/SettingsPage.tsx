@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -50,11 +51,17 @@ const tabs: TabConfig[] = [
   { id: 'ai', label: 'AI Features', icon: Sparkles },
 ];
 
+const TAB_IDS = tabs.map((t) => t.id);
+
 export function SettingsPage() {
   const { user, signOut } = useAuth();
   const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<Tab>(
+    (TAB_IDS as string[]).includes(requestedTab || '') ? (requestedTab as Tab) : 'profile'
+  );
 
   // Form state
   const [firstName, setFirstName] = useState('');

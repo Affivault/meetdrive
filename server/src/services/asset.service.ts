@@ -49,7 +49,7 @@ export function renderAssetSvg(
   let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
 
   // Background
-  svgContent += `<rect width="${width}" height="${height}" fill="${background_color}" />`;
+  svgContent += `<rect width="${width}" height="${height}" fill="${escapeXml(background_color)}" />`;
 
   // Render layers
   for (const layer of layers) {
@@ -66,9 +66,9 @@ function renderLayer(layer: AssetTemplateLayer, params: Record<string, string>):
       const text = interpolateText(layer.content || '', params);
       const escaped = escapeXml(text);
       const fontSize = layer.fontSize || 24;
-      const fontFamily = layer.fontFamily || 'Arial, sans-serif';
-      const fontWeight = layer.fontWeight || 'normal';
-      const color = layer.color || '#000000';
+      const fontFamily = escapeXml(layer.fontFamily || 'Arial, sans-serif');
+      const fontWeight = escapeXml(layer.fontWeight || 'normal');
+      const color = escapeXml(layer.color || '#000000');
       const anchor = layer.align === 'center' ? 'middle' : layer.align === 'right' ? 'end' : 'start';
       const x = layer.align === 'center'
         ? layer.x + (layer.width || 0) / 2
@@ -80,7 +80,7 @@ function renderLayer(layer: AssetTemplateLayer, params: Record<string, string>):
     }
 
     case 'shape': {
-      const fill = layer.fill || '#e5e7eb';
+      const fill = escapeXml(layer.fill || '#e5e7eb');
       const opacity = layer.opacity !== undefined ? layer.opacity : 1;
       const rx = layer.borderRadius || 0;
 

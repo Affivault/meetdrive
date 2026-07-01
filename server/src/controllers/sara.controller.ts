@@ -26,7 +26,7 @@ export const saraController = {
   async classify(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.params;
-      const result = await saraService.processReply(messageId);
+      const result = await saraService.processReply(messageId, req.userId!);
       res.json(result);
     } catch (err) { next(err); }
   },

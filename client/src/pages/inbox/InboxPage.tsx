@@ -1182,8 +1182,6 @@ export function InboxPage() {
   const [showReplySchedule, setShowReplySchedule] = useState(false);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const replyComposerRef = useRef<HTMLDivElement>(null);
-  // Stores the contact email of the conversation being archived so onMutate can remove it from cache
-  const archiveContactEmailRef = useRef<string | null>(null);
   const replyEditor = useRichTextEditorRef();
 
   /* ── SMTP accounts for sender selection ── */
@@ -1349,11 +1347,10 @@ export function InboxPage() {
   });
 
   const archiveMut = useMutation({
-    mutationFn: inboxApi.archiveThread,
-    onMutate: async () => {
+    mutationFn: ({ id }: { id: string; contactEmail: string | null }) => inboxApi.archiveThread(id),
+    onMutate: async ({ contactEmail }: { id: string; contactEmail: string | null }) => {
       await qc.cancelQueries({ queryKey: ['inbox', folder, tagFilter, search] });
       const prevData = qc.getQueryData(['inbox', folder, tagFilter, search]);
-      const contactEmail = archiveContactEmailRef.current;
       if (contactEmail) {
         qc.setQueryData(['inbox', folder, tagFilter, search], (old: any) => {
           if (!old?.data) return old;
@@ -1381,11 +1378,10 @@ export function InboxPage() {
   });
 
   const unarchiveMut = useMutation({
-    mutationFn: inboxApi.unarchiveThread,
-    onMutate: async () => {
+    mutationFn: ({ id }: { id: string; contactEmail: string | null }) => inboxApi.unarchiveThread(id),
+    onMutate: async ({ contactEmail }: { id: string; contactEmail: string | null }) => {
       await qc.cancelQueries({ queryKey: ['inbox', folder, tagFilter, search] });
       const prevData = qc.getQueryData(['inbox', folder, tagFilter, search]);
-      const contactEmail = archiveContactEmailRef.current;
       if (contactEmail) {
         qc.setQueryData(['inbox', folder, tagFilter, search], (old: any) => {
           if (!old?.data) return old;
@@ -1537,7 +1533,7 @@ export function InboxPage() {
   // Defined here (after conversations) so it can read conversations to pick the next entry
   const handleArchiveToggle = useCallback((msg: Message) => {
     const conv = conversations.find(c => c.latestMessage.id === msg.id);
-    archiveContactEmailRef.current = conv?.contactEmail ?? null;
+    const contactEmail = conv?.contactEmail ?? null;
     // Select the next conversation immediately so the panel doesn't go blank
     if (conv) {
       const idx = conversations.indexOf(conv);
@@ -1547,9 +1543,9 @@ export function InboxPage() {
       setSelectedId(null);
     }
     if (folder === 'archived' || msg.is_archived) {
-      unarchiveMut.mutate(msg.id);
+      unarchiveMut.mutate({ id: msg.id, contactEmail });
     } else {
-      archiveMut.mutate(msg.id);
+      archiveMut.mutate({ id: msg.id, contactEmail });
     }
   }, [folder, archiveMut, unarchiveMut, conversations]);
 

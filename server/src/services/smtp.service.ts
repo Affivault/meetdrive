@@ -5,6 +5,18 @@ import { sendViaSmtp } from './email-sender.service.js';
 import { billingService } from './billing.service.js';
 
 export const smtpService = {
+  /** Verify an smtp_accounts row belongs to this user before acting on its id alone. */
+  async assertOwnership(userId: string, id: string): Promise<void> {
+    const { data, error } = await supabaseAdmin
+      .from('smtp_accounts')
+      .select('id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw new AppError(error.message, 500);
+    if (!data) throw new AppError('SMTP account not found', 404);
+  },
+
   async list(userId: string) {
     const { data, error } = await supabaseAdmin
       .from('smtp_accounts')

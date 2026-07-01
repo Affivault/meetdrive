@@ -74,7 +74,7 @@ export function BillingPage() {
     setBusy(planId);
     try {
       const { url } = await billingApi.checkout(planId, interval);
-      if (!url) throw new Error('No checkout URL returned');
+      if (typeof url !== 'string' || !url) throw new Error('No checkout URL returned');
       window.location.href = url;
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Could not start checkout. Please try again.');
@@ -87,7 +87,7 @@ export function BillingPage() {
     setBusy('portal');
     try {
       const { url } = await billingApi.portal();
-      if (!url) throw new Error('No portal URL returned');
+      if (typeof url !== 'string' || !url) throw new Error('No portal URL returned');
       window.location.href = url;
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Could not open the billing portal.');

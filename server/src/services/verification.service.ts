@@ -227,12 +227,13 @@ export async function verifyEmail(email: string): Promise<DcsVerificationResult>
 /**
  * Verify a contact and store DCS results.
  */
-export async function verifyContact(contactId: string): Promise<DcsVerificationResult> {
+export async function verifyContact(contactId: string, userId: string): Promise<DcsVerificationResult> {
   const { data: contact } = await supabaseAdmin
     .from('contacts')
     .select('email, user_id')
     .eq('id', contactId)
-    .single();
+    .eq('user_id', userId)
+    .maybeSingle();
 
   if (!contact) throw new Error('Contact not found');
 
@@ -402,8 +403,17 @@ export async function getDcsStats(userId: string): Promise<{
  */
 export async function getSuppressedContacts(
   campaignId: string,
-  threshold: number
+  threshold: number,
+  userId: string
 ): Promise<{ contact_id: string; email: string; dcs_score: number }[]> {
+  const { data: campaign } = await supabaseAdmin
+    .from('campaigns')
+    .select('id')
+    .eq('id', campaignId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (!campaign) throw new Error('Campaign not found');
+
   const { data } = await supabaseAdmin
     .from('campaign_contacts')
     .select('contact_id, contacts(email, dcs_score)')

@@ -44,9 +44,29 @@ async function getOrCreateCustomer(userId: string, email: string | undefined): P
       .update({ stripe_customer_id: customer.id })
       .eq('user_id', userId);
   } else {
-    await supabaseAdmin
+    const { error: insertErr } = await supabaseAdmin
       .from('subscriptions')
       .insert({ user_id: userId, stripe_customer_id: customer.id, plan: 'free', status: 'free' });
+    if (insertErr) {
+      // Lost a race to a concurrent getOrCreateCustomer call for the same
+      // user (e.g. a double-click on "Upgrade") — a row now exists. Don't
+      // insert a duplicate; just make sure a customer id is persisted,
+      // preferring whichever one won the race.
+      if (insertErr.code === '23505') {
+        const { data: existing } = await supabaseAdmin
+          .from('subscriptions')
+          .select('stripe_customer_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (existing?.stripe_customer_id) return existing.stripe_customer_id;
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({ stripe_customer_id: customer.id })
+          .eq('user_id', userId);
+      } else {
+        throw new AppError(insertErr.message, 500);
+      }
+    }
   }
 
   return customer.id;

@@ -1,10 +1,10 @@
 import { app } from './app.js';
 import { env } from './config/env.js';
-import { startEmailWorker } from './jobs/workers/email.worker.js';
 import { startSequenceWorker } from './jobs/workers/sequence.worker.js';
 import { startInboxWorker } from './jobs/workers/inbox.worker.js';
 import { startVerificationWorker } from './jobs/workers/verification.worker.js';
 import { scheduleInboxSync } from './jobs/schedulers/inbox.scheduler.js';
+import { startSseMaintenanceScheduler } from './jobs/schedulers/sse-maintenance.scheduler.js';
 
 const port = parseInt(env.PORT, 10);
 
@@ -17,14 +17,6 @@ const server = app.listen(port, () => {
   console.log(`Health: ${env.API_BASE_URL}/health`);
 
   // Start background workers
-  try {
-    const emailWorker = startEmailWorker();
-    if (emailWorker) disposers.push(() => emailWorker.close());
-    console.log('Email worker started');
-  } catch (err: any) {
-    console.warn('Email worker failed to start (Redis may not be available):', err.message);
-  }
-
   try {
     const sequenceWorker = startSequenceWorker();
     if (sequenceWorker) disposers.push(() => sequenceWorker.stop());
@@ -57,6 +49,16 @@ const server = app.listen(port, () => {
     console.log('Verification worker started');
   } catch (err: any) {
     console.warn('Verification worker failed to start:', err.message);
+  }
+
+  // Daily SMTP send-count reset + bounce-rate recalculation (cross-tenant
+  // maintenance — intentionally not exposed over HTTP, see sse.routes.ts)
+  try {
+    const sseMaintenance = startSseMaintenanceScheduler();
+    if (sseMaintenance) disposers.push(() => sseMaintenance.stop());
+    console.log('SSE maintenance scheduler started');
+  } catch (err: any) {
+    console.warn('SSE maintenance scheduler failed to start:', err.message);
   }
 });
 
