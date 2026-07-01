@@ -759,7 +759,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
         {/* Conversion funnel */}
         <div>
           <div className="flex items-center justify-between mb-2.5">
-            <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Conversion funnel</span>
+            <span className="text-[10px] font-semibold text-[var(--text-tertiary)]">Conversion funnel</span>
             {sent === 0 && <span className="text-[10.5px] text-[var(--text-tertiary)]">No emails sent yet</span>}
           </div>
           <div className="space-y-2">
@@ -792,7 +792,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
           {/* Audience progress */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Audience</span>
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)]">Audience</span>
               <span className="text-[11px] text-[var(--text-tertiary)] tabular">{totalContacts.toLocaleString()} contacts</span>
             </div>
             <div className="flex h-2.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
@@ -810,7 +810,7 @@ function CampaignSnapshot({ campaign: c, onOpenReport }: { campaign: any; onOpen
 
           {/* Sending config */}
           <div>
-            <span className="font-data text-[10px] font-semibold text-[var(--text-tertiary)]">Sending config</span>
+            <span className="text-[10px] font-semibold text-[var(--text-tertiary)]">Sending config</span>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
               <ConfigItem icon={Layers}   label="Steps"       value={`${c.steps_count || 0}`} />
               <ConfigItem icon={Gauge}    label="Daily limit" value={c.daily_limit ? `${c.daily_limit}/day` : '—'} />
@@ -972,9 +972,9 @@ function FolderAnalyticsModal({ folderId, onClose }: { folderId: string; onClose
             <MetricChip icon={MessageSquare}     label="Replied" value={data.totals.replied} tone="emerald" rate={data.totals.sent ? (data.totals.replied/data.totals.sent*100) : 0} />
           </div>
 
-          <div className="font-data text-[10px] text-[var(--text-tertiary)] mb-2">By campaign</div>
+          <div className="text-[10px] text-[var(--text-tertiary)] mb-2">By campaign</div>
           <table className="w-full text-sm">
-            <thead className="font-data text-[10px] text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
+            <thead className="text-[10px] text-[var(--text-tertiary)] border-b border-[var(--border-subtle)]">
               <tr>
                 <th className="text-left py-2 font-medium">Campaign</th>
                 <th className="text-right py-2 font-medium">Sent</th>
