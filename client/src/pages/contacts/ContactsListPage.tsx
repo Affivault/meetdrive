@@ -1207,7 +1207,7 @@ export function ContactsListPage() {
                       {/* Shown — drag to reorder, eye to hide */}
                       <p className="flex items-center justify-between px-1.5 pt-1 pb-1.5 text-[10px] font-semibold text-[var(--text-tertiary)]">
                         Shown
-                        {!q && <span className="font-data normal-case tracking-normal text-[var(--text-muted)]">drag to reorder</span>}
+                        {!q && <span className="normal-case text-[var(--text-muted)]">drag to reorder</span>}
                       </p>
                       {shown.length === 0 && <p className="px-2 py-1.5 text-[12px] text-[var(--text-tertiary)]">No matching columns.</p>}
                       {shown.map(({ id, i, label }) => (
