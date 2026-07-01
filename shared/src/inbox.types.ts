@@ -53,3 +53,14 @@ export interface SaraQueueStats {
   sent_today: number;
   top_intents: { intent: string; count: number }[];
 }
+
+/**
+ * Inbox sidebar counts — computed server-side over the full mailbox (not a
+ * capped page) so smart-view / tag badges stay accurate at scale.
+ */
+export interface InboxCounts {
+  /** Unread conversations in the Inbox folder. */
+  unread: number;
+  /** Count of inbox messages per SARA intent. Missing keys mean zero. */
+  intents: Partial<Record<SaraIntent, number>>;
+}

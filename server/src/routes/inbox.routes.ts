@@ -5,6 +5,7 @@ export const inboxRoutes = Router();
 
 // Static routes first (before parameterized /:id routes)
 inboxRoutes.get('/unread-count', inboxController.unreadCount);
+inboxRoutes.get('/counts', inboxController.counts);
 inboxRoutes.get('/', inboxController.list);
 inboxRoutes.get('/scheduled', inboxController.listScheduled);
 inboxRoutes.put('/mark-all-read', inboxController.markAllRead);

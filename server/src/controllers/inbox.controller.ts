@@ -10,6 +10,13 @@ export const inboxController = {
     } catch (err) { next(err); }
   },
 
+  async counts(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const result = await inboxService.counts(req.userId!);
+      res.json(result);
+    } catch (err) { next(err); }
+  },
+
   async list(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const result = await inboxService.list(req.userId!, req.query as any);

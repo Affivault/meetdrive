@@ -217,6 +217,42 @@ export const inboxService = {
     return count || 0;
   },
 
+  /**
+   * Sidebar counts for the Inbox: unread + a per-intent breakdown, computed
+   * over the whole mailbox with exact head-counts (no rows transferred) so the
+   * smart-view / tag badges stay accurate no matter how large the inbox grows.
+   */
+  async counts(userId: string): Promise<{ unread: number; intents: Record<string, number> }> {
+    // Same folder predicate the list uses for "inbox": not archived (null or false).
+    const INTENTS = ['interested', 'meeting', 'objection', 'not_now', 'unsubscribe', 'out_of_office', 'bounce'];
+
+    const unreadQ = supabaseAdmin
+      .from('inbox_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+      .or('is_archived.is.null,is_archived.eq.false');
+
+    const intentQs = INTENTS.map(intent =>
+      supabaseAdmin
+        .from('inbox_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .or('is_archived.is.null,is_archived.eq.false')
+        .eq('sara_intent', intent),
+    );
+
+    const [unreadRes, ...intentRes] = await Promise.all([unreadQ, ...intentQs]);
+
+    const intents: Record<string, number> = {};
+    INTENTS.forEach((intent, i) => {
+      const c = intentRes[i]?.count || 0;
+      if (c > 0) intents[intent] = c;
+    });
+
+    return { unread: unreadRes.count || 0, intents };
+  },
+
   async list(userId: string, params: {
     page?: number;
     limit?: number;

@@ -1,10 +1,16 @@
 import { apiClient } from './client';
-import type { InboxMessage, InboxMessageWithContext, PaginatedResponse } from '@lemlist/shared';
+import type { InboxMessage, InboxMessageWithContext, InboxCounts, PaginatedResponse } from '@lemlist/shared';
 
 export const inboxApi = {
   unreadCount: async (): Promise<number> => {
     const { data } = await apiClient.get<{ count: number }>('/inbox/unread-count');
     return data.count;
+  },
+
+  /** Full-mailbox unread + per-intent counts for the sidebar badges. */
+  counts: async (): Promise<InboxCounts> => {
+    const { data } = await apiClient.get<InboxCounts>('/inbox/counts');
+    return data;
   },
 
   list: async (params?: {

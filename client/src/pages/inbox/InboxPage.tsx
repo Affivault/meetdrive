@@ -1379,25 +1379,22 @@ export function InboxPage() {
 
   const messages: Message[] = Array.isArray(messagesData?.data) ? messagesData.data : [];
 
-  /* ── Unfiltered inbox snapshot — powers sidebar smart-view counts.
-        Shares its key with the main query when Inbox is unfiltered, so it
-        only costs an extra fetch while a filter/search is active. ── */
-  const { data: inboxAllData } = useQuery({
-    queryKey: ['inbox', 'inbox', 'all', ''],
-    queryFn: () => inboxApi.list({ limit: 50, folder: 'inbox' }),
+  /* ── Sidebar badge counts — computed server-side over the whole mailbox
+        (exact head-counts, uncapped) so smart-view / tag badges stay accurate
+        at any scale. Invalidated by the shared ['inbox'] key on every mutation. ── */
+  const { data: countsData } = useQuery({
+    queryKey: ['inbox', 'counts'],
+    queryFn: inboxApi.counts,
+    refetchInterval: 60000,
   });
   const viewCounts = useMemo(() => {
-    const convs = groupConversations(Array.isArray(inboxAllData?.data) ? inboxAllData.data : []);
-    const c: Record<string, number> = {};
-    for (const conv of convs) {
-      const it = conv.latestMessage.sara_intent || '';
-      if (it) c[it] = (c[it] || 0) + 1;
-    }
-    c.unread = convs.filter(x => x.hasUnread).length;
-    c.hot = (c.interested || 0) + (c.meeting || 0);
-    c.needs_reply = (c.interested || 0) + (c.objection || 0) + (c.meeting || 0);
+    const intents = (countsData?.intents || {}) as Record<string, number>;
+    const c: Record<string, number> = { ...intents };
+    c.unread = countsData?.unread || 0;
+    c.hot = (intents.interested || 0) + (intents.meeting || 0);
+    c.needs_reply = (intents.interested || 0) + (intents.objection || 0) + (intents.meeting || 0);
     return c;
-  }, [inboxAllData]);
+  }, [countsData]);
 
   const { data: selectedMsg } = useQuery({
     queryKey: ['inbox', 'detail', selectedId],
